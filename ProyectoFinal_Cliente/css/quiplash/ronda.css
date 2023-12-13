@@ -1,0 +1,85 @@
+* {
+  user-select: none;
+}
+
+#round {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10%;
+  height: 100vh;
+}
+#round #promptHeader {
+  grid-column: 1/3;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+#round #promptHeader #textoPrompt {
+  min-width: 50%;
+  max-width: 50%;
+  text-align: center;
+  line-height: 1.6;
+  font-size: 2.6rem;
+  font-family: sans-serif;
+  color: #fafa1f;
+  text-shadow: #574c1d 0 5px;
+  user-select: text;
+}
+#round #promptHeader #tiempoPrompt {
+  max-width: 25%;
+  font-size: 4rem;
+  font-family: sans-serif;
+  transform: skew(-15deg) rotate(-15deg);
+  font-weight: bold;
+  color: white;
+  text-shadow: 5px 5px gray;
+}
+#round #promptHeader div {
+  max-width: 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 2em;
+  transform: skew(5deg) rotate(5deg);
+}
+#round #promptHeader div h3 {
+  margin: 0;
+  font-family: sans-serif;
+  text-transform: lowercase;
+  padding: 0 30px 0 30px;
+}
+#round #promptHeader div .gameCode {
+  background-color: #333232;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+  box-shadow: -5px 5px black;
+}
+#round #promptMessages {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+#round #promptMessages .prompts {
+  width: 500px;
+  height: 300px;
+  border-radius: 50px;
+  background-color: #f1f1f1;
+  user-select: text;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3em;
+  overflow: hidden;
+  padding: 30px;
+  text-transform: uppercase;
+  box-shadow: -10px -7px gray;
+}
+#round #promptMessages .prompts:nth-child(2) {
+  box-shadow: 10px -7px gray;
+}
+
+/*# sourceMappingURL=ronda.css.map */

@@ -1,0 +1,42 @@
+{
+  "es" : {
+    "round" : {
+      "0" : "El mayor amigo del perro es ...",
+      "1" : "Estás en 1945, Berlín. Lo primero que haces es ...",
+      "2" : "Después de ganar la lotería, decides...",
+      "3" : "En un mundo habitado por unicornios y dragones, tu misión es...",
+      "4" : "Tu superpoder recién descubierto es...",
+      "5" : "El hashtag que usarías en un golpe de estado"
+    },
+    "safety_quip" : {
+      "0" : {
+        "0" : "su pelota",
+        "1" : "su hueso"
+      },
+      "1" : {
+        "0" : "huir",
+        "1" : "cortarte el bigote"
+      }
+    }
+  },
+  "en" : {
+    "round" : {
+      "0" : "Dog's best friend is ...",
+      "1" : "You're in 1945, Berlin. First thing you do is ...",
+      "2" : "After winning the lottery, you decide to ...",
+      "3" : "In a world inhabited by unicorns and dragons, your mission is ...",
+      "4" : "Your newly discovered superpower is ...",
+      "5" : "The hashtag you'd use in a coup d'etat"
+    },
+    "safety_quip" : {
+      "0" : {
+        "0" : "its ball",
+        "1" : "its bone"
+      },
+      "1" : {
+        "0" : "run away",
+        "1" : "shave your moustache"
+      }
+    }
+  }
+}

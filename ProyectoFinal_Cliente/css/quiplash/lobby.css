@@ -1,0 +1,156 @@
+#lobby {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  height: 100vh;
+}
+
+body {
+  background: cadetblue;
+}
+
+#lobby > article:first-child {
+  display: flex;
+  flex-direction: column;
+  padding-left: 20%;
+}
+#lobby > article:first-child h1 {
+  font-size: 3.4rem;
+  user-select: none;
+}
+#lobby > article:first-child h2 {
+  font-size: 2.5rem;
+  user-select: none;
+}
+#lobby > article:first-child h3 {
+  font-size: 3rem;
+}
+
+.gameCode {
+  text-transform: uppercase;
+  font-family: sans-serif;
+  user-select: text;
+}
+
+.icono {
+  width: 100px;
+  aspect-ratio: 1/1;
+  background-color: #ad2424;
+  border-radius: 20%;
+  animation: infinite reverse linear rotarPersonajes 30s;
+  position: relative;
+  box-shadow: 3px 3px black;
+}
+.icono .nombreJug {
+  position: absolute;
+  bottom: calc(0% - 65px);
+  width: 100px;
+  height: 40px;
+  background: aliceblue;
+  border-radius: 0 0 50% 50%;
+  text-wrap: none;
+  overflow: visible;
+  white-space: nowrap;
+  font-weight: bolder;
+  display: flex;
+  justify-content: center;
+  font-size: 2em;
+  box-shadow: inherit;
+  user-select: none;
+}
+
+#jugadores {
+  transition: 500ms;
+  position: relative;
+  animation: infinite rotarPersonajes 30s linear;
+  background: #f390ad;
+  outline: 13px double black;
+  margin-top: calc(50% - 300px);
+  width: 600px;
+  aspect-ratio: 1/1;
+  transform-origin: 50% 50%;
+  border-radius: 50%;
+}
+#jugadores .icono {
+  opacity: 0;
+}
+#jugadores .palo {
+  width: 50px;
+  height: 350px;
+  transform-origin: 50% 100%;
+  position: absolute;
+  left: 50%;
+  top: 20%;
+}
+#jugadores .palo:nth-child(1) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 1));
+}
+#jugadores .palo:nth-child(1) .icono {
+  rotate: calc(45deg * 1 - 45deg);
+}
+#jugadores .palo:nth-child(2) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 2));
+}
+#jugadores .palo:nth-child(2) .icono {
+  rotate: 270deg;
+  background-color: #147714;
+}
+#jugadores .palo:nth-child(3) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 3));
+}
+#jugadores .palo:nth-child(3) .icono {
+  rotate: 270deg;
+  background-color: #147714;
+}
+#jugadores .palo:nth-child(4) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 4));
+}
+#jugadores .palo:nth-child(4) .icono {
+  rotate: calc(45deg * 4 - 360deg);
+  background-color: #2323a1;
+}
+#jugadores .palo:nth-child(5) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 5));
+}
+#jugadores .palo:nth-child(5) .icono {
+  rotate: calc(45deg * 5 - 45deg);
+  background-color: #2323a1;
+}
+#jugadores .palo:nth-child(6) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 6));
+}
+#jugadores .palo:nth-child(6) .icono {
+  rotate: calc(45deg * 6 - 180deg);
+  background-color: #d2b638;
+}
+#jugadores .palo:nth-child(7) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 7));
+}
+#jugadores .palo:nth-child(7) .icono {
+  rotate: calc(45deg * 7 - 225deg);
+  background-color: #d2b638;
+}
+#jugadores .palo:nth-child(8) {
+  transform: translate(-50%, -50%) rotate(calc(45deg * 8));
+}
+#jugadores .palo:nth-child(8) .icono {
+  rotate: calc(45deg * 8 - 360deg);
+}
+#jugadores .palo:nth-child(odd) .icono {
+  animation-delay: -4s;
+}
+
+@keyframes rotarPersonajes {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes burbuja {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 100%;
+  }
+}
+
+/*# sourceMappingURL=lobby.css.map */

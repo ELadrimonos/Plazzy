@@ -1,0 +1,149 @@
+#lobby {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  height: 100vh;
+}
+
+body{
+  background: cadetblue;
+}
+
+#lobby > article:first-child{
+  display: flex;
+  flex-direction: column;
+
+  padding-left: 20%;
+
+  & h1{
+    font-size: 3.4rem;
+    user-select: none;
+
+  }
+
+  & h2 {
+    font-size: 2.5rem;
+    user-select: none;
+
+  }
+
+  & h3 {
+    font-size: 3rem;
+  }
+}
+
+.gameCode{
+  text-transform: uppercase;
+  font-family: sans-serif;
+  user-select: text;
+}
+
+.icono{
+  width: 100px;
+  aspect-ratio: 1/1;
+  background-color: #ad2424;
+  border-radius: 20%;
+  animation: infinite reverse linear rotarPersonajes 30s;
+  position: relative;
+  box-shadow: 3px 3px black;
+  & .nombreJug{
+    position: absolute;
+    bottom: calc(0% - 65px);
+    width: 100px;
+    height: 40px;
+    background: aliceblue;
+    border-radius: 0 0 50% 50%;
+    text-wrap: none;
+    overflow: visible;
+    white-space: nowrap;
+    font-weight: bolder;
+    display: flex;
+    justify-content: center;
+    font-size: 2em;
+    box-shadow: inherit;
+    user-select: none;
+  }
+
+}
+
+#jugadores {
+  transition: 500ms;
+  position: relative;
+  animation: infinite rotarPersonajes 30s linear;
+  background: #f390ad;
+  outline: 13px double black;
+  margin-top: calc(50% - 300px);
+  width: 600px;
+  aspect-ratio: 1/1;
+  transform-origin: 50% 50%;
+  border-radius: 50%;
+  .icono{
+    // Empezamos con todos a opacidad 0 para mantener el timing de animación de rotación de cada icono
+    opacity: 0;
+  }
+  .palo {
+    width: 50px;
+    height: 350px;
+    transform-origin: 50% 100%;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    @for $i from 1 through 8 {
+      &:nth-child(#{$i}) {
+        $grados: 360deg / 8;
+        $rotate: calc($grados * #{$i});
+        transform: translate(-50%, -50%) rotate($rotate);
+        @if ($i == 2 or $i == 3) {
+          .icono {
+            rotate: 270deg;
+            background-color: #147714;
+          }
+        } @else if ($i == 4 or $i == 5) {
+          .icono {
+            @if ($i == 4) {rotate: calc($rotate - 360deg)};
+            @if ($i == 5) {rotate: calc($rotate - 45deg)};
+            background-color: #2323a1;
+          }
+        } @else if ($i == 6 or $i == 7) {
+          .icono {
+            @if ($i == 6) {rotate: calc($rotate - 180deg)};
+            @if ($i == 7) {rotate: calc($rotate - 225deg)};
+            background-color: #d2b638;
+          }
+        } @else {
+          .icono {
+            @if ($i == 1) {
+              rotate: calc($rotate - 45deg)
+            };
+            @if ($i == 8) {
+              rotate: calc($rotate - 360deg)
+            };
+          }
+        }
+
+      }
+
+    }
+
+    &:nth-child(odd){
+      .icono{
+        animation-delay: -4s;
+      }
+    }
+
+  }
+}
+
+@keyframes rotarPersonajes {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes burbuja {
+  from{
+    scale: 0;
+  }
+  to{
+    scale: 100%;
+  }
+}
