@@ -25,6 +25,15 @@ body {
   font-size: 3rem;
 }
 
+#QRcode {
+  position: absolute;
+  left: 10%;
+  top: 60vh;
+  outline: 5px solid black;
+  outline-offset: 10px;
+  animation: burbuja 400ms ease-in-out;
+}
+
 .gameCode {
   text-transform: uppercase;
   font-family: sans-serif;
@@ -36,7 +45,7 @@ body {
   aspect-ratio: 1/1;
   background-color: #ad2424;
   border-radius: 20%;
-  animation: infinite reverse linear rotarPersonajes 30s;
+  animation: infinite reverse linear rotarPersonajes 30s, burbuja 400ms ease-in-out paused;
   position: relative;
   box-shadow: 3px 3px black;
 }
@@ -85,12 +94,13 @@ body {
   transform: translate(-50%, -50%) rotate(calc(45deg * 1));
 }
 #jugadores .palo:nth-child(1) .icono {
-  rotate: calc(45deg * 1 - 45deg);
+  rotate: calc(45deg * 1 - 90deg);
 }
 #jugadores .palo:nth-child(2) {
   transform: translate(-50%, -50%) rotate(calc(45deg * 2));
 }
 #jugadores .palo:nth-child(2) .icono {
+  rotate: 270deg;
   rotate: 270deg;
   background-color: #147714;
 }
@@ -99,6 +109,7 @@ body {
 }
 #jugadores .palo:nth-child(3) .icono {
   rotate: 270deg;
+  rotate: -135deg;
   background-color: #147714;
 }
 #jugadores .palo:nth-child(4) {
@@ -112,7 +123,7 @@ body {
   transform: translate(-50%, -50%) rotate(calc(45deg * 5));
 }
 #jugadores .palo:nth-child(5) .icono {
-  rotate: calc(45deg * 5 - 45deg);
+  rotate: calc(45deg * 5 - 90deg);
   background-color: #2323a1;
 }
 #jugadores .palo:nth-child(6) {
@@ -126,7 +137,7 @@ body {
   transform: translate(-50%, -50%) rotate(calc(45deg * 7));
 }
 #jugadores .palo:nth-child(7) .icono {
-  rotate: calc(45deg * 7 - 225deg);
+  rotate: calc(45deg * 7 - 270deg);
   background-color: #d2b638;
 }
 #jugadores .palo:nth-child(8) {
@@ -135,9 +146,6 @@ body {
 #jugadores .palo:nth-child(8) .icono {
   rotate: calc(45deg * 8 - 360deg);
 }
-#jugadores .palo:nth-child(odd) .icono {
-  animation-delay: -4s;
-}
 
 @keyframes rotarPersonajes {
   to {
@@ -145,10 +153,15 @@ body {
   }
 }
 @keyframes burbuja {
-  from {
+  0% {
+    opacity: 0;
     scale: 0;
   }
-  to {
+  75% {
+    scale: 105%;
+    opacity: 1;
+  }
+  100% {
     scale: 100%;
   }
 }

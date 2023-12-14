@@ -1,5 +1,5 @@
 var numJug = 0;
-
+const cuentaAtrasPrompt = document.getElementById("tiempoPrompt")
 
 class Jugador {
     constructor(nombre) {
@@ -14,9 +14,9 @@ const cambiarFondoNoria = () => {
 }
 
 
-//TODO Hacer en lado servidor
+//TODO Obtener code del servidor socket.io
 const obtenerCodigoLobby = () => {
-    return "jdsh";
+    return "2kfs";
 }
 
 const empezarPartida = () => {
@@ -36,9 +36,26 @@ const mostrarJugador = (nombre = ("J" + (numJug+1))) => {
         const icono = padre.children[0];
         icono.style.opacity = "1";
         icono.children[0].innerText = nombre;
+        icono.style.animationPlayState = "running";
     }
 
 }
 
+
 // TODO setTimeout dentro de Promise de unos 60 segundos con error a la hora de escribir una respuesta
 // Así puedo saber si el jugador no ha escrito nada y si envía algo ignorará el error
+
+
+//TODO Transformar en promesa
+const cuentaAtras = (segundos) => {
+    if (segundos >= 0) {
+        cuentaAtrasPrompt.innerText = segundos;
+        setTimeout(() => cuentaAtras(segundos - 1), 1000);
+    } else {
+        return true;
+    }
+}
+
+// cuentaAtras(50);
+
+

@@ -31,6 +31,16 @@ body{
   }
 }
 
+#QRcode{
+  position: absolute;
+  left: 10%;
+  top: 60vh;
+  outline: 5px solid black;
+  outline-offset: 10px;
+  animation: burbuja 400ms ease-in-out;
+}
+
+
 .gameCode{
   text-transform: uppercase;
   font-family: sans-serif;
@@ -42,7 +52,7 @@ body{
   aspect-ratio: 1/1;
   background-color: #ad2424;
   border-radius: 20%;
-  animation: infinite reverse linear rotarPersonajes 30s;
+  animation: infinite reverse linear rotarPersonajes 30s, burbuja 400ms ease-in-out paused;
   position: relative;
   box-shadow: 3px 3px black;
   & .nombreJug{
@@ -95,24 +105,26 @@ body{
         @if ($i == 2 or $i == 3) {
           .icono {
             rotate: 270deg;
+            @if ($i == 2) {rotate: 270deg};
+            @if ($i == 3) {rotate: -135deg};
             background-color: #147714;
           }
         } @else if ($i == 4 or $i == 5) {
           .icono {
             @if ($i == 4) {rotate: calc($rotate - 360deg)};
-            @if ($i == 5) {rotate: calc($rotate - 45deg)};
+            @if ($i == 5) {rotate: calc($rotate - 90deg)};
             background-color: #2323a1;
           }
         } @else if ($i == 6 or $i == 7) {
           .icono {
             @if ($i == 6) {rotate: calc($rotate - 180deg)};
-            @if ($i == 7) {rotate: calc($rotate - 225deg)};
+            @if ($i == 7) {rotate: calc($rotate - 270deg)};
             background-color: #d2b638;
           }
         } @else {
           .icono {
             @if ($i == 1) {
-              rotate: calc($rotate - 45deg)
+              rotate: calc($rotate - 90deg)
             };
             @if ($i == 8) {
               rotate: calc($rotate - 360deg)
@@ -124,11 +136,6 @@ body{
 
     }
 
-    &:nth-child(odd){
-      .icono{
-        animation-delay: -4s;
-      }
-    }
 
   }
 }
@@ -140,10 +147,16 @@ body{
 }
 
 @keyframes burbuja {
-  from{
+  0%{
+    opacity: 0;
     scale: 0;
   }
-  to{
+  75%{
+    scale: 105%;
+    opacity: 1;
+
+  }
+  100%{
     scale: 100%;
   }
 }
