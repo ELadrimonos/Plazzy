@@ -6,17 +6,14 @@ const io = require('socket.io')(http, {
     }
 });
 
-const mysql = require('mysql');
-const db = mysql.createConnection({
-    host: '192.168.18.33',
-    user: 'root',
-    password: 'root',
-    database: 'jackbox'
-});
+// const mysql = require('mysql');
+// const db = mysql.createConnection({
+//     host: '192.168.18.33',
+//     user: 'root',
+//     password: 'root',
+//     database: 'jackbox'
+// });
 
-io.on('connection', (socket) => {
-    console.log("CONEXION")
-});
 
 const lobbies = [];
 
