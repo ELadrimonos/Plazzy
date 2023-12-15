@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Menú principal</title>
     <link rel="stylesheet" type="text/css" href="css/menuPrincipal.css">
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script defer src="js/cliente.js"></script>
+<!--    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>-->
+<!--    <script defer src="js/cliente.js"></script>-->
 </head>
 <body>
     <main>
@@ -39,17 +39,17 @@
     </main>
     <script>
  
-        document.getElementById('crearPartida').addEventListener('click', function(event) {
-        
-            socket.emit('create', document.getElementById("nombreHost").value, document.getElementById("modoDeJuego").value);
-            return false;
-        });
-
-        document.getElementById('unirsePartida').addEventListener('click', function(event) {
-    
-            socket.emit('join', document.getElementById("nombreJugador").value, document.getElementById("gameCode").value);
-            return false;
-        });
+        // document.getElementById('crearPartida').addEventListener('click', function(event) {
+        //
+        //     socket.emit('create', document.getElementById("nombreHost").value, document.getElementById("modoDeJuego").value);
+        //     return false;
+        // });
+        //
+        // document.getElementById('unirsePartida').addEventListener('click', function(event) {
+        //
+        //     socket.emit('join', document.getElementById("nombreJugador").value, document.getElementById("gameCode").value);
+        //     return false;
+        // });
     </script>
 </body>
 </html>
