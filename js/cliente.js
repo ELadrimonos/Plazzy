@@ -1,10 +1,11 @@
 const socket = io('ws://localhost:8080');
 
 socket.on('lobbyCreated', ()  => {
-
+    //TODO insertar info del lobby en BBDD
 });
 
 socket.on('join', (lobbyCode) => {
+    //TODO insertar info jugadores en BBDD
 
     const codes = document.getElementsByClassName('gameCode')
 
@@ -26,6 +27,8 @@ socket.on('updatePlayers', (players) => {
 });
 
 socket.on('disconnectPlayer', (playerId, players) => {
+    //TODO borrar info del jugador desconectado
+
     const padre = document.getElementsByClassName("palo")[playerId];
     const icono = padre.children[0];
 
@@ -40,16 +43,16 @@ socket.on('disconnectPlayer', (playerId, players) => {
 
 socket.on('joinError', (message) => {
     alert(message);
-    // window.location.href = index.html;
+    window.location.href = 'index.html';
 });
 
 //TODO Obtener datos del formulario y meterlos
 
 // if crear lobby
-if (0){
-    socket.emit('create', 'Adrian', 'quiplash')
+if (obtenerParametroUrl('juego') !== false){
+    socket.emit('create', obtenerParametroUrl('username'), obtenerParametroUrl('juego'))
 } else {
-    socket.emit('join', 'Calvo', '0DCR');
+    socket.emit('join', obtenerParametroUrl('username'), obtenerParametroUrl('code'));
 }
 
 
