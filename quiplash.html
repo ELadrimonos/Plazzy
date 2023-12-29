@@ -61,7 +61,24 @@
     <img id="QRcode" src="" alt="codigoQR">
     
 </section>
-<section id="typing"></section>
+<section id="typing">
+    <form id="respuestaJugadorForm">
+        <label for="respuestaJugadorInput" id="respuestaJugadorLabel"></label>
+        <input type="text" id="respuestaJugadorInput" maxlength="30">
+        <input type="submit" value="Enviar">
+    </form>
+    <h3 id="caracteresRestantes">30</h3>
+    <script>
+        //TODO Tal vez cambiar esto de sitio
+        let inputJugador = document.getElementById("respuestaJugadorInput");
+        inputJugador.addEventListener("input", () => {
+            document.getElementById("caracteresRestantes").innerText = obtenerCaracteresRestantes(inputJugador)
+        });
+        inputJugador.addEventListener("property-change", () => {
+            document.getElementById("caracteresRestantes").innerText = obtenerCaracteresRestantes(inputJugador)
+        });
+    </script>
+</section>
 <section id="round">
     <div id="promptHeader">
         <h2 id="tiempoPrompt">10</h2>
