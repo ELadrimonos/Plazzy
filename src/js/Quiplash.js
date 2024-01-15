@@ -1,4 +1,5 @@
 import IconoJugador from "./ComponentesComunes";
+import '../css/Quiplash.css';
 
 function Noria() {
     return (
