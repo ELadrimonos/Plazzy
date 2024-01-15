@@ -1,0 +1,251 @@
+#lobby {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    height: 100vh;
+}
+
+body {
+    background: cadetblue;
+}
+
+#lobby > article:first-child {
+    display: flex;
+    flex-direction: column;
+    padding-left: 20%;
+}
+#lobby > article:first-child h1 {
+    font-size: 3.4rem;
+    user-select: none;
+}
+#lobby > article:first-child h2 {
+    font-size: 2.5rem;
+    user-select: none;
+}
+#lobby > article:first-child h3 {
+    font-size: 3rem;
+}
+
+#QRcode {
+    position: absolute;
+    left: 10%;
+    top: 60vh;
+    outline: 5px solid black;
+    outline-offset: 10px;
+    animation: burbuja 400ms ease-in-out;
+}
+
+.gameCode {
+    text-transform: uppercase;
+    font-family: sans-serif;
+    user-select: text;
+}
+
+.icono {
+    width: 100px;
+    aspect-ratio: 1/1;
+    background-color: #ad2424;
+    border-radius: 20%;
+    animation: infinite reverse linear rotarPersonajes 30s, burbuja 400ms ease-in-out paused;
+    position: relative;
+    box-shadow: 3px 3px black;
+}
+.icono .nombreJug {
+    position: absolute;
+    bottom: calc(0% - 65px);
+    width: 100px;
+    height: 40px;
+    background: aliceblue;
+    border-radius: 0 0 50% 50%;
+    text-wrap: none;
+    overflow: visible;
+    white-space: nowrap;
+    font-weight: bolder;
+    display: flex;
+    justify-content: center;
+    font-size: 2em;
+    box-shadow: inherit;
+    user-select: none;
+}
+
+#jugadores {
+    transition: 500ms;
+    position: relative;
+    animation: infinite rotarPersonajes 30s linear;
+    background: #f390ad;
+    outline: 13px double black;
+    margin-top: calc(50% - 300px);
+    width: 600px;
+    aspect-ratio: 1/1;
+    transform-origin: 50% 50%;
+    border-radius: 50%;
+}
+/*#jugadores .icono {*/
+/*    opacity: 0;*/
+/*}*/
+#jugadores .palo {
+    width: 50px;
+    height: 350px;
+    transform-origin: 50% 100%;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+}
+#jugadores .palo:nth-child(1) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 1));
+}
+#jugadores .palo:nth-child(1) .icono {
+    rotate: calc(45deg * 1 - 90deg);
+}
+#jugadores .palo:nth-child(2) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 2));
+}
+#jugadores .palo:nth-child(2) .icono {
+    rotate: 270deg;
+    rotate: 270deg;
+    background-color: #147714;
+}
+#jugadores .palo:nth-child(3) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 3));
+}
+#jugadores .palo:nth-child(3) .icono {
+    rotate: 270deg;
+    rotate: -135deg;
+    background-color: #147714;
+}
+#jugadores .palo:nth-child(4) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 4));
+}
+#jugadores .palo:nth-child(4) .icono {
+    rotate: calc(45deg * 4 - 360deg);
+    background-color: #2323a1;
+}
+#jugadores .palo:nth-child(5) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 5));
+}
+#jugadores .palo:nth-child(5) .icono {
+    rotate: calc(45deg * 5 - 90deg);
+    background-color: #2323a1;
+}
+#jugadores .palo:nth-child(6) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 6));
+}
+#jugadores .palo:nth-child(6) .icono {
+    rotate: calc(45deg * 6 - 180deg);
+    background-color: #d2b638;
+}
+#jugadores .palo:nth-child(7) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 7));
+}
+#jugadores .palo:nth-child(7) .icono {
+    rotate: calc(45deg * 7 - 270deg);
+    background-color: #d2b638;
+}
+#jugadores .palo:nth-child(8) {
+    transform: translate(-50%, -50%) rotate(calc(45deg * 8));
+}
+#jugadores .palo:nth-child(8) .icono {
+    rotate: calc(45deg * 8 - 360deg);
+}
+
+@keyframes rotarPersonajes {
+    to {
+        transform: rotate(360deg);
+    }
+}
+/*@keyframes burbuja {*/
+/*    0% {*/
+/*        opacity: 0;*/
+/*        scale: 0;*/
+/*    }*/
+/*    75% {*/
+/*        scale: 105%;*/
+/*        opacity: 1;*/
+/*    }*/
+/*    100% {*/
+/*        scale: 100%;*/
+/*    }*/
+/*}*/
+
+* {
+    user-select: none;
+}
+
+#round {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10%;
+    height: 100vh;
+}
+#round #promptHeader {
+    grid-column: 1/3;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+#round #promptHeader #textoPrompt {
+    min-width: 50%;
+    max-width: 50%;
+    text-align: center;
+    line-height: 1.6;
+    font-size: 2.6rem;
+    font-family: sans-serif;
+    color: #fafa1f;
+    text-shadow: #574c1d 0 5px;
+    user-select: text;
+}
+#round #promptHeader #tiempoPrompt {
+    font-size: 4rem;
+    font-family: sans-serif;
+    transform: skew(-15deg) rotate(-15deg);
+    font-weight: bold;
+    color: white;
+    text-shadow: 5px 5px gray;
+}
+#round #promptHeader div {
+    max-width: 25%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 2em;
+    transform: skew(5deg) rotate(5deg);
+}
+#round #promptHeader div h3 {
+    margin: 0;
+    font-family: sans-serif;
+    text-transform: lowercase;
+    padding: 0 30px 0 30px;
+}
+#round #promptHeader div .gameCode {
+    background-color: #333232;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+    box-shadow: -5px 5px black;
+}
+#round #promptMessages {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+#round #promptMessages .prompts {
+    width: 500px;
+    height: 300px;
+    border-radius: 50px;
+    background-color: #f1f1f1;
+    user-select: text;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+    overflow: hidden;
+    padding: 30px;
+    text-transform: uppercase;
+    box-shadow: -10px -7px gray;
+}
+#round #promptMessages .prompts:nth-child(2) {
+    box-shadow: 10px -7px gray;
+}
+
