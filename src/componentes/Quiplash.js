@@ -1,6 +1,17 @@
 import IconoJugador from "./ComponentesComunes";
 import '../css/Quiplash.css';
 
+
+function Prompt({texto}) {
+    return (
+        <div>
+            <h1>{texto}</h1>
+        </div>
+    );
+}
+
+
+
 function Noria() {
     return (
         <>

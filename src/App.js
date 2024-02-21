@@ -1,11 +1,12 @@
 import {useState} from "react";
-import LobbyQuiplash from './js/Quiplash.js';
-import MenuPrincipal from './js/MainMenu.js';
+import LobbyQuiplash from './componentes/Quiplash.js';
+import MenuPrincipal from './componentes/MainMenu.js';
 
 
 function App() {
     return (
-        <MenuPrincipal></MenuPrincipal>
+        // <MenuPrincipal></MenuPrincipal>
+        <LobbyQuiplash/>
     );
 }
 
