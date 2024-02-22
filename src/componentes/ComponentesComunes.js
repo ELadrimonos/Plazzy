@@ -8,7 +8,7 @@ export function IconoJugador({nombre}) {
 }
 
 export function CodigoPartida({gameCode}){
-    return <h2>{gameCode}</h2>
+    return <h2 className="gameCode">{gameCode}</h2>
 }
 
 export function Contador({tiempoInicial}){
