@@ -2,6 +2,8 @@ import React from 'react';
 import Juego from './Juego';
 import {useState} from "react";
 import {CodigoPartida, Contador, IconoJugador} from "../ComponentesComunes";
+import '../../css/Quiplash.css';
+
 
 class Quiplash extends Juego {
   constructor(props) {
@@ -17,7 +19,7 @@ class Quiplash extends Juego {
             <article>
                 <h1>Quiplash</h1>
                 <h2>Código de sala</h2>
-                <h3 className="gameCode"></h3>
+                <CodigoPartida gameCode={1234}/>
             </article>
             <article id="jugadores">
                 <Noria></Noria>
@@ -28,37 +30,40 @@ class Quiplash extends Juego {
   }
 
     renderRespondiendo() {
-        const [respuesta, setRespuesta] = useState('');
+        this.state.respuesta = ''
 
-        function enviarRespuesta(texto){
+        function enviarRespuesta(){
           // Enviar respuesta al servidor
       }
 
       return (
-          <>
+          <section id="typing">
               <Prompt texto={'PRUEBA'}/>
-              <input type="text" value={respuesta} onChange={e => setRespuesta(e.target.value)}/>
-              <button onClick={enviarRespuesta(respuesta)}>Enviar</button>
+              <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({respuesta: e.target.value})}/>
+              <button onClick={enviarRespuesta()}>Enviar</button>
               <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
 
-          </>
+          </section>
       );
     }
 
     renderJugando() {
         return (
-            <>
-                <header>
-                <Contador tiempoInicial={10}/>
-                <Prompt texto={'PRUEBA'}/>
-                <CodigoPartida gameCode={1234}/>
-            </header>
-            <div id="promptMessages">
-                <RespuestaPrompt texto={'UNO'}/>
-                <RespuestaPrompt texto={'DOS'}/>
-            </div>
+            <section id="round">
+                <header id="promptHeader">
+                    <Contador tiempoInicial={10}/>
+                    <Prompt texto={'PRUEBA'}/>
+                    <div>
+                        <h3>Jackbox.tv</h3>
+                        <CodigoPartida gameCode={1234}/>
+                    </div>
+                </header>
+                <div id="promptMessages">
+                    <RespuestaPrompt texto={'UNO'}/>
+                    <RespuestaPrompt texto={'DOS'}/>
+                </div>
             <button onClick={() => this.setState({estadoJuego: 'inicio'})}>Comenzar</button>
-        </>
+        </section>
     );
   }
 
@@ -80,9 +85,7 @@ class Quiplash extends Juego {
 
 function Prompt({texto}) {
     return (
-        <div className="prompt">
-            <h1>{texto}</h1>
-        </div>
+        <h1 className="prompt">{texto}</h1>
     );
 }
 
