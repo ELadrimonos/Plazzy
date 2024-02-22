@@ -5,26 +5,13 @@ import {useState} from "react";
 
 function Prompt({texto}) {
     return (
-        <div className="promt">
+        <div className="prompt">
             <h1>{texto}</h1>
         </div>
     );
 }
 
-function Respuesta({texto, propietario}){
-    const [visibilidadUsuario, setVisibilidadUsuario] = useState('hidden');
 
-    const estilosPropietario = {
-        visibility: {visibilidadUsuario},
-    }
-
-    return (
-        <div className="promptResponse">
-            <p>{texto}</p>
-            <h5 style={estilosPropietario}>{propietario}</h5>
-        </div>
-    );
-}
 
 function TablaPuntuaciones() {
     //TODO Rellenar con iconos para cada jugador
@@ -46,36 +33,7 @@ export function Partida() {
     );
 }
 
-function Noria() {
-    return (
-        <>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-            <div className="palo">
-                <IconoJugador/>
-            </div>
-        </>
-    );
-}
+
 
 export function LobbyQuiplash() {
     return (
