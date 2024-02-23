@@ -6,6 +6,7 @@ class Juego extends Component {
     this.state = {
       // Estado común del juego
       estadoJuego: 'inicio', // estado inicial del juego
+      rondaActual: 1, // ronda inicial del juego
     };
   }
 
