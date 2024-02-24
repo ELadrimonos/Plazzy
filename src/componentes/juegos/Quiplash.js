@@ -47,13 +47,19 @@ class Quiplash extends Juego {
                     <CodigoPartida gameCode={this.GameCode}/>
                 </article>
                 <article id="jugadores">
-                    <Noria></Noria>
+                    <Noria jugadores={this.state.jugadoresConectados}></Noria>
                 </article>
                 <img id="QRcode" src="" alt="codigoQR"/>
             </section>
             {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
             <button onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
-        </>);
+            <button onClick={() => this.setState(prevState => ({
+              jugadoresConectados: [
+                ...prevState.jugadoresConectados,
+                { nombre: 'Rar', rutaImagen: 'ruta/a/imagen1.png' }
+              ]
+            }))} disabled={this.state.jugadoresConectados.length >= this.maxJugadores}>Aumentar Jugadores</button>
+                    </>);
   }
 
     renderRespondiendo() {
@@ -69,7 +75,7 @@ class Quiplash extends Juego {
             <Prompt texto={'PRUEBA'} />
             <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({ respuesta: e.target.value })} />
             <button onClick={enviarRespuesta()}>Enviar</button>
-            <button onClick={() => this.setState({ estadoJuego: 'jugando' })}>Juego</button>
+            <button onClick={() => this.setState({ estadoJuego: 'jugando' })} >Juego</button>
 
           </section>
         );
@@ -117,36 +123,46 @@ function Prompt({ texto }) {
   );
 }
 
-function Noria() {
+function Noria({ jugadores }) {
+  // Estado local para almacenar los jugadores
+  const [listaJugadores, setListaJugadores] = useState([]);
+
+  useEffect(() => {
+    // Cuando los jugadores cambian, actualiza el estado local
+    if (jugadores) {
+      setListaJugadores(jugadores);
+    } else {
+      // Si no hay jugadores, establece la lista como vacía
+      setListaJugadores([]);
+    }
+  }, [jugadores]); // Ejecutar efecto cuando los jugadores cambien
+
+  // Calcular el número de jugadores conectados usando la longitud del array listaJugadores
+  const numeroJugadores = listaJugadores.length;
+
+  // Mapear los objetos Jugador para renderizar los IconoJugador
+  const iconosJugadores = listaJugadores.map((jugador, index) => (
+    <div className="palo" key={index}>
+      <IconoJugador nombre={jugador.nombre} rutaImagen={jugador.rutaImagen} />
+    </div>
+  ));
+
+  // Rellenar los espacios restantes con IconoJugador vacíos
+  for (let i = numeroJugadores; i < 8; i++) {
+    iconosJugadores.push(
+      <div className="palo" key={i} style={{ visibility: 'hidden' }}>
+        <IconoJugador />
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="palo">
-        <IconoJugador nombre='Juan' />
-      </div>
-      <div className="palo">
-        <IconoJugador />
-      </div>
-      <div className="palo">
-        <IconoJugador />
-      </div>
-      <div className="palo">
-        <IconoJugador />
-      </div>
-      <div className="palo">
-        <IconoJugador nombre='Pepe' />
-      </div>
-      <div className="palo">
-        <IconoJugador />
-      </div>
-      <div className="palo">
-        <IconoJugador />
-      </div>
-      <div className="palo">
-        <IconoJugador />
-      </div>
+      {iconosJugadores}
     </>
   );
 }
+
 
 function RespuestaPrompt({ texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios }) {
   const [springs, api] = useSpring(() => ({

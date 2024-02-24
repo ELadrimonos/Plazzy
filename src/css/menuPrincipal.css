@@ -1,16 +1,5 @@
-body{
-    background-color: cornflowerblue;
-}
+#menuPrincipal {
 
-main{
-    width: 50%;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    height: 50vh;
-    background-color: aliceblue;
-    padding: 30px;
 }
 
 fieldset{
