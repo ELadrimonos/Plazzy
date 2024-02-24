@@ -11,11 +11,11 @@ export function CodigoPartida({gameCode}){
     return <h2 className="gameCode">{gameCode}</h2>
 }
 
+// onTiempoTerminado es una función que se ejecuta cuando termina
 export function Contador({ tiempoInicial, onTiempoTerminado }) {
   const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
 
   useEffect(() => {
-    // Función recursiva para contar el tiempo y emitir la señal cuando termina
     const contarTiempo = () => {
       if (tiempoActual > 0) {
         setTimeout(() => {

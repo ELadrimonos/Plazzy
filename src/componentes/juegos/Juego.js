@@ -8,6 +8,8 @@ class Juego extends Component {
       estadoJuego: 'inicio', // estado inicial del juego
       rondaActual: 1, // ronda inicial del juego
     };
+    this.GameCode = 1234;
+    this.isUserHost = false;
   }
 
   // Métodos para renderizar diferentes estados del juego
