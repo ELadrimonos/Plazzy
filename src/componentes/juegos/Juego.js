@@ -7,9 +7,14 @@ class Juego extends Component {
       // Estado común del juego
       estadoJuego: 'inicio', // estado inicial del juego
       rondaActual: 1, // ronda inicial del juego
+      jugadoresConectados:  [
+            { nombre: 'Juan', rutaImagen: 'ruta/a/imagen1.png' },
+            { nombre: 'Pepe', rutaImagen: 'ruta/a/imagen2.png' }
+          ]
     };
     this.GameCode = 1234;
     this.isUserHost = false;
+    this.maxJugadores = 8;
   }
 
   // Métodos para renderizar diferentes estados del juego
