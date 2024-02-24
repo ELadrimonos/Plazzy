@@ -27,12 +27,12 @@ class Quiplash extends Juego {
 
   componentDidMount() {
     // Llamar a la función después de que el componente se haya montado
-    generarQRLobby();
+    generarQRLobby(this.GameCode);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
-      generarQRLobby();
+      generarQRLobby(this.GameCode);
     }
   }
 
@@ -44,14 +44,14 @@ class Quiplash extends Juego {
                 <article>
                     <h1>Quiplash</h1>
                     <h2>Código de sala</h2>
-                    <CodigoPartida gameCode={1234}/>
+                    <CodigoPartida gameCode={this.GameCode}/>
                 </article>
                 <article id="jugadores">
                     <Noria></Noria>
                 </article>
                 <img id="QRcode" src="" alt="codigoQR"/>
             </section>
-
+            {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
             <button onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
         </>);
   }
@@ -59,19 +59,20 @@ class Quiplash extends Juego {
     renderRespondiendo() {
         this.state.respuesta = ''
 
-    function enviarRespuesta() {
-      // Enviar respuesta al servidor
-    }
+        function enviarRespuesta() {
+          // Enviar respuesta al servidor
+        }
 
-    return (
-      <section id="typing">
-        <Prompt texto={'PRUEBA'} />
-        <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({ respuesta: e.target.value })} />
-        <button onClick={enviarRespuesta()}>Enviar</button>
-        <button onClick={() => this.setState({ estadoJuego: 'jugando' })}>Juego</button>
+        return (
+          <section id="typing">
+            <Contador tiempoInicial={90} />
+            <Prompt texto={'PRUEBA'} />
+            <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({ respuesta: e.target.value })} />
+            <button onClick={enviarRespuesta()}>Enviar</button>
+            <button onClick={() => this.setState({ estadoJuego: 'jugando' })}>Juego</button>
 
-      </section>
-    );
+          </section>
+        );
   }
 
   renderJugando() {
@@ -82,7 +83,7 @@ class Quiplash extends Juego {
           <Prompt texto={'PRUEBA'} />
           <div>
             <h3>Jackbox.tv</h3>
-            <CodigoPartida gameCode={1234} />
+            <CodigoPartida gameCode={this.GameCode} />
           </div>
         </header>
         <div id="promptMessages">
