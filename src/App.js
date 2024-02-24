@@ -5,7 +5,7 @@ import MenuPrincipal from "./componentes/MainMenu";
 
 function App() {
     return (
-        <Quiplash></Quiplash>
+        <MenuPrincipal></MenuPrincipal>
     );
 }
 
