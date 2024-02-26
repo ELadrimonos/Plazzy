@@ -1,3 +1,84 @@
+body {
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+#root {
+    height: 90%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+}
+
 #lobby {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 25%;
+    padding: 20px;
+    text-align: center;
+}
+
+#lobby header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+#lobby h1, #lobby h2 {
+    margin: 0;
+}
+
+#jugadores {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+button {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 10px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#QRcode {
+    position: absolute !important;
+    left: 10vw;
+    bottom: 10vh;
+    max-width: 300px;
+}
+
+#lobby .icono {
+    height: 60px;
+    display: flex;
+}
+
+#lobby .icono > img {
+    max-height: 40px;
+    aspect-ratio: 1/1;
 
 }

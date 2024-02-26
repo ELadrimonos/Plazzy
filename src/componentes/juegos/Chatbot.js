@@ -29,25 +29,27 @@ class Chatbot extends Juego {
     return (
         <>
             <section id="lobby">
-                <article>
+                <header>
                     <h1>Chatbot</h1>
                     <h2>Código de sala</h2>
                     <CodigoPartida gameCode={this.GameCode}/>
-                </article>
+                </header>
                 <article id="jugadores">
                     <ListaUsuarios jugadores={this.state.jugadoresConectados}></ListaUsuarios>
                 </article>
-                <img id="QRcode" src="" alt="codigoQR"/>
             </section>
+            <img id="QRcode" src="" alt="codigoQR"/>
+
             {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
             <button onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
             <button onClick={() => this.setState(prevState => ({
-              jugadoresConectados: [
-                ...prevState.jugadoresConectados,
-                { nombre: 'Rar', rutaImagen: 'ruta/a/imagen1.png' }
-              ]
-            }))} disabled={this.state.jugadoresConectados.length >= this.maxJugadores}>Aumentar Jugadores</button>
-                    </>);
+                jugadoresConectados: [
+                    ...prevState.jugadoresConectados,
+                    {nombre: 'Rar', rutaImagen: 'ruta/a/imagen1.png'}
+                ]
+            }))} disabled={this.state.jugadoresConectados.length >= this.maxJugadores}>Aumentar Jugadores
+            </button>
+        </>);
   }
 
     renderRespondiendo() {
@@ -60,7 +62,6 @@ class Chatbot extends Juego {
         return (
           <section id="typing">
             <Contador tiempoInicial={90} />
-            <Prompt texto={'PRUEBA'} />
             <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({ respuesta: e.target.value })} />
             <button onClick={enviarRespuesta()}>Enviar</button>
             <button onClick={() => this.setState({ estadoJuego: 'jugando' })} >Juego</button>
@@ -74,7 +75,6 @@ class Chatbot extends Juego {
       <section id="round">
         <header id="promptHeader">
           <Contador tiempoInicial={10} />
-          <Prompt texto={'PRUEBA'} />
           <div>
             <h3>Jackbox.tv</h3>
             <CodigoPartida gameCode={this.GameCode} />

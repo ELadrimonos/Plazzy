@@ -1,12 +1,14 @@
-import Index from "./componentes/MainMenu";
+// import Index from "./componentes/MainMenu";
+// import Chatbot from "./componentes/juegos/Chatbot";
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useParams  } from 'react-router-dom';
+import Chatbot from "./componentes/juegos/Chatbot";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<Chatbot />} />
         <Route path="/game/:gameLobbyCode" element={<GamePage />} />
       </Routes>
     </Router>

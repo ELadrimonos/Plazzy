@@ -8,20 +8,20 @@ body {
     background: cadetblue;
 }
 
-#lobby > article:first-child {
+#lobby > header {
     display: flex;
     flex-direction: column;
     padding-left: 20%;
 }
-#lobby > article:first-child h1 {
+#lobby > header h1 {
     font-size: 3.4rem;
     user-select: none;
 }
-#lobby > article:first-child h2 {
+#lobby > header h2 {
     font-size: 2.5rem;
     user-select: none;
 }
-#lobby > article:first-child h3 {
+#lobby > header h3 {
     font-size: 3rem;
 }
 
@@ -65,6 +65,11 @@ body {
     font-size: 2em;
     box-shadow: inherit;
     user-select: none;
+}
+
+.icono img {
+    max-width: 100px;
+    aspect-ratio: 1/1;
 }
 
 #jugadores {
