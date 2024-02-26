@@ -1,23 +1,85 @@
-#menuPrincipal {
-
+/* Estilos generales para el cuerpo y las secciones animadas */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  overflow-x: hidden;
 }
 
-fieldset{
-    background-color: #abfcef;
+main{
+    max-width: 50%;
 }
 
-form{
-    display: grid;
-    align-items: center;
-    gap: 30px;
+animated.section {
+  width: 50%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+  padding: 20px;
+  overflow-y: auto;
 }
 
-label{
-    grid-column: 1;
+/* Estilos para los botones */
+button {
+  background-color: #008CBA;
+  color: white;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
-input[type=text], select{
-    grid-column: 2;
+
+button:hover {
+  background-color: #005f73;
 }
-input[type=submit]{
-    grid-column: 1/3;
+
+/* Estilos para los formularios y leyendas */
+fieldset {
+  border: 2px solid #008CBA;
+  border-radius: 5px;
+  padding: 20px;
+}
+
+legend {
+  padding: 0 10px;
+  background-color: #008CBA;
+  color: white;
+  border-radius: 5px;
+}
+
+label {
+  display: block;
+  margin: 15px 0 5px;
+}
+
+input[type="text"],
+select {
+width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+input[type="text"]{
+    width: calc(100% - 22px);
+}
+
+input[type="submit"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #008CBA;
+  background-color: #008CBA;
+  color: white;
+}
+
+input[type="submit"]:hover {
+  background-color: #005f73;
 }

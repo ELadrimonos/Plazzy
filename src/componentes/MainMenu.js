@@ -3,6 +3,7 @@ import '../css/menuPrincipal.css';
 import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { useSpring, animated } from '@react-spring/web'
 
 // Cambiar por iconos de los juegos
 function FondoTresD() {
@@ -24,7 +25,7 @@ function FondoTresD() {
     fontLoader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/fonts/helvetiker_regular.typeface.json', function(font) {
       const textGeometry = new TextGeometry('PLAZZY', {
         font: font,
-        size: 0.3,
+        size: 0.5,
         height: 0.5,
         curveSegments: 12,
         bevelEnabled: true,
@@ -72,9 +73,13 @@ function FondoTresD() {
 }
 
 function CrearPartida({ volverAlMenu }) {
+    const springs = useSpring({
+    from: { x: -1000 },
+    to: { x: 0 },
+  })
+
     return (
-        <main id="menuCrearPartida">
-            <button onClick={volverAlMenu}>Volver al menú</button>
+        <animated.section style={{...springs,}} id="menuCrearPartida">
             <fieldset id="crearPartidaForm">
                 <legend>Crear Partida</legend>
                 <form>
@@ -83,16 +88,41 @@ function CrearPartida({ volverAlMenu }) {
                     <label htmlFor="modoDeJuego">Modo de juego: </label>
                     <select name="juego" id="modoDeJuego">
                         <option value="quiplash" defaultValue={true}>Quiplash</option>
+                        <option value="chatbot">Chatbot</option>
                     </select>
                     <input type="submit" value="Crear" id="crearPartida"/>
                 </form>
             </fieldset>
-        </main>
+            <button onClick={volverAlMenu}>Volver al menú</button>
+
+        </animated.section>
+    );
+}
+
+function MenuPrincipal({menuCrear}) {
+    const springs = useSpring({
+        from: {x: -1000},
+        to: {x: 0},
+    })
+    return (
+        <animated.section style={{...springs,}} id="menuPrincipal">
+            <fieldset id="joinGame">
+                <legend>Unirse A Partida</legend>
+                <form>
+                    <label htmlFor="nombreJugador">Nombre: </label>
+                    <input type="text" name="username" id="nombreJugador" required/>
+                    <label htmlFor="gameCode">Código partida: </label>
+                    <input type="text" name="code" id="gameCode" minLength="4" maxLength="4" required/>
+                    <input type="submit" value="Unirse" id="unirsePartida"/>
+                </form>
+            </fieldset>
+            <button onClick={menuCrear}>Crear partida</button>
+        </animated.section>
     );
 }
 
 
-function MenuPrincipal() {
+function Index() {
     const [mostrarCrearPartida, setMostrarCrearPartida] = useState(false);
 
     const mostrarCrearPartidaHandler = () => {
@@ -105,30 +135,18 @@ function MenuPrincipal() {
 
     return (
         <>
+            <FondoTresD/>
             <header>
                 <h1>plazzy</h1>
             </header>
-            <main id="menuPrincipal">
-                {!mostrarCrearPartida && (
-                    <fieldset id="joinGame">
-                        <legend>Unirse A Partida</legend>
-                        <form>
-                            <label htmlFor="nombreJugador">Nombre: </label>
-                            <input type="text" name="username" id="nombreJugador" required/>
-                            <label htmlFor="gameCode">Código partida: </label>
-                            <input type="text" name="code" id="gameCode" minLength="4" maxLength="4" required/>
-                            <input type="submit" value="Unirse" id="unirsePartida"/>
-                        </form>
-                    </fieldset>
-                )}
-                {!mostrarCrearPartida && (
-                    <button onClick={mostrarCrearPartidaHandler}>Crear partida</button>
-                )}
+            <main>
 
+
+                {!mostrarCrearPartida && <MenuPrincipal menuCrear={mostrarCrearPartidaHandler} />}
                 {mostrarCrearPartida && <CrearPartida volverAlMenu={volverAlMenuHandler} />}
             </main>
         </>
     );
 }
 
-export default MenuPrincipal;
+export default Index;
