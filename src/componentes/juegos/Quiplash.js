@@ -41,11 +41,11 @@ class Quiplash extends Juego {
     return (
         <>
             <section id="lobby">
-                <article>
+                <header>
                     <h1>Quiplash</h1>
                     <h2>Código de sala</h2>
                     <CodigoPartida gameCode={this.GameCode}/>
-                </article>
+                </header>
                 <article id="jugadores">
                     <Noria jugadores={this.state.jugadoresConectados}></Noria>
                 </article>

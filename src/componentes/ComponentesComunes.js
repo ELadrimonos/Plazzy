@@ -1,8 +1,9 @@
 import {useState, useEffect} from "react";
 
-export function IconoJugador({nombre}) {
+export function IconoJugador({nombre, rutaImagen}) {
     return (
         <div className="icono">
+            <img src={rutaImagen} alt="icono jugador"/>
             <h4 className="nombreJug">{nombre}</h4>
         </div>);
 }

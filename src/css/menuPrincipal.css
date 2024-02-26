@@ -23,7 +23,7 @@ animated.section {
 }
 
 /* Estilos para los botones */
-button {
+main button {
   background-color: #008CBA;
   color: white;
   padding: 10px 20px;
