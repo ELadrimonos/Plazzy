@@ -5,7 +5,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { useSpring, animated } from '@react-spring/web'
 import Chatbot from "./juegos/Chatbot";
-// import Quiplash from "./juegos/Quiplash";
+import Quiplash from "./juegos/Quiplash";
 
 // TODO Refactorizar estilos por clases del styles
 
@@ -82,38 +82,50 @@ function CrearPartida({ volverAlMenu }) {
     from: { x: -1000 },
     to: { x: 0 },
   })
-
-  const [showMenu, setShowMenu] = useState(true);
-
+    const [showMenu, setShowMenu] = useState(true);
+    const [selectedGameMode, setSelectedGameMode] = useState(undefined);
 
     const handleSubmit = (event) => {
-    event.preventDefault();
-    setShowMenu(false); // Cambiar el estado para ocultar el menú de creación de partida
-    // Aquí puedes agregar lógica para manejar la creación de la partida
+        event.preventDefault();
+        // Aquí puedes agregar lógica para manejar la creación de la partida
+        const formData = new FormData(event.target);
+        setSelectedGameMode(formData.get('juego'));
+        console.log('Juego seleccionado:' + formData.get('juego'));
+        console.log('Variable Juego seleccionado:' + selectedGameMode);
+        setShowMenu(false); // Cambiar el estado para ocultar el menú de creación de partida
+
   };
 
     if (showMenu) {
-    return (
-      <animated.section id="menuCrearPartida" style={{...springs,}}>
-        <fieldset id="crearPartidaForm">
-          <legend>Crear Partida</legend>
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="nombreHost">Nombre: </label>
-            <input type="text" name="username" id="nombreHost" required />
-            <label htmlFor="modoDeJuego">Modo de juego: </label>
-            <select name="juego" id="modoDeJuego">
-              <option value="quiplash" defaultValue={true}>Quiplash</option>
-              <option value="chatbot">Chatbot</option>
-            </select>
-            <input type="submit" value="Crear" id="crearPartida" />
-          </form>
-        </fieldset>
-        <button onClick={volverAlMenu}>Unirse a partida</button>
-      </animated.section>
-    );
+        return (
+          <animated.section id="menuCrearPartida" style={{...springs,}}>
+            <fieldset id="crearPartidaForm">
+              <legend>Crear Partida</legend>
+              <form onSubmit={handleSubmit}>
+                <label htmlFor="nombreHost">Nombre: </label>
+                <input type="text" name="username" id="nombreHost" required />
+                <label htmlFor="modoDeJuego">Modo de juego: </label>
+                <select name="juego" id="modoDeJuego">
+                  <option value="quiplash" defaultValue={true}>Quiplash</option>
+                  <option value="chatbot">Chatbot</option>
+                </select>
+                <input type="submit" value="Crear" id="crearPartida" />
+              </form>
+            </fieldset>
+            <button onClick={volverAlMenu}>Unirse a partida</button>
+          </animated.section>
+        );
   } else {
     // Aquí puedes renderizar la siguiente pantalla después de enviar el formulario
-    return <Chatbot />;
+        switch (selectedGameMode){
+          case 'quiplash':
+            return <Quiplash />;
+          case 'chatbot':
+            return <Chatbot />;
+          default:
+              console.log(selectedGameMode)
+            return 'ERROR';
+        }
   }
 
 }
