@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Juego from './Juego';
 import { CodigoPartida, Contador, IconoJugador } from "../ComponentesComunes";
-import '../../css/Quiplash.css';
+import '../../css/Quiplash.module.css';
 import { useSpring, animated } from '@react-spring/web'
 import {generarQRLobby} from "../../scripts/generarQRLobby"
 

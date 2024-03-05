@@ -1,9 +1,13 @@
 /* Estilos generales para el cuerpo y las secciones animadas */
-body {
+.body {
   font-family: 'Arial', sans-serif;
   background-color: #f4f4f4;
   margin: 0;
   overflow-x: hidden;
+  height: 100vh;
+  width: 100vw;
+  z-index: -1;
+  position: absolute;
 }
 
 main{
