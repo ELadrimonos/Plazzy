@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Juego from './Juego';
 import { CodigoPartida, Contador, IconoJugador } from "../ComponentesComunes";
 import styles from '../../css/Chatbot.module.css';
-import { useSpring, animated } from '@react-spring/web'
-import {generarQRLobby} from "../../scripts/generarQRLobby"
+
 
 class Chatbot extends Juego {
   constructor(props) {
@@ -13,16 +12,7 @@ class Chatbot extends Juego {
     };
   }
 
-  componentDidMount() {
-    // Llamar a la función después de que el componente se haya montado
-    generarQRLobby(this.GameCode);
-  }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
-      generarQRLobby(this.GameCode);
-    }
-  }
 
     // Métodos para renderizar diferentes estados del juego
   renderLobby() {

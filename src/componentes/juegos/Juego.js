@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-
 class Juego extends Component {
   constructor(props) {
     super(props);
@@ -13,8 +12,26 @@ class Juego extends Component {
           ]
     };
     this.GameCode = 1234;
-    this.isUserHost = false;
+    this.isUserHost = props["userHost"];
     this.maxJugadores = 8;
+  }
+
+  componentDidMount() {
+    // Llamar a la función aquí de que el componente se haya montado
+    this.generarQRLobby();
+  }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
+      this.generarQRLobby();
+    }
+  }
+
+  generarQRLobby() {
+    const imgQRCode = document.getElementById("QRcode");
+    let url = window.location.href + "/game/" + this.GameCode;
+    console.log(url)
+    imgQRCode.src = "https://api.qrserver.com/v1/create-qr-code/?data=" + url + "";
   }
 
   // Métodos para renderizar diferentes estados del juego
