@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Juego from './Juego';
 import { CodigoPartida, Contador, IconoJugador } from "../ComponentesComunes";
-import '../../css/Chatbot.css';
+import styles from '../../css/Chatbot.module.css';
 import { useSpring, animated } from '@react-spring/web'
 import {generarQRLobby} from "../../scripts/generarQRLobby"
 
@@ -28,7 +28,7 @@ class Chatbot extends Juego {
   renderLobby() {
     return (
         <>
-            <section id="lobby">
+            <section className={styles.lobby}>
                 <header>
                     <h1>Chatbot</h1>
                     <h2>Código de sala</h2>
@@ -41,8 +41,8 @@ class Chatbot extends Juego {
             <img id="QRcode" src="" alt="codigoQR"/>
 
             {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
-            <button onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
-            <button onClick={() => this.setState(prevState => ({
+            <button className={styles.button} onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
+            <button className={styles.button} onClick={() => this.setState(prevState => ({
                 jugadoresConectados: [
                     ...prevState.jugadoresConectados,
                     {nombre: 'Rar', rutaImagen: 'ruta/a/imagen1.png'}
@@ -63,8 +63,8 @@ class Chatbot extends Juego {
           <section id="typing">
             <Contador tiempoInicial={90} />
             <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({ respuesta: e.target.value })} />
-            <button onClick={enviarRespuesta()}>Enviar</button>
-            <button onClick={() => this.setState({ estadoJuego: 'jugando' })} >Juego</button>
+            <button className={styles.button} onClick={enviarRespuesta()}>Enviar</button>
+            <button className={styles.button} onClick={() => this.setState({ estadoJuego: 'jugando' })} >Juego</button>
 
           </section>
         );
@@ -81,7 +81,7 @@ class Chatbot extends Juego {
           </div>
         </header>
 
-        <button onClick={() => this.setState({ estadoJuego: 'inicio' })}>Comenzar</button>
+        <button className={styles.button} onClick={() => this.setState({ estadoJuego: 'inicio' })}>Comenzar</button>
       </section>
     );
   }

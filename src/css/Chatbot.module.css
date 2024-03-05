@@ -14,7 +14,7 @@ body {
     padding-top: 50px;
 }
 
-#lobby {
+.lobby {
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -23,7 +23,7 @@ body {
     text-align: center;
 }
 
-#lobby header {
+.lobby header {
     background-color: #4CAF50;
     color: white;
     padding: 10px;
@@ -31,11 +31,11 @@ body {
     border-top-right-radius: 10px;
 }
 
-#lobby h1, #lobby h2 {
+.lobby h1, .lobby h2 {
     margin: 0;
 }
 
-#jugadores {
+.jugadores {
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -45,7 +45,7 @@ body {
     flex-direction: column;
 }
 
-button {
+.button {
     background-color: #4CAF50;
     border: none;
     border-radius: 5px;
@@ -56,11 +56,11 @@ button {
     margin: 10px;
 }
 
-button:hover {
+.button:hover {
     background-color: #45a049;
 }
 
-button:disabled {
+.button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
@@ -72,12 +72,12 @@ button:disabled {
     max-width: 300px;
 }
 
-#lobby .icono {
+.lobby .icono {
     height: 60px;
     display: flex;
 }
 
-#lobby .icono > img {
+.lobby .icono > img {
     max-height: 40px;
     aspect-ratio: 1/1;
 
