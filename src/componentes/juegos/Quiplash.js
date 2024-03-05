@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Juego from './Juego';
+import Juego from  './Juego';
 import { CodigoPartida, Contador, IconoJugador } from "../ComponentesComunes";
-import '../../css/Quiplash.module.css';
+import styles from  '../../css/Quiplash.module.css';
 import { useSpring, animated } from '@react-spring/web'
-import {generarQRLobby} from "../../scripts/generarQRLobby"
+
 
 class Quiplash extends Juego {
   constructor(props) {
@@ -25,16 +25,9 @@ class Quiplash extends Juego {
     this.setState({ senalMostrarPropietarios: true });
   }
 
-  componentDidMount() {
-    // Llamar a la función después de que el componente se haya montado
-    generarQRLobby(this.GameCode);
-  }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
-      generarQRLobby(this.GameCode);
-    }
-  }
+
+
 
     // Métodos para renderizar diferentes estados del juego
   renderLobby() {

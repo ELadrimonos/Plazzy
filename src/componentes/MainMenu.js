@@ -164,10 +164,16 @@ function Index() {
         setMostrarCrearPartida(false);
     };
 
+    const estilosHeader = {
+        backgroundColor: 'purple',
+        zIndex: 1000,
+        width: '100%',
+        height: '100px',
+    }
+
     return (
         <>
-            <FondoTresD/>
-            <header>
+            <header style={estilosHeader}>
                 <h1>plazzy</h1>
             </header>
             <main>
@@ -176,6 +182,7 @@ function Index() {
                 {!mostrarCrearPartida && <MenuPrincipal menuCrear={mostrarCrearPartidaHandler} />}
                 {mostrarCrearPartida && <CrearPartida volverAlMenu={volverAlMenuHandler} />}
             </main>
+
         </>
     );
 }
