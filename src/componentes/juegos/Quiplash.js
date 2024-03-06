@@ -25,24 +25,20 @@ class Quiplash extends Juego {
     this.setState({ senalMostrarPropietarios: true });
   }
 
-
-
-
-
     // Métodos para renderizar diferentes estados del juego
   renderLobby() {
     return (
         <>
-            <section id="lobby">
+            <section className={styles.lobby}>
                 <header>
                     <h1>Quiplash</h1>
                     <h2>Código de sala</h2>
                     <CodigoPartida gameCode={this.GameCode}/>
                 </header>
-                <article id="jugadores">
+                <article className={styles.jugadores}>
                     <Noria jugadores={this.state.jugadoresConectados}></Noria>
                 </article>
-                <img id="QRcode" src="" alt="codigoQR"/>
+                <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
             </section>
             {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
             <button onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
@@ -63,7 +59,7 @@ class Quiplash extends Juego {
         }
 
         return (
-          <section id="typing">
+          <section className={''}>
             <Contador tiempoInicial={90} />
             <Prompt texto={'PRUEBA'} />
             <input type="text" value={this.state.respuesta.value} onChange={e => this.setState({ respuesta: e.target.value })} />
@@ -76,8 +72,8 @@ class Quiplash extends Juego {
 
   renderJugando() {
     return (
-      <section id="round">
-        <header id="promptHeader">
+      <section className={styles.round}>
+        <header className={styles.promptHeader}>
           <Contador tiempoInicial={10} />
           <Prompt texto={'PRUEBA'} />
           <div>
@@ -85,7 +81,7 @@ class Quiplash extends Juego {
             <CodigoPartida gameCode={this.GameCode} />
           </div>
         </header>
-        <div id="promptMessages">
+        <div className={styles.promptMessages}>
           <RespuestaPrompt desdeIzquierda={true} texto={'UNO'} senalMostrarRespuestas={this.state.senalMostrarRespuestas} senalMostrarPropietarios={this.state.senalMostrarPropietarios} />
           <RespuestaPrompt desdeIzquierda={false} texto={'DOS'} senalMostrarRespuestas={this.state.senalMostrarRespuestas} senalMostrarPropietarios={this.state.senalMostrarPropietarios} />
         </div>
@@ -112,7 +108,7 @@ class Quiplash extends Juego {
 
 function Prompt({ texto }) {
   return (
-    <h1 className="prompt">{texto}</h1>
+    <h1 className={styles.prompt}>{texto}</h1>
   );
 }
 
@@ -133,17 +129,20 @@ function Noria({ jugadores }) {
   // Calcular el número de jugadores conectados usando la longitud del array listaJugadores
   const numeroJugadores = listaJugadores.length;
 
+  //TODO Arreglar orientación de iconos, hacer que se mantengan rectos sin importar la orientación del padre
+
+
   // Mapear los objetos Jugador para renderizar los IconoJugador
   const iconosJugadores = listaJugadores.map((jugador, index) => (
-    <div className="palo" key={index}>
-      <IconoJugador nombre={jugador.nombre} rutaImagen={jugador.rutaImagen} />
+    <div className={styles.palo} key={index}>
+      <IconoJugador nombreClase={styles.icono} nombre={jugador.nombre} rutaImagen={jugador.rutaImagen} />
     </div>
   ));
 
   // Rellenar los espacios restantes con IconoJugador vacíos
   for (let i = numeroJugadores; i < 8; i++) {
     iconosJugadores.push(
-      <div className="palo" key={i} style={{ visibility: 'hidden' }}>
+      <div className={styles.palo} key={i} style={{ visibility: 'hidden' }}>
         <IconoJugador />
       </div>
     );
@@ -189,7 +188,7 @@ function RespuestaPrompt({ texto, propietario, desdeIzquierda, senalMostrarRespu
       style={{
         ...springs,
       }}
-      className="promptResponse"
+      className={styles.promptResponse}
     >
       <p>{texto}</p>
       <h5 style={estiloPropietario}>{propietario}</h5> {/* Ocultar propietario por ahora */}

@@ -10,10 +10,6 @@
   position: absolute;
 }
 
-main{
-    max-width: 50%;
-}
-
 animated.section {
   width: 50%;
   position: fixed;
@@ -27,7 +23,7 @@ animated.section {
 }
 
 /* Estilos para los botones */
-main button {
+.button {
   background-color: #008CBA;
   color: white;
   padding: 10px 20px;
@@ -38,7 +34,7 @@ main button {
   transition: background-color 0.3s;
 }
 
-button:hover {
+.button:hover {
   background-color: #005f73;
 }
 
