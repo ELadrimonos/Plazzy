@@ -1,10 +1,10 @@
 import {useState, useEffect} from "react";
 
-export function IconoJugador({nombre, rutaImagen}) {
+export function IconoJugador({nombreClase, nombre, rutaImagen}) {
     return (
-        <div className="icono">
+        <div className={nombreClase}>
             <img src={rutaImagen} alt="icono jugador"/>
-            <h4 className="nombreJug">{nombre}</h4>
+            <h4>{nombre}</h4>
         </div>);
 }
 

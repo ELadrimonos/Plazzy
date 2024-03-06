@@ -65,7 +65,7 @@ body {
     cursor: not-allowed;
 }
 
-#QRcode {
+.QRcode {
     position: absolute !important;
     left: 10vw;
     bottom: 10vh;

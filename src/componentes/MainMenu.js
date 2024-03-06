@@ -98,7 +98,7 @@ function CrearPartida({ volverAlMenu }) {
 
     if (showMenu) {
         return (
-          <animated.section id="menuCrearPartida" style={{...springs,}}>
+          <animated.section id="menuCrearPartida" style={{...springs,'maxWidth': '50%'}}>
             <fieldset id="crearPartidaForm">
               <legend>Crear Partida</legend>
               <form onSubmit={handleSubmit}>
@@ -112,7 +112,7 @@ function CrearPartida({ volverAlMenu }) {
                 <input type="submit" value="Crear" id="crearPartida" />
               </form>
             </fieldset>
-            <button onClick={volverAlMenu}>Unirse a partida</button>
+            <button className={styles.button} onClick={volverAlMenu}>Unirse a partida</button>
           </animated.section>
         );
   } else {
@@ -136,7 +136,7 @@ function MenuPrincipal({menuCrear}) {
         to: {x: 0},
     })
     return (
-        <animated.section style={{...springs,}} id="menuPrincipal">
+        <animated.section style={{...springs,'maxWidth': '50%'}} id="menuPrincipal">
             <fieldset id="joinGame">
                 <legend>Unirse A Partida</legend>
                 <form>
@@ -147,7 +147,7 @@ function MenuPrincipal({menuCrear}) {
                     <input type="submit" value="Unirse" id="unirsePartida"/>
                 </form>
             </fieldset>
-            <button onClick={menuCrear}>Crear partida</button>
+            <button className={styles.button} onClick={menuCrear}>Crear partida</button>
         </animated.section>
     );
 }
@@ -167,8 +167,9 @@ function Index() {
     const estilosHeader = {
         backgroundColor: 'purple',
         zIndex: 1000,
-        width: '100%',
+        width: '90%',
         height: '100px',
+        paddingLeft: '30px',
     }
 
     return (
@@ -176,12 +177,8 @@ function Index() {
             <header style={estilosHeader}>
                 <h1>plazzy</h1>
             </header>
-            <main>
-
-
                 {!mostrarCrearPartida && <MenuPrincipal menuCrear={mostrarCrearPartidaHandler} />}
                 {mostrarCrearPartida && <CrearPartida volverAlMenu={volverAlMenuHandler} />}
-            </main>
 
         </>
     );

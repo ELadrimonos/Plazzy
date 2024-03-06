@@ -28,7 +28,7 @@ class Chatbot extends Juego {
                     <ListaUsuarios jugadores={this.state.jugadoresConectados}></ListaUsuarios>
                 </article>
             </section>
-            <img id="QRcode" src="" alt="codigoQR"/>
+            <img className={'QRcode'} id="QRcode" src="" alt="codigoQR"/>
 
             {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
             <button className={styles.button} onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
