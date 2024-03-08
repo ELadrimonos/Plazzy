@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Juego from  './Juego';
-import { CodigoPartida, Contador, IconoJugador } from "../ComponentesComunes";
+import {CodigoPartida, Contador, IconoJugador, IconoLobby} from "../ComponentesComunes";
 import styles from  '../../css/Quiplash.module.css';
 import { useSpring, animated } from '@react-spring/web'
 
@@ -76,10 +76,7 @@ class Quiplash extends Juego {
         <header className={styles.promptHeader}>
           <Contador tiempoInicial={10} />
           <Prompt texto={'PRUEBA'} />
-          <div>
-            <h3>Jackbox.tv</h3>
-            <CodigoPartida gameCode={this.GameCode} />
-          </div>
+          <IconoLobby gameCode={this.GameCode}/>
         </header>
         <div className={styles.promptMessages}>
           <RespuestaPrompt desdeIzquierda={true} texto={'UNO'} senalMostrarRespuestas={this.state.senalMostrarRespuestas} senalMostrarPropietarios={this.state.senalMostrarPropietarios} />

@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import React, {useState, useEffect} from "react";
 
 export function IconoJugador({nombreClase, nombre, rutaImagen}) {
     return (
@@ -8,7 +8,16 @@ export function IconoJugador({nombreClase, nombre, rutaImagen}) {
         </div>);
 }
 
-export function CodigoPartida({gameCode}){
+export function IconoLobby({gameCode}){
+    return (
+        <div>
+            <h3>Jackbox.tv</h3>
+            <CodigoPartida gameCode={gameCode}/>
+        </div>
+    );
+}
+
+export function CodigoPartida({gameCode}) {
     return <h2 className="gameCode">{gameCode}</h2>
 }
 

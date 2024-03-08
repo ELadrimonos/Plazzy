@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Juego from './Juego';
-import { CodigoPartida, Contador, IconoJugador } from "../ComponentesComunes";
+import {CodigoPartida, Contador, IconoJugador, IconoLobby} from "../ComponentesComunes";
 import styles from '../../css/Chatbot.module.css';
 
 
@@ -24,14 +24,14 @@ class Chatbot extends Juego {
                     <h2>Código de sala</h2>
                     <CodigoPartida gameCode={this.GameCode}/>
                 </header>
-                <article id="jugadores">
+                <article className={styles.jugadores}>
                     <ListaUsuarios jugadores={this.state.jugadoresConectados}></ListaUsuarios>
                 </article>
             </section>
-            <img className={'QRcode'} id="QRcode" src="" alt="codigoQR"/>
-
+            <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
             {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
-            <button className={styles.button} onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
+            <button className={styles.button} onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar
+            </button>
             <button className={styles.button} onClick={() => this.setState(prevState => ({
                 jugadoresConectados: [
                     ...prevState.jugadoresConectados,
@@ -65,10 +65,7 @@ class Chatbot extends Juego {
       <section id="round">
         <header id="promptHeader">
           <Contador tiempoInicial={10} />
-          <div>
-            <h3>Jackbox.tv</h3>
-            <CodigoPartida gameCode={this.GameCode} />
-          </div>
+          <IconoLobby gameCode={this.GameCode}/>
         </header>
 
         <button className={styles.button} onClick={() => this.setState({ estadoJuego: 'inicio' })}>Comenzar</button>
@@ -113,13 +110,13 @@ function ListaUsuarios({ jugadores }) {
 
   // Mapear los objetos Jugador para renderizar los IconoJugador
   const iconosJugadores = listaJugadores.map((jugador, index) => (
-      <IconoJugador key={index} nombre={jugador.nombre} rutaImagen={jugador.rutaImagen} />
+      <IconoJugador nombreClase={styles.jugador_mostrado} key={index} nombre={jugador.nombre} rutaImagen={jugador.rutaImagen} />
   ));
 
   // Rellenar los espacios restantes con IconoJugador vacíos
   for (let i = numeroJugadores; i < 8; i++) {
     iconosJugadores.push(
-        <IconoJugador key={i} style={{ visibility: 'hidden' }}/>
+        <IconoJugador nombreClase={styles.jugador_oculto} key={i}/>
     );
   }
 

@@ -38,31 +38,37 @@ class Juego extends Component {
   renderInicio() {
     return (
       <div>
-        {/* Componentes para el estado inicial del juego */}
-        <h1>¡Bienvenido al juego!</h1>
+        <h1>Placeholder inicio</h1>
         <button onClick={() => this.setState({ estadoJuego: 'jugando' })}>Comenzar</button>
       </div>
     );
   }
 
+  renderRespondiendo() {
+    return (
+      <div>
+        <h1>Placeholder respondiendo propio prompt</h1>
+      </div>
+    );
+  }
+
+
   renderJugando() {
     return (
       <div>
-        {/* Componentes para cuando el juego está en curso */}
-        <h1>Jugando...</h1>
-        {/* Otros componentes específicos del estado 'jugando' pueden ir aquí */}
+        <h1>Placeholder jugando ronda</h1>
       </div>
     );
   }
 
   render() {
-    // Determinar qué método de renderizado llamar según el estado del juego
     switch (this.state.estadoJuego) {
       case 'inicio':
         return this.renderInicio();
+      case 'respondiendo':
+        return this.renderRespondiendo();
       case 'jugando':
         return this.renderJugando();
-      // Puedes agregar más casos para otros estados del juego si es necesario
       default:
         return null;
     }

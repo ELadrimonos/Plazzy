@@ -1,18 +1,13 @@
-body {
-    height: 100vh;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-}
 
-#root {
-    height: 90%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 50px;
-}
+
+/*#root {*/
+/*    height: 90%;*/
+/*    position: relative;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: center;*/
+/*    padding-top: 50px;*/
+/*}*/
 
 .lobby {
     background-color: #ffffff;
@@ -21,6 +16,7 @@ body {
     width: 25%;
     padding: 20px;
     text-align: center;
+    margin: auto;
 }
 
 .lobby header {
@@ -43,6 +39,18 @@ body {
     padding: 10px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+.jugador_mostrado {
+    display: flex;
+    max-height: 70px;
+    height: 70px;
+}
+
+.jugador_oculto{
+    visibility: hidden;
+    height: 70px;
 }
 
 .button {
