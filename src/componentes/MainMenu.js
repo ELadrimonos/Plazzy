@@ -90,6 +90,7 @@ function CrearPartida({ volverAlMenu }) {
         // Aquí puedes agregar lógica para manejar la creación de la partida
         const formData = new FormData(event.target);
         setSelectedGameMode(formData.get('juego'));
+        const username = formData.get('username');
         console.log('Juego seleccionado:' + formData.get('juego'));
         console.log('Variable Juego seleccionado:' + selectedGameMode);
         setShowMenu(false); // Cambiar el estado para ocultar el menú de creación de partida
@@ -134,12 +135,21 @@ function MenuPrincipal({menuCrear}) {
     const springs = useSpring({
         from: {x: -1000},
         to: {x: 0},
-    })
+    });
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        // Aquí puedes agregar lógica para manejar la creación de la partida
+        const formData = new FormData(event.target);
+        const gameCode = formData.get('code');
+        const username = formData.get('username');
+    };
+
     return (
         <animated.section style={{...springs,'maxWidth': '50%'}} id="menuPrincipal">
             <fieldset id="joinGame">
                 <legend>Unirse A Partida</legend>
-                <form>
+                <form onSubmit={handleSubmit}>
                     <label htmlFor="nombreJugador">Nombre: </label>
                     <input type="text" name="username" id="nombreJugador" required/>
                     <label htmlFor="gameCode">Código partida: </label>
@@ -177,9 +187,10 @@ function Index() {
             <header style={estilosHeader}>
                 <h1>plazzy</h1>
             </header>
+            <main>
                 {!mostrarCrearPartida && <MenuPrincipal menuCrear={mostrarCrearPartidaHandler} />}
                 {mostrarCrearPartida && <CrearPartida volverAlMenu={volverAlMenuHandler} />}
-
+            </main>
         </>
     );
 }
