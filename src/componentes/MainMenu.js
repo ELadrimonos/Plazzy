@@ -6,6 +6,8 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { useSpring, animated } from '@react-spring/web'
 import Chatbot from "./juegos/Chatbot";
 import Quiplash from "./juegos/Quiplash";
+import {socket} from "../scripts/cliente";
+
 
 // TODO Refactorizar estilos por clases del styles
 
@@ -92,9 +94,9 @@ function CrearPartida({ volverAlMenu }) {
         setSelectedGameMode(formData.get('juego'));
         const username = formData.get('username');
         console.log('Juego seleccionado:' + formData.get('juego'));
+        socket.emit('create', username, formData.get('juego'));
         console.log('Variable Juego seleccionado:' + selectedGameMode);
         setShowMenu(false); // Cambiar el estado para ocultar el menú de creación de partida
-
   };
 
     if (showMenu) {
@@ -143,6 +145,8 @@ function MenuPrincipal({menuCrear}) {
         const formData = new FormData(event.target);
         const gameCode = formData.get('code');
         const username = formData.get('username');
+        socket.emit('join', username, gameCode);
+
     };
 
     return (

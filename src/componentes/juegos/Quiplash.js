@@ -3,6 +3,7 @@ import Juego from  './Juego';
 import {CodigoPartida, Contador, IconoJugador, IconoLobby} from "../ComponentesComunes";
 import styles from  '../../css/Quiplash.module.css';
 import { useSpring, animated } from '@react-spring/web'
+import {socket} from "../../scripts/cliente";
 
 
 class Quiplash extends Juego {
