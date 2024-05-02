@@ -1,5 +1,5 @@
 import Index from "./componentes/MainMenu";
-
+import './scripts/cliente.js';
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useParams  } from 'react-router-dom';
 

@@ -57,11 +57,13 @@ io.on('connection', (socket) => {
         const newLobby = { code: generateRandomCode(), players: [], game: juego };
         lobbies.push(newLobby);
 
+
         // El socket (cliente) se conecta
         socket.join(newLobby.code);
 
         // Metemos un nuevo jugador al lobby con el id del socket y el nombre del creador de la partida
         newLobby.players.push({ id: socket.id, name: nombreHost});
+        console.log(newLobby);
 
         // Emitimos el evento de lobby creado a los jugadores (solo 1 en teoria)
         socket.emit('lobbyCreated');
