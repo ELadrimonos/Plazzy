@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
+
 class Juego extends Component {
   constructor(props) {
     super(props);
@@ -7,11 +8,11 @@ class Juego extends Component {
       estadoJuego: 'inicio', // estado inicial del juego
       rondaActual: 1, // ronda inicial del juego
       jugadoresConectados:  [
-            { nombre: 'Juan', rutaImagen: 'ruta/a/imagen1.png' },
-            { nombre: 'Pepe', rutaImagen: 'ruta/a/imagen2.png' }
+            // { nombre: 'Juan', rutaImagen: 'ruta/a/imagen1.png' },
+            // { nombre: 'Pepe', rutaImagen: 'ruta/a/imagen2.png' }
           ]
     };
-    this.GameCode = 1234;
+    this.GameCode = props.gameCode;
     this.isUserHost = props["userHost"];
     this.maxJugadores = 8;
   }
@@ -21,7 +22,7 @@ class Juego extends Component {
     this.generarQRLobby();
   }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
       this.generarQRLobby();
     }
@@ -30,7 +31,7 @@ class Juego extends Component {
   generarQRLobby() {
     const imgQRCode = document.getElementById("QRcode");
     let url = window.location.href + "/game/" + this.GameCode;
-    console.log(url)
+    console.log('URL IMAGEN: ' + url)
     imgQRCode.src = "https://api.qrserver.com/v1/create-qr-code/?data=" + url + "";
   }
 

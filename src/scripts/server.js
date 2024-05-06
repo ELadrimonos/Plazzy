@@ -23,61 +23,40 @@ http.listen(8080, () => console.log("LISTENING ON 8080"));
 io.on('connection', (socket) => {
     // console.log('Usuario conectado:', socket.id);
 
-    // Unirse a una sala
-    socket.on('join', (nombreJug, lobbyCode) => {
-
-        // db.query('SELECT * FROM Sala WHERE codigo_sala = ?', [lobbyCode], (error, results) => {
-        //     if (error) {
-        //         console.error(error);
-        //         return;
-        //     }
-        //
-        //     const lobby = results[0];
-        //
-        //     // Realiza acciones necesarias con la información de la sala y los jugadores
-        //     io.to(lobbyCode).emit('updatePlayers', lobby.players);
-        // });
-
+// Unirse a sala
+    socket.on('joinGame', (nombreJug, lobbyCode) => {
         const lobby = lobbies.find((l) => l.code === lobbyCode);
 
         if (lobby && lobby.players.length < 8) {
             socket.join(lobbyCode);
-            socket.emit('join', lobbyCode);
-            lobby.players.push({ id: socket.id, name: nombreJug});
+            socket.emit('joinGame', lobby);
+            socket.emit('shareGameMode', lobby.game)
+            lobby.players.push({id: socket.id, name: nombreJug});
+            console.log(lobby);
+
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
         }
     });
 
-    // Crear una nueva sala
+// Crear sala
     socket.on('create', (nombreHost, juego) => {
-
-        // Creamos un nuevo lobby y lo agregamos a la lista de lobbies del servidor
-        const newLobby = { code: generateRandomCode(), players: [], game: juego };
+        const newLobby = {code: generateRandomCode(), players: [], game: juego};
         lobbies.push(newLobby);
-
-
-        // El socket (cliente) se conecta
-        socket.join(newLobby.code);
-
-        // Metemos un nuevo jugador al lobby con el id del socket y el nombre del creador de la partida
-        newLobby.players.push({ id: socket.id, name: nombreHost});
+        newLobby.players.push({id: socket.id, name: nombreHost});
         console.log(newLobby);
-
-        // Emitimos el evento de lobby creado a los jugadores (solo 1 en teoria)
-        socket.emit('lobbyCreated');
-        socket.emit('join', newLobby.code);
+        socket.emit('lobbyCreated', newLobby);
+        socket.emit('joinGame', newLobby);
         io.to(newLobby.code).emit('updatePlayers', newLobby.players);
     });
-
     // Manejar la desconexión
     socket.on('disconnect', () => {
         const lobby = lobbies.find((l) => l.players.some((p) => p.id === socket.id));
 
         if (lobby) {
 
-            if (lobby.players[0].id === socket.id){
+            if (lobby.players[0].id === socket.id) {
                 io.to(lobby.code).emit('joinError', 'El host se ha desconectado de la sala');
             }
 

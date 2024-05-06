@@ -29,6 +29,7 @@ class Quiplash extends Juego {
 
 
     componentDidMount() {
+        super.componentDidMount();
         this.interval = setInterval(
             () => this.setState({colorNoria: this.colorAleatorio()}),
             1000
@@ -154,13 +155,14 @@ function Noria({jugadores}) {
     // Calcular el número de jugadores conectados usando la longitud del array listaJugadores
     const numeroJugadores = listaJugadores.length;
 
-    //TODO Arreglar orientación de iconos, hacer que se mantengan rectos sin importar la orientación del padre
+    //TODO Arreglar orientación de iconos, hacer que se mantengan rectos sin importar la orientación del padre ni el tiempo que tarda en crearse
 
 
     // Mapear los objetos Jugador para renderizar los IconoJugador
     const iconosJugadores = listaJugadores.map((jugador, index) => (
         <div className={styles.palo} key={index}>
             <IconoJugador nombreClase={styles.icono} nombre={jugador.nombre} rutaImagen={jugador.rutaImagen}/>
+
         </div>
     ));
 
@@ -168,7 +170,7 @@ function Noria({jugadores}) {
     for (let i = numeroJugadores; i < 8; i++) {
         iconosJugadores.push(
             <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
-                <IconoJugador/>
+                    <IconoJugador/>
             </div>
         );
     }
