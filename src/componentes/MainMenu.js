@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styles from '../css/menuPrincipal.module.css';
 import * as THREE from 'three';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
-import { useSpring, animated } from '@react-spring/web'
+import {FontLoader} from 'three/examples/jsm/loaders/FontLoader';
+import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry';
+import {useSpring, animated} from '@react-spring/web'
 import Chatbot from "./juegos/Chatbot";
 import Quiplash from "./juegos/Quiplash";
 import {socket} from "../scripts/cliente";
@@ -14,126 +14,110 @@ import {socket} from "../scripts/cliente";
 
 // Cambiar por iconos de los juegos
 function FondoTresD() {
-  const canvasRef = React.useRef();
+    const canvasRef = React.useRef();
 
-  React.useEffect(() => {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
-   const geometry = new THREE.BoxGeometry(100, 100, 100);
-    const textureLoader = new THREE.TextureLoader();
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    camera.position.z = 5;
-    let textMesh; // Definimos textMesh aquí
+    React.useEffect(() => {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
+        const geometry = new THREE.BoxGeometry(100, 100, 100);
+        const textureLoader = new THREE.TextureLoader();
+        const material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.BackSide});
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        camera.position.z = 5;
+        let textMesh; // Definimos textMesh aquí
 
-    const fontLoader = new FontLoader();
-    fontLoader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-      const textGeometry = new TextGeometry('PLAZZY', {
-        font: font,
-        size: 0.5,
-        height: 0.5,
-        curveSegments: 12,
-        bevelEnabled: true,
-        bevelThickness: 0.01,
-        bevelSize: 0.02,
-        bevelSegments: 1
-      });
+        const fontLoader = new FontLoader();
+        fontLoader.load('https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const textGeometry = new TextGeometry('PLAZZY', {
+                font: font,
+                size: 0.5,
+                height: 0.5,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.01,
+                bevelSize: 0.02,
+                bevelSegments: 1
+            });
 
-      const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      textMesh = new THREE.Mesh(textGeometry, material); // Asignamos a textMesh aquí
-      scene.add(textMesh);
+            const material = new THREE.MeshBasicMaterial({color: 0x000000});
+            textMesh = new THREE.Mesh(textGeometry, material); // Asignamos a textMesh aquí
+            scene.add(textMesh);
 
-      let rotationDirection = 0.3; // Dirección de rotación (1 para la derecha, -1 para la izquierda)
-      let rotationAngle = 0; // Ángulo de rotación acumulado
+            let rotationDirection = 0.3; // Dirección de rotación (1 para la derecha, -1 para la izquierda)
+            let rotationAngle = 0; // Ángulo de rotación acumulado
 
-      const animate = () => {
-        requestAnimationFrame(animate);
+            const animate = () => {
+                requestAnimationFrame(animate);
 
-        // Girar hasta 2 en una dirección y luego 2 en la dirección opuesta
-        if (rotationAngle >= 0.5 || rotationAngle <= -0.5) {
-          rotationDirection *= -1; // Cambiar la dirección de rotación
-        }
+                // Girar hasta 2 en una dirección y luego 2 en la dirección opuesta
+                if (rotationAngle >= 0.5 || rotationAngle <= -0.5) {
+                    rotationDirection *= -1; // Cambiar la dirección de rotación
+                }
 
-        // Girar en la dirección actual
-        textMesh.rotation.x += 0.005 * rotationDirection;
-        textMesh.rotation.y -= 0.005 * rotationDirection;
+                // Girar en la dirección actual
+                textMesh.rotation.x += 0.005 * rotationDirection;
+                textMesh.rotation.y -= 0.005 * rotationDirection;
 
-        rotationAngle += 0.005 * rotationDirection; // Actualizar el ángulo de rotación acumulado
+                rotationAngle += 0.005 * rotationDirection; // Actualizar el ángulo de rotación acumulado
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.render(scene, camera);
-      };
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.render(scene, camera);
+            };
 
-      animate();
-    });
+            animate();
+        });
 
-    return () => {
-      if (textMesh) { // Verificamos si textMesh está definido antes de usarlo
-        scene.remove(textMesh);
-      }
-    };
-  }, []);
+        return () => {
+            if (textMesh) { // Verificamos si textMesh está definido antes de usarlo
+                scene.remove(textMesh);
+            }
+        };
+    }, []);
 
-  return <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, zIndex: -1 }} />;
+    return <canvas ref={canvasRef} style={{position: 'fixed', top: 0, left: 0, zIndex: -1}}/>;
 }
 
-function CrearPartida({ volverAlMenu }) {
+function MenuCrear({volverAlMenu, crearPartida}) {
     const springs = useSpring({
-    from: { x: -1000 },
-    to: { x: 0 },
-  })
-    const [showMenu, setShowMenu] = useState(true);
-    const [selectedGameMode, setSelectedGameMode] = useState(undefined);
+        from: {x: -1000},
+        to: {x: 0},
+    })
 
     const handleSubmit = (event) => {
         event.preventDefault();
         // Aquí puedes agregar lógica para manejar la creación de la partida
         const formData = new FormData(event.target);
-        setSelectedGameMode(formData.get('juego'));
         const username = formData.get('username');
-        console.log('Juego seleccionado:' + formData.get('juego'));
-        socket.emit('create', username, formData.get('juego'));
-        console.log('Variable Juego seleccionado:' + selectedGameMode);
-        setShowMenu(false); // Cambiar el estado para ocultar el menú de creación de partida
-  };
+        const modoJuego = formData.get('juego');
+        crearPartida(username, modoJuego);
+    };
 
-    if (showMenu) {
-        return (
-          <animated.section id="menuCrearPartida" style={{...springs,'maxWidth': '50%'}}>
+
+    return (
+        <animated.section id="menuCrearPartida" style={{...springs, 'maxWidth': '50%'}}>
             <fieldset id="crearPartidaForm">
-              <legend>Crear Partida</legend>
-              <form onSubmit={handleSubmit}>
-                <label htmlFor="nombreHost">Nombre: </label>
-                <input type="text" name="username" id="nombreHost" required />
-                <label htmlFor="modoDeJuego">Modo de juego: </label>
-                <select name="juego" id="modoDeJuego">
-                  <option value="quiplash" defaultValue={true}>Quiplash</option>
-                  <option value="chatbot">Chatbot</option>
-                </select>
-                <input type="submit" value="Crear" id="crearPartida" />
-              </form>
+                <legend>Crear Partida</legend>
+                <form onSubmit={handleSubmit}>
+                    <label htmlFor="nombreHost">Nombre: </label>
+                    <input type="text" name="username" id="nombreHost" required/>
+                    <label htmlFor="modoDeJuego">Modo de juego: </label>
+                    <select name="juego" id="modoDeJuego">
+                        <option value="quiplash" defaultValue={true}>Quiplash</option>
+                        <option value="chatbot">Chatbot</option>
+                    </select>
+                    <input type="submit" value="Crear" id="crearPartida"/>
+                </form>
             </fieldset>
             <button className={styles.button} onClick={volverAlMenu}>Unirse a partida</button>
-          </animated.section>
-        );
-  } else {
-    // Aquí puedes renderizar la siguiente pantalla después de enviar el formulario
-        switch (selectedGameMode){
-          case 'quiplash':
-            return <Quiplash />;
-          case 'chatbot':
-            return <Chatbot />;
-          default:
-              console.log(selectedGameMode)
-            return 'ERROR';
-        }
-  }
+        </animated.section>
+    );
+
 
 }
 
-function MenuPrincipal({menuCrear}) {
+function MenuUnirse({menuCrear, unirsePartida}) {
     const springs = useSpring({
         from: {x: -1000},
         to: {x: 0},
@@ -145,12 +129,11 @@ function MenuPrincipal({menuCrear}) {
         const formData = new FormData(event.target);
         const gameCode = formData.get('code');
         const username = formData.get('username');
-        socket.emit('join', username, gameCode);
-
+        unirsePartida(username, gameCode);
     };
 
     return (
-        <animated.section style={{...springs,'maxWidth': '50%'}} id="menuPrincipal">
+        <animated.section style={{...springs, 'maxWidth': '50%'}} id="menuPrincipal">
             <fieldset id="joinGame">
                 <legend>Unirse A Partida</legend>
                 <form onSubmit={handleSubmit}>
@@ -167,7 +150,7 @@ function MenuPrincipal({menuCrear}) {
 }
 
 
-function Index() {
+function MenuPrincipal({onCreate, onJoin}) {
     const [mostrarCrearPartida, setMostrarCrearPartida] = useState(false);
 
     const mostrarCrearPartidaHandler = () => {
@@ -192,11 +175,49 @@ function Index() {
                 <h1>plazzy</h1>
             </header>
             <main>
-                {!mostrarCrearPartida && <MenuPrincipal menuCrear={mostrarCrearPartidaHandler} />}
-                {mostrarCrearPartida && <CrearPartida volverAlMenu={volverAlMenuHandler} />}
+                {!mostrarCrearPartida && <MenuUnirse menuCrear={mostrarCrearPartidaHandler} unirsePartida={onJoin}/>}
+                {mostrarCrearPartida && <MenuCrear volverAlMenu={volverAlMenuHandler} crearPartida={onCreate}/>}
             </main>
         </>
     );
+}
+
+function Index() {
+    const [game, setGame] = useState(null);
+    const [gameCode, setGameCode] = useState(null);
+
+    const handleCreate = (userName, gameMode) => {
+        setGame(gameMode);
+        socket.emit('create', userName, gameMode);
+
+    };
+    socket.on('lobbyCreated', (lobby) => {
+        //TODO insertar info del lobby en BBDD
+        setGameCode(lobby.code);
+    });
+
+    socket.on('shareGameMode', (gameMode) => {
+        //TODO insertar info jugadores en BBDD
+        setGame(gameMode);
+    });
+
+    const handleJoin = (userName, gameCode) => {
+        // Aquí puedes agregar la lógica para determinar el modo de juego basado en el gameCode
+        // Por ahora, solo estableceremos el gameCode
+        setGameCode(gameCode);
+        socket.emit('joinGame', userName, gameCode);
+
+    };
+
+    if (game === 'quiplash' && gameCode) {
+        return <Quiplash gameCode={gameCode}/>;
+    } else if (game === 'chatbot' && gameCode) {
+        return <Chatbot gameCode={gameCode}/>;
+    } else {
+        return (
+            <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+        );
+    }
 }
 
 export default Index;
