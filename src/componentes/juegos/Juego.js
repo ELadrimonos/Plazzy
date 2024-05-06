@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {socket} from "../../scripts/cliente";
 
 class Juego extends Component {
   constructor(props) {
@@ -15,12 +16,18 @@ class Juego extends Component {
     this.GameCode = props.gameCode;
     this.isUserHost = props["userHost"];
     this.maxJugadores = 8;
+    socket.on('updatePlayers', (players) => this.updatePlayers(players));
   }
 
   componentDidMount() {
     // Llamar a la función aquí de que el componente se haya montado
     this.generarQRLobby();
   }
+
+  updatePlayers(players) {
+    console.log('ACTUALIZANDO JUGADORES')
+    this.state.jugadoresConectados = players;
+  };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
