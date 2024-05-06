@@ -3,7 +3,6 @@ import Juego from './Juego';
 import {CodigoPartida, Contador, IconoJugador, IconoLobby} from "../ComponentesComunes";
 import styles from '../../css/Quiplash.module.css';
 import {useSpring, animated} from '@react-spring/web'
-import {socket} from "../../scripts/cliente";
 
 
 class Quiplash extends Juego {
@@ -47,9 +46,6 @@ class Quiplash extends Juego {
     // Métodos para renderizar diferentes estados del juego
     renderLobby() {
 
-
-
-
         return (
             <>
                 <section className={styles.lobby}>
@@ -68,7 +64,6 @@ class Quiplash extends Juego {
                 <button onClick={() => this.setState(prevState => ({
                     jugadoresConectados: [
                         ...prevState.jugadoresConectados,
-                        {nombre: 'Rar', rutaImagen: 'ruta/a/imagen1.png'}
                     ]
                 }))} disabled={this.state.jugadoresConectados.length >= this.maxJugadores}>Aumentar Jugadores
                 </button>
@@ -161,7 +156,7 @@ function Noria({jugadores}) {
     // Mapear los objetos Jugador para renderizar los IconoJugador
     const iconosJugadores = listaJugadores.map((jugador, index) => (
         <div className={styles.palo} key={index}>
-            <IconoJugador nombreClase={styles.icono} nombre={jugador.nombre} rutaImagen={jugador.rutaImagen}/>
+            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={jugador.rutaImagen}/>
 
         </div>
     ));

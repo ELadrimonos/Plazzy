@@ -3,13 +3,6 @@ import io from 'socket.io-client';
 export const socket = io('ws://localhost:8080');
 
 
-
-
-socket.on('updatePlayers', (players) => {
-    console.log(players.length)
-
-});
-
 socket.on('disconnectPlayer', (playerId, players) => {
     //TODO borrar info del jugador desconectado
 
