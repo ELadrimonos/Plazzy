@@ -87,7 +87,7 @@ class Quiplash extends Juego {
             <section className={styles.answerScreen}>
                 <Contador tiempoInicial={90}/>
                 <Prompt texto={'PRUEBA'}/>
-                <InputRespuestaLimitado socket={socket} gameCode={this.GameCode} styles={styles}/>
+                <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode} styles={styles}/>
                 <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
             </section>
             <section className={styles.jugadores}>
@@ -158,7 +158,6 @@ function Noria({jugadores}) {
     const numeroJugadores = listaJugadores.length;
 
     //TODO Arreglar orientación de iconos, hacer que se mantengan rectos sin importar la orientación del padre ni el tiempo que tarda en crearse
-
 
     // Mapear los objetos Jugador para renderizar los IconoJugador
     const iconosJugadores = listaJugadores.map((jugador, index) => (

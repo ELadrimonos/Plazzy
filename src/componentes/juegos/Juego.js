@@ -24,8 +24,7 @@ class Juego extends Component {
   }
 
   isPlayerHost(){
-    // return this.playerReference === this.state.jugadoresConectados[0].name;
-    return true;
+    return this.playerReference.id === this.state.jugadoresConectados[0].id;
   }
 
   startGame() {
