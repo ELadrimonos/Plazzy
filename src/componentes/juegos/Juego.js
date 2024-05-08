@@ -8,13 +8,10 @@ class Juego extends Component {
       // Estado común del juego
       estadoJuego: 'inicio', // estado inicial del juego
       rondaActual: 1, // ronda inicial del juego
-      jugadoresConectados:  [
-            // { nombre: 'Juan', rutaImagen: 'ruta/a/imagen1.png' },
-            // { nombre: 'Pepe', rutaImagen: 'ruta/a/imagen2.png' }
-          ]
+      jugadoresConectados:  props.connectedPlayers,
     };
     this.GameCode = props.gameCode;
-    this.isUserHost = props["userHost"];
+    this.playerReference = props.player;
     this.maxJugadores = 8;
     socket.on('updatePlayers', (players) => this.updatePlayers(players));
   }
@@ -22,6 +19,10 @@ class Juego extends Component {
   componentDidMount() {
     // Llamar a la función aquí de que el componente se haya montado
     this.generarQRLobby();
+  }
+
+  isPlayerHost(){
+    return this.playerReference === this.state.jugadoresConectados[0].name;
   }
 
   updatePlayers(players) {

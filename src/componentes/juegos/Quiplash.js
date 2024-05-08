@@ -60,13 +60,11 @@ class Quiplash extends Juego {
                     <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
                 </section>
                 {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
-                <button onClick={() => this.setState({estadoJuego: 'respondiendo'})}>Comenzar</button>
-                <button onClick={() => this.setState(prevState => ({
-                    jugadoresConectados: [
-                        ...prevState.jugadoresConectados,
-                    ]
-                }))} disabled={this.state.jugadoresConectados.length >= this.maxJugadores}>Aumentar Jugadores
-                </button>
+                {this.isPlayerHost() && (
+                  <button className={styles.startButton} onClick={() => this.setState({ estadoJuego: 'respondiendo' })}>
+                    Comenzar
+                  </button>
+                )}
             </>);
     }
 
@@ -170,7 +168,6 @@ function Noria({jugadores}) {
         );
     }
 
-    let estilos;
     return (
         <>
             {iconosJugadores}
