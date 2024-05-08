@@ -7,6 +7,7 @@ import {useSpring, animated} from '@react-spring/web'
 import Chatbot from "./juegos/Chatbot";
 import Quiplash from "./juegos/Quiplash";
 import {socket} from "../scripts/cliente";
+import {log} from "three/nodes";
 
 
 // TODO Refactorizar estilos por clases del styles
@@ -184,13 +185,34 @@ function MenuPrincipal({onCreate, onJoin}) {
 
 function Index() {
     const [game, setGame] = useState(null);
+    const [player, setPlayer] = useState(null);
+    const [playersInLobby, setPlayersInLobby] = useState([]);
     const [gameCode, setGameCode] = useState(null);
 
     const handleCreate = (userName, gameMode) => {
+
         setGame(gameMode);
+        setPlayer(userName);
+
         socket.emit('create', userName, gameMode);
 
     };
+
+    socket.on('disconnectPlayer', (playerId, players) => {
+        if (player === players[playerId]){
+            returnToLobby();
+        }
+    });
+
+    function returnToLobby() {
+        setPlayer(null);
+        setPlayersInLobby([]);
+        setGame(null);
+        setGameCode(null);
+    }
+
+    socket.on('closeLobby', returnToLobby);
+
     socket.on('lobbyCreated', (lobby) => {
         //TODO insertar info del lobby en BBDD
         setGameCode(lobby.code);
@@ -201,6 +223,11 @@ function Index() {
         setGame(gameMode);
     });
 
+    socket.on('updatePlayers', (players) => {
+        console.log('UPDATED PLAYERS', players)
+        setPlayersInLobby(players);
+    });
+
     const handleJoin = (userName, gameCode) => {
         // Aquí puedes agregar la lógica para determinar el modo de juego basado en el gameCode
         // Por ahora, solo estableceremos el gameCode
@@ -209,13 +236,13 @@ function Index() {
 
     };
 
-    if (game === 'quiplash' && gameCode) {
-        return <Quiplash gameCode={gameCode}/>;
+    if (game === 'quiplash' && gameCode /*&& playersInLobby > 0*/) {
+        return <Quiplash gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
     } else if (game === 'chatbot' && gameCode) {
-        return <Chatbot gameCode={gameCode}/>;
+        return <Chatbot gameCode={gameCode} player={player}/>;
     } else {
         return (
-            <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+            <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin} connectedPlayers={playersInLobby}/>
         );
     }
 }

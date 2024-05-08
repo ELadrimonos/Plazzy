@@ -33,7 +33,7 @@ io.on('connection', (socket) => {
             socket.emit('shareGameMode', lobby.game)
             lobby.players.push({id: socket.id, name: nombreJug});
             console.log(lobby);
-
+            socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
@@ -48,8 +48,11 @@ io.on('connection', (socket) => {
         console.log(newLobby);
         socket.emit('lobbyCreated', newLobby);
         socket.emit('joinGame', newLobby);
+        socket.emit('updatePlayers', newLobby.players);
         io.to(newLobby.code).emit('updatePlayers', newLobby.players);
+
     });
+
     // Manejar la desconexión
     socket.on('disconnect', () => {
         const lobby = lobbies.find((l) => l.players.some((p) => p.id === socket.id));
@@ -58,6 +61,7 @@ io.on('connection', (socket) => {
 
             if (lobby.players[0].id === socket.id) {
                 io.to(lobby.code).emit('joinError', 'El host se ha desconectado de la sala');
+                io.to(lobby.code).emit('closeLobby');
             }
 
             let disconnectedPlayer = lobby.players.find(p => p.id === socket.id);
@@ -65,7 +69,9 @@ io.on('connection', (socket) => {
 
             lobby.players = lobby.players.filter((p) => p.id !== socket.id);
 
+            socket.leave(lobby.code);
             io.to(lobby.code).emit('disconnectPlayer', disconPlayerId, lobby.players);
+            io.to(lobby.code).emit('updatePlayers', lobby.players);
         }
 
 
