@@ -33,6 +33,22 @@
     animation: burbuja 400ms ease-in-out;
 }
 
+.startButton {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 10px;
+    width: 100%;
+    max-width: 200px;
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+}
+
 .gameCode {
     text-transform: uppercase;
     font-family: sans-serif;
