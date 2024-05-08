@@ -46,3 +46,25 @@ export function Contador({ tiempoInicial, onTiempoTerminado }) {
 
   return <h2>{tiempoActual}</h2>;
 }
+
+
+export function InputRespuestaLimitado({socket, gameCode, styles, maxLength = 30}) {
+    const [respuesta, setRespuesta] = useState('');
+
+    function enviarRespuesta() {
+        return undefined;
+    }
+
+    return (
+        <div>
+        <h2>{respuesta.length}/30</h2>
+    <input
+        type="text"
+        value={respuesta}
+        maxLength={maxLength}
+        onChange={e => setRespuesta( e.target.value)}
+    />
+    <button onClick={enviarRespuesta()}>Enviar</button>
+            </div>
+    );
+}

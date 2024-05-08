@@ -214,17 +214,14 @@ function Index() {
     socket.on('closeLobby', returnToLobby);
 
     socket.on('lobbyCreated', (lobby) => {
-        //TODO insertar info del lobby en BBDD
         setGameCode(lobby.code);
     });
 
     socket.on('shareGameMode', (gameMode) => {
-        //TODO insertar info jugadores en BBDD
         setGame(gameMode);
     });
 
     socket.on('updatePlayers', (players) => {
-        console.log('UPDATED PLAYERS', players)
         setPlayersInLobby(players);
     });
 
@@ -236,10 +233,10 @@ function Index() {
 
     };
 
-    if (game === 'quiplash' && gameCode /*&& playersInLobby > 0*/) {
+    if (game === 'quiplash' && gameCode) {
         return <Quiplash gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
     } else if (game === 'chatbot' && gameCode) {
-        return <Chatbot gameCode={gameCode} player={player}/>;
+        return <Chatbot gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
     } else {
         return (
             <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin} connectedPlayers={playersInLobby}/>

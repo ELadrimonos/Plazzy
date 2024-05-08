@@ -18,11 +18,19 @@ class Juego extends Component {
 
   componentDidMount() {
     // Llamar a la función aquí de que el componente se haya montado
-    this.generarQRLobby();
+    if (this.state.estadoJuego === 'inicio') {
+      this.generarQRLobby();
+    }
   }
 
   isPlayerHost(){
-    return this.playerReference === this.state.jugadoresConectados[0].name;
+    // return this.playerReference === this.state.jugadoresConectados[0].name;
+    return true;
+  }
+
+  startGame() {
+    this.setState({ estadoJuego: 'jugando' });
+    socket.emit('startGame', this.GameCode);
   }
 
   updatePlayers(players) {
