@@ -37,6 +37,7 @@ io.on('connection', (socket) => {
             socket.emit('sharePlayer', player);
             socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
+            console.log(lobby)
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
         }
