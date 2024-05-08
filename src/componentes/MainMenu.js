@@ -190,12 +190,8 @@ function Index() {
     const [gameCode, setGameCode] = useState(null);
 
     const handleCreate = (userName, gameMode) => {
-
         setGame(gameMode);
-        setPlayer(userName);
-
         socket.emit('create', userName, gameMode);
-
     };
 
     socket.on('disconnectPlayer', (playerId, players) => {
@@ -221,6 +217,10 @@ function Index() {
         setGame(gameMode);
     });
 
+    socket.on('sharePlayer', (player) => {
+        setPlayer(player);
+    });
+
     socket.on('updatePlayers', (players) => {
         setPlayersInLobby(players);
     });
@@ -230,10 +230,9 @@ function Index() {
         // Por ahora, solo estableceremos el gameCode
         setGameCode(gameCode);
         socket.emit('joinGame', userName, gameCode);
-
     };
 
-    if (game === 'quiplash' && gameCode) {
+    if (game === 'quiplash' && gameCode && player) {
         return <Quiplash gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
     } else if (game === 'chatbot' && gameCode) {
         return <Chatbot gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;

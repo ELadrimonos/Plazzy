@@ -46,7 +46,7 @@
     padding: 10px 20px;
     margin: 10px;
     width: 100%;
-    max-width: 200px;
+    max-width: 400px;
 
 }
 
@@ -284,17 +284,33 @@
     font-size: 1.5em;
 }
 
-.answerScreen input[type="text"] {
+
+.answerInput {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.answerInput input[type="text"] {
     width: 300px;
     max-width: 500px;
     line-break: anywhere;
     max-lines: 2;
     font-size: 1em;
-
+    border-top-right-radius: 10% 55%;
 }
 
-.answerScreen button {
+.answerInput button {
     width: 300px;
     max-width: 500px;
     font-size: 1.5em;
+}
+
+.answerInput > h2 {
+    position: absolute;
+    right: -25px;
+    top: -45px;
+    rotate: 25deg;
+    font-size: 1em;
 }

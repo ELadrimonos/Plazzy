@@ -48,15 +48,16 @@ export function Contador({ tiempoInicial, onTiempoTerminado }) {
 }
 
 
-export function InputRespuestaLimitado({socket, gameCode, styles, maxLength = 30}) {
+export function InputRespuestaLimitado({socket, playerID, gameCode, styles, maxLength = 30}) {
     const [respuesta, setRespuesta] = useState('');
 
     function enviarRespuesta() {
-        return undefined;
+        socket.emit('answer', gameCode, playerID, respuesta);
+        setRespuesta('');
     }
 
     return (
-        <div>
+        <div className={styles.answerInput}>
         <h2>{respuesta.length}/30</h2>
     <input
         type="text"
@@ -64,7 +65,7 @@ export function InputRespuestaLimitado({socket, gameCode, styles, maxLength = 30
         maxLength={maxLength}
         onChange={e => setRespuesta( e.target.value)}
     />
-    <button onClick={enviarRespuesta()}>Enviar</button>
+    <button onClick={enviarRespuesta}>Enviar</button>
             </div>
     );
 }

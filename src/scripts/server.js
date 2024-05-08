@@ -29,10 +29,12 @@ io.on('connection', (socket) => {
 
         if (lobby && lobby.players.length < 8) {
             socket.join(lobbyCode);
-            socket.emit('joinGame', lobby);
-            socket.emit('shareGameMode', lobby.game)
-            lobby.players.push({id: socket.id, name: nombreJug});
-            console.log(lobby);
+
+            let player = {id: socket.id, name: nombreJug};
+            lobby.players.push(player);
+            // socket.emit('joinGame', lobby);
+            socket.emit('shareGameMode', lobby.game);
+            socket.emit('sharePlayer', player);
             socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
         } else {
@@ -44,10 +46,11 @@ io.on('connection', (socket) => {
     socket.on('create', (nombreHost, juego) => {
         const newLobby = {code: generateRandomCode(), players: [], game: juego};
         lobbies.push(newLobby);
-        newLobby.players.push({id: socket.id, name: nombreHost});
-        console.log(newLobby);
+        let player = {id: socket.id, name: nombreHost};
+        newLobby.players.push(player);
         socket.emit('lobbyCreated', newLobby);
         socket.emit('joinGame', newLobby);
+        socket.emit('sharePlayer', player);
         socket.emit('updatePlayers', newLobby.players);
         io.to(newLobby.code).emit('updatePlayers', newLobby.players);
 
