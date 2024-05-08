@@ -4,6 +4,7 @@
     height: 100vh;
     width: 100%;
     background-color: turquoise;
+    overflow-y: hidden;
 }
 
 
@@ -18,7 +19,6 @@
 }
 .lobby > header h2 {
     font-size: 2.5rem;
-    user-select: none;
 }
 .lobby > header h3 {
     font-size: 3rem;
@@ -26,11 +26,14 @@
 
 .QRcode {
     position: absolute !important;
-    left: 10%;
-    top: 60vh;
+    left: calc(150px);
+    top: calc(50% - 150px);
+    width: 300px;
+    aspect-ratio: 1/1;
     outline: 5px solid black;
     outline-offset: 10px;
     animation: burbuja 400ms ease-in-out;
+    background-color: white;
 }
 
 .startButton {
@@ -44,15 +47,13 @@
     margin: 10px;
     width: 100%;
     max-width: 200px;
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
+
 }
 
 .gameCode {
     text-transform: uppercase;
     font-family: sans-serif;
-    user-select: text;
+    user-select: text !important;
 }
 
 .icono {
@@ -87,7 +88,7 @@
     aspect-ratio: 1/1;
 }
 
-.jugadores {
+.lobby .jugadores {
     transition: 500ms;
     position: relative;
     animation: infinite rotarPersonajes 30s linear;
@@ -102,7 +103,7 @@
 /*.jugadores .icono {*/
 /*    opacity: 0;*/
 /*}*/
-.jugadores .palo {
+.lobby .jugadores .palo {
     width: 50px;
     height: 350px;
     transform-origin: 50% 100%;
@@ -110,60 +111,60 @@
     left: 50%;
     top: 20%;
 }
-.jugadores .palo:nth-child(1) {
+.lobby .jugadores .palo:nth-child(1) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 1));
 }
-.jugadores .palo:nth-child(1) .icono {
+.lobby .jugadores .palo:nth-child(1) .icono {
     rotate: calc(45deg * 1 - 90deg);
 }
-.jugadores .palo:nth-child(2) {
+.lobby .jugadores .palo:nth-child(2) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 2));
 }
-.jugadores .palo:nth-child(2) .icono {
+.lobby .jugadores .palo:nth-child(2) .icono {
     rotate: 270deg;
     rotate: 270deg;
     background-color: #147714;
 }
-.jugadores .palo:nth-child(3) {
+.lobby .jugadores .palo:nth-child(3) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 3));
 }
-.jugadores .palo:nth-child(3) .icono {
+.lobby .jugadores .palo:nth-child(3) .icono {
     rotate: 270deg;
     rotate: -135deg;
     background-color: #147714;
 }
-.jugadores .palo:nth-child(4) {
+.lobby .jugadores .palo:nth-child(4) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 4));
 }
-.jugadores .palo:nth-child(4) .icono {
+.lobby .jugadores .palo:nth-child(4) .icono {
     rotate: calc(45deg * 4 - 360deg);
     background-color: #2323a1;
 }
-.jugadores .palo:nth-child(5) {
+.lobby .jugadores .palo:nth-child(5) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 5));
 }
-.jugadores .palo:nth-child(5) .icono {
+.lobby .jugadores .palo:nth-child(5) .icono {
     rotate: calc(45deg * 5 - 90deg);
     background-color: #2323a1;
 }
-.jugadores .palo:nth-child(6) {
+.lobby .jugadores .palo:nth-child(6) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 6));
 }
-.jugadores .palo:nth-child(6) .icono {
+.lobby .jugadores .palo:nth-child(6) .icono {
     rotate: calc(45deg * 6 - 180deg);
     background-color: #d2b638;
 }
-.jugadores .palo:nth-child(7) {
+.lobby .jugadores .palo:nth-child(7) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 7));
 }
-.jugadores .palo:nth-child(7) .icono {
+.lobby .jugadores .palo:nth-child(7) .icono {
     rotate: calc(45deg * 7 - 270deg);
     background-color: #d2b638;
 }
-.jugadores .palo:nth-child(8) {
+.lobby .jugadores .palo:nth-child(8) {
     transform: translate(-50%, -50%) rotate(calc(45deg * 8));
 }
-.jugadores .palo:nth-child(8) .icono {
+.lobby .jugadores .palo:nth-child(8) .icono {
     rotate: calc(45deg * 8 - 360deg);
 }
 
@@ -172,23 +173,21 @@
         transform: rotate(360deg);
     }
 }
-/*@keyframes burbuja {*/
-/*    0% {*/
-/*        opacity: 0;*/
-/*        scale: 0;*/
-/*    }*/
-/*    75% {*/
-/*        scale: 105%;*/
-/*        opacity: 1;*/
-/*    }*/
-/*    100% {*/
-/*        scale: 100%;*/
-/*    }*/
-/*}*/
-
-* {
-    user-select: none;
+@keyframes burbuja {
+    0% {
+        opacity: 0;
+        scale: 0;
+    }
+    75% {
+        scale: 105%;
+        opacity: 1;
+    }
+    100% {
+        scale: 100%;
+    }
 }
+
+
 
 .round {
     width: 100%;
@@ -276,3 +275,26 @@
     box-shadow: 10px -7px gray;
 }
 
+.answerScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+    font-size: 1.5em;
+}
+
+.answerScreen input[type="text"] {
+    width: 300px;
+    max-width: 500px;
+    line-break: anywhere;
+    max-lines: 2;
+    font-size: 1em;
+
+}
+
+.answerScreen button {
+    width: 300px;
+    max-width: 500px;
+    font-size: 1.5em;
+}

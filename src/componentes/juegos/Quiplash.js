@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import Juego from './Juego';
-import {CodigoPartida, Contador, IconoJugador, IconoLobby} from "../ComponentesComunes";
+import {CodigoPartida, Contador, IconoJugador, IconoLobby, InputRespuestaLimitado} from "../ComponentesComunes";
 import styles from '../../css/Quiplash.module.css';
 import {useSpring, animated} from '@react-spring/web'
+import {socket} from "../../scripts/cliente";
 
 
 class Quiplash extends Juego {
@@ -53,38 +54,46 @@ class Quiplash extends Juego {
                         <h1>Quiplash</h1>
                         <h2>Código de sala</h2>
                         <CodigoPartida gameCode={this.GameCode}/>
+                        {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
+                        {this.isPlayerHost() && (
+                            <button className={styles.startButton}
+                                    onClick={() => this.setState({estadoJuego: 'respondiendo'})}>
+                                Comenzar
+                            </button>
+                        )}
                     </header>
-                    <article className={styles.jugadores} style={{ backgroundColor: this.state.colorNoria }}>
-                        <Noria jugadores={this.state.jugadoresConectados}></Noria>
-                    </article>
-                    <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
+                    <div style={{position: "relative"}}>
+                        <article className={styles.jugadores} style={{backgroundColor: this.state.colorNoria}}>
+                            <Noria jugadores={this.state.jugadoresConectados}></Noria>
+                        </article>
+                        <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
+
+                    </div>
+
                 </section>
-                {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
-                {this.isPlayerHost() && (
-                  <button className={styles.startButton} onClick={() => this.setState({ estadoJuego: 'respondiendo' })}>
-                    Comenzar
-                  </button>
-                )}
+
             </>);
     }
 
     renderRespondiendo() {
-        this.state.respuesta = ''
+        this.state.respuesta = '';
 
         function enviarRespuesta() {
             // Enviar respuesta al servidor
         }
 
         return (
-            <section className={''}>
+            <>
+            <section className={styles.answerScreen}>
                 <Contador tiempoInicial={90}/>
                 <Prompt texto={'PRUEBA'}/>
-                <input type="text" value={this.state.respuesta.value}
-                       onChange={e => this.setState({respuesta: e.target.value})}/>
-                <button onClick={enviarRespuesta()}>Enviar</button>
+                <InputRespuestaLimitado socket={socket} gameCode={this.GameCode} styles={styles}/>
                 <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
+            </section>
+            <section className={styles.jugadores}>
 
             </section>
+            </>
         );
     }
 
@@ -155,7 +164,6 @@ function Noria({jugadores}) {
     const iconosJugadores = listaJugadores.map((jugador, index) => (
         <div className={styles.palo} key={index}>
             <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={jugador.rutaImagen}/>
-
         </div>
     ));
 
@@ -163,7 +171,7 @@ function Noria({jugadores}) {
     for (let i = numeroJugadores; i < 8; i++) {
         iconosJugadores.push(
             <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
-                    <IconoJugador/>
+                <IconoJugador/>
             </div>
         );
     }
@@ -174,7 +182,6 @@ function Noria({jugadores}) {
         </>
     );
 }
-
 
 function RespuestaPrompt({texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios}) {
     const [springs, api] = useSpring(() => ({
