@@ -61,7 +61,7 @@
     aspect-ratio: 1/1;
     background-color: #ad2424;
     border-radius: 20%;
-    animation: infinite reverse linear rotarPersonajes 30s, burbuja 400ms ease-in-out paused;
+    animation: infinite reverse linear rotarPersonajes 30s;
     position: relative;
     box-shadow: 3px 3px black;
 }

@@ -159,6 +159,9 @@ function Noria({jugadores}) {
 
     //TODO Arreglar orientación de iconos, hacer que se mantengan rectos sin importar la orientación del padre ni el tiempo que tarda en crearse
 
+    //TODO Hacer efecto burbuja a nuevos elementos (con react animate)
+
+
     // Mapear los objetos Jugador para renderizar los IconoJugador
     const iconosJugadores = listaJugadores.map((jugador, index) => (
         <div className={styles.palo} key={index}>
