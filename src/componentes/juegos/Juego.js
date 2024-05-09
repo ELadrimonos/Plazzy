@@ -13,7 +13,10 @@ class Juego extends Component {
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
     this.maxJugadores = 8;
+
   }
+
+
 
   componentDidMount() {
     // Llamar a la función aquí de que el componente se haya montado
@@ -22,12 +25,12 @@ class Juego extends Component {
     }
   }
 
+
   isPlayerHost(){
     return this.playerReference.id === this.state.jugadoresConectados[0].id;
   }
 
   startGame() {
-    this.setState({ estadoJuego: 'jugando' });
     socket.emit('startGame', this.GameCode);
   }
 
@@ -76,6 +79,9 @@ class Juego extends Component {
   }
 
   render() {
+    socket.on('cambiarEscena', (pantalla) => {
+        this.setState(pantalla);
+    });
     switch (this.state.estadoJuego) {
       case 'inicio':
         return this.renderInicio();

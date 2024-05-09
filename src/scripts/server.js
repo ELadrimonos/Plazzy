@@ -6,6 +6,16 @@ const io = require('socket.io')(http, {
     }
 });
 
+// Enum de pantallas de juego
+const GameScreens = Object.freeze({
+    LOBBY: 'lobby',
+    START: 'start',
+    ANSWER: 'respondiendo',
+    GAMEPLAY: 'jugando',
+    SCOREBOARD: 'puntuaje',
+    FINAL_SCREEN: 'fin',
+});
+
 // const mysql = require('mysql');
 // const db = mysql.createConnection({
 //     host: '192.168.18.33',
@@ -87,6 +97,14 @@ io.on('connection', (socket) => {
 
         // console.log('Usuario desconectado:', socket.id);
     });
+
+    socket.on('startGame', (lobbyCode) => {
+        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        if (lobby) {
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+        }
+    });
+
 });
 
 function generateRandomCode() {
