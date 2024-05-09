@@ -32,12 +32,12 @@ io.on('connection', (socket) => {
 
             let player = {id: socket.id, name: nombreJug};
             lobby.players.push(player);
-            // socket.emit('joinGame', lobby);
+            socket.emit('joinGame', lobby);
             socket.emit('shareGameMode', lobby.game);
             socket.emit('sharePlayer', player);
             socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
-            console.log(lobby)
+            console.log(io.sockets.adapter.rooms)
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
         }
@@ -47,6 +47,10 @@ io.on('connection', (socket) => {
     socket.on('create', (nombreHost, juego) => {
         const newLobby = {code: generateRandomCode(), players: [], game: juego};
         lobbies.push(newLobby);
+
+        // Aqui es donde realmente se conecta al lobby
+        socket.join(newLobby.code);
+
         let player = {id: socket.id, name: nombreHost};
         newLobby.players.push(player);
         socket.emit('lobbyCreated', newLobby);
@@ -54,7 +58,6 @@ io.on('connection', (socket) => {
         socket.emit('sharePlayer', player);
         socket.emit('updatePlayers', newLobby.players);
         io.to(newLobby.code).emit('updatePlayers', newLobby.players);
-
     });
 
     // Manejar la desconexión
