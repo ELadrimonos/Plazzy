@@ -13,7 +13,6 @@ class Juego extends Component {
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
     this.maxJugadores = 8;
-    this.state.jugadoresConectados.onChange = () => this.setState({jugadoresConectados: this.state.jugadoresConectados});
   }
 
   componentDidMount() {
@@ -33,6 +32,10 @@ class Juego extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.connectedPlayers !== this.props.connectedPlayers) {
+      // Actualizar jugadoresConectados en el estado
+      this.setState({ jugadoresConectados: this.props.connectedPlayers });
+    }
     if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
       this.generarQRLobby();
     }

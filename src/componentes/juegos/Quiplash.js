@@ -66,7 +66,8 @@ class Quiplash extends Juego {
                     </header>
                     <div style={{position: "relative"}}>
                         <article className={styles.jugadores} style={{backgroundColor: this.state.colorNoria}}>
-                            <Noria jugadores={this.state.jugadoresConectados}/>
+<Noria key={this.state.jugadoresConectados.map(jugador => jugador.id).join('_')} jugadores={this.state.jugadoresConectados} />
+
                         </article>
                         <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
 
@@ -143,33 +144,32 @@ function Prompt({texto}) {
     );
 }
 
-function Noria({jugadores}) {
-    // Calcular el número de jugadores conectados usando la longitud del array jugadores
-    const numeroJugadores = jugadores.length;
+const Noria = React.memo(function Noria({ jugadores }) {
+      const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
 
-    // Mapear los objetos Jugador para renderizar los IconoJugador
-    const iconosJugadores = jugadores.map((jugador, index) => (
-        <div className={styles.palo} key={index}>
-            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={jugador.rutaImagen}/>
+    useEffect(() => {
+        setConnectedPlayers(jugadores);
+    }, [jugadores]);
+
+
+    const iconosJugadores = connectedPlayers.map((jugador) => (
+        <div className={styles.palo} key={jugador.id}>
+            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={jugador.rutaImagen} />
         </div>
     ));
+    console.log()
 
     // Rellenar los espacios restantes con IconoJugador vacíos
-    for (let i = numeroJugadores; i < 8; i++) {
+    for (let i = connectedPlayers.length; i < 8; i++) {
         iconosJugadores.push(
-            <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
-                <IconoJugador/>
+            <div className={styles.palo} key={i} style={{ visibility: 'hidden' }}>
+                <IconoJugador />
             </div>
         );
     }
 
-    return (
-        <>
-            {iconosJugadores}
-        </>
-    );
-}
-
+    return <>{iconosJugadores}</>;
+});
 function RespuestaPrompt({texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios}) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
