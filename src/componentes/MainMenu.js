@@ -227,6 +227,7 @@ function Index() {
 
     // Si refresca la pagina se desconecta
     window.onbeforeunload = function (){
+        if (player)
        socket.emit('disconnect');
        return null;
     }

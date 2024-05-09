@@ -69,6 +69,9 @@ io.on('connection', (socket) => {
             if (lobby.players[0].id === socket.id) {
                 io.to(lobby.code).emit('joinError', 'El host se ha desconectado de la sala');
                 io.to(lobby.code).emit('closeLobby');
+
+                lobbies.splice(lobbies.indexOf(lobby), 1);
+
             }
 
             let disconnectedPlayer = lobby.players.find(p => p.id === socket.id);
