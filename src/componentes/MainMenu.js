@@ -225,9 +225,13 @@ function Index() {
         setPlayersInLobby(players);
     });
 
+    // Si refresca la pagina se desconecta
+    window.onbeforeunload = function (){
+       socket.emit('disconnect');
+       return null;
+    }
+
     const handleJoin = (userName, gameCode) => {
-        // Aquí puedes agregar la lógica para determinar el modo de juego basado en el gameCode
-        // Por ahora, solo estableceremos el gameCode
         setGameCode(gameCode);
         socket.emit('joinGame', userName, gameCode);
     };

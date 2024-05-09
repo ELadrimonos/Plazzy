@@ -57,14 +57,16 @@ class Quiplash extends Juego {
                         {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
                         {this.isPlayerHost() && (
                             <button className={styles.startButton}
-                                    onClick={() => this.setState({estadoJuego: 'respondiendo'})}>
+                                    onClick={() => this.setState({estadoJuego: 'respondiendo'})}
+                                    disabled={this.state.jugadoresConectados.length < 3}
+                            >
                                 Comenzar
                             </button>
                         )}
                     </header>
                     <div style={{position: "relative"}}>
                         <article className={styles.jugadores} style={{backgroundColor: this.state.colorNoria}}>
-                            <Noria jugadores={this.state.jugadoresConectados}></Noria>
+                            <Noria jugadores={this.state.jugadoresConectados}/>
                         </article>
                         <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
 
@@ -84,15 +86,16 @@ class Quiplash extends Juego {
 
         return (
             <>
-            <section className={styles.answerScreen}>
-                <Contador tiempoInicial={90}/>
-                <Prompt texto={'PRUEBA'}/>
-                <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode} styles={styles}/>
-                <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
-            </section>
-            <section className={styles.jugadores}>
-
-            </section>
+                <section className={styles.answerScreen}>
+                    <Contador tiempoInicial={90}/>
+                    <Prompt texto={'PRUEBA'}/>
+                    <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode}
+                                            styles={styles}/>
+                    <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
+                    <section className={styles.jugadores}>
+                        <div className={styles.sombraJugadores}></div>
+                    </section>
+                </section>
             </>
         );
     }
@@ -100,7 +103,7 @@ class Quiplash extends Juego {
     renderJugando() {
         return (
             <section className={styles.round}>
-                <header className={styles.promptHeader}>
+            <header className={styles.promptHeader}>
                     <Contador tiempoInicial={10}/>
                     <Prompt texto={'PRUEBA'}/>
                     <IconoLobby gameCode={this.GameCode}/>
@@ -141,29 +144,11 @@ function Prompt({texto}) {
 }
 
 function Noria({jugadores}) {
-    // Estado local para almacenar los jugadores
-    const [listaJugadores, setListaJugadores] = useState([]);
-
-    useEffect(() => {
-        // Cuando los jugadores cambian, actualiza el estado local
-        if (jugadores) {
-            setListaJugadores(jugadores);
-        } else {
-            // Si no hay jugadores, establece la lista como vacía
-            setListaJugadores([]);
-        }
-    }, [jugadores]); // Ejecutar efecto cuando los jugadores cambien
-
-    // Calcular el número de jugadores conectados usando la longitud del array listaJugadores
-    const numeroJugadores = listaJugadores.length;
-
-    //TODO Arreglar orientación de iconos, hacer que se mantengan rectos sin importar la orientación del padre ni el tiempo que tarda en crearse
-
-    //TODO Hacer efecto burbuja a nuevos elementos (con react animate)
-
+    // Calcular el número de jugadores conectados usando la longitud del array jugadores
+    const numeroJugadores = jugadores.length;
 
     // Mapear los objetos Jugador para renderizar los IconoJugador
-    const iconosJugadores = listaJugadores.map((jugador, index) => (
+    const iconosJugadores = jugadores.map((jugador, index) => (
         <div className={styles.palo} key={index}>
             <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={jugador.rutaImagen}/>
         </div>

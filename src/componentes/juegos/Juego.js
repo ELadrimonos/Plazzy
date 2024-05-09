@@ -13,7 +13,7 @@ class Juego extends Component {
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
     this.maxJugadores = 8;
-    socket.on('updatePlayers', (players) => this.updatePlayers(players));
+    this.state.jugadoresConectados.onChange = () => this.setState({jugadoresConectados: this.state.jugadoresConectados});
   }
 
   componentDidMount() {
@@ -31,11 +31,6 @@ class Juego extends Component {
     this.setState({ estadoJuego: 'jugando' });
     socket.emit('startGame', this.GameCode);
   }
-
-  updatePlayers(players) {
-    console.log('ACTUALIZANDO JUGADORES')
-    this.state.jugadoresConectados = players;
-  };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
