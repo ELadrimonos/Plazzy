@@ -78,10 +78,8 @@ io.on('connection', (socket) => {
 
             if (lobby.players[0].id === socket.id) {
                 io.to(lobby.code).emit('joinError', 'El host se ha desconectado de la sala');
-                io.to(lobby.code).emit('closeLobby');
 
-                lobbies.splice(lobbies.indexOf(lobby), 1);
-
+                closeLobby(lobby.code);
             }
 
             let disconnectedPlayer = lobby.players.find(p => p.id === socket.id);
@@ -101,11 +99,35 @@ io.on('connection', (socket) => {
     socket.on('startGame', (lobbyCode) => {
         const lobby = lobbies.find((l) => l.code === lobbyCode);
         if (lobby) {
-            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START.toString());
         }
     });
 
 });
+
+const closeLobby = (lobbyCode) => {
+    const lobby = lobbies.find((l) => l.code === lobbyCode);
+    if (lobby) {
+        io.to(lobby.code).emit('closeLobby');
+    }
+
+    const room = io.sockets.adapter.rooms.get(lobbyCode);
+
+
+     if (room) {
+            // Eliminar la sala de la lista de lobbies
+            const index = lobbies.findIndex(lobby => lobby.code === lobbyCode);
+            if (index !== -1) {
+                lobbies.splice(index, 1);
+                console.log("Sala cerrada:", lobbyCode);
+            } else {
+                console.error("No se encontró la sala para cerrar:", lobbyCode);
+            }
+        } else {
+            console.error("La sala no existe:", lobbyCode);
+        }
+
+}
 
 function generateRandomCode() {
     return Math.random().toString(36).substring(2, 6).toUpperCase();
