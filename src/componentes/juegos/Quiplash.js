@@ -57,7 +57,7 @@ class Quiplash extends Juego {
                         {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
                         {this.isPlayerHost() && (
                             <button className={styles.startButton}
-                                    onClick={this.startGame}
+                                    onClick={() => this.startGame()}
                                     disabled={this.state.jugadoresConectados.length < 3}
                             >
                                 Comenzar

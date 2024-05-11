@@ -13,6 +13,9 @@ class Juego extends Component {
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
     this.maxJugadores = 8;
+    socket.on('cambiarEscena', (pantalla) => {
+        this.setState({ estadoJuego: pantalla });
+    });
 
   }
 
@@ -79,9 +82,7 @@ class Juego extends Component {
   }
 
   render() {
-    socket.on('cambiarEscena', (pantalla) => {
-        this.setState(pantalla);
-    });
+
     switch (this.state.estadoJuego) {
       case 'inicio':
         return this.renderInicio();
