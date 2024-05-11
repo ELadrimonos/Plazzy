@@ -122,22 +122,22 @@ class Quiplash extends Juego {
         );
     }
 
-    render() {
-        // Determinar qué método de renderizado llamar según el estado del juego
-        switch (this.state.estadoJuego) {
-            case 'inicio':
-                return this.renderLobby();
-            case 'start':
-                return 'EMPEZADO';
-            case 'respondiendo':
-                return this.renderRespondiendo();
-            case 'jugando':
-                return this.renderJugando();
-            // Puedes agregar más casos para otros estados del juego si es necesario
-            default:
-                return null;
-        }
-    }
+    // render() {
+    //     // Determinar qué método de renderizado llamar según el estado del juego
+    //     switch (this.state.estadoJuego) {
+    //         case 'inicio':
+    //             return this.renderLobby();
+    //         case 'start':
+    //             return 'EMPEZADO';
+    //         case 'respondiendo':
+    //             return this.renderRespondiendo();
+    //         case 'jugando':
+    //             return this.renderJugando();
+    //         // Puedes agregar más casos para otros estados del juego si es necesario
+    //         default:
+    //             return null;
+    //     }
+    // }
 }
 
 function Prompt({texto}) {

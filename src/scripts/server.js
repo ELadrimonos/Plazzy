@@ -11,7 +11,7 @@ const GameScreens = Object.freeze({
     LOBBY: 'lobby',
     START: 'start',
     ANSWER: 'respondiendo',
-    GAMEPLAY: 'jugando',
+    VOTING: 'jugando',
     SCOREBOARD: 'puntuaje',
     FINAL_SCREEN: 'fin',
 });
@@ -99,7 +99,35 @@ io.on('connection', (socket) => {
     socket.on('startGame', (lobbyCode) => {
         const lobby = lobbies.find((l) => l.code === lobbyCode);
         if (lobby) {
-            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START.toString());
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+        }
+    });
+
+    socket.on('startAnswering', (lobbyCode) => {
+        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        if (lobby) {
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
+        }
+    });
+
+    socket.on('startVoting', (lobbyCode) => {
+        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        if (lobby) {
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
+        }
+    });
+
+    socket.on('startResults', (lobbyCode) => {
+        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        if (lobby) {
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
+        }
+    });
+
+    socket.on('startEndGame', (lobbyCode) => {
+        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        if (lobby) {
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
         }
     });
 
