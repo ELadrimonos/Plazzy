@@ -13,6 +13,7 @@ class Juego extends Component {
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
     this.maxJugadores = 8;
+    this.maxRounds = 3;
     socket.on('cambiarEscena', (pantalla) => {
         this.setState({ estadoJuego: pantalla });
     });
@@ -37,6 +38,26 @@ class Juego extends Component {
     socket.emit('startGame', this.GameCode);
   }
 
+  startNewRound() {
+    socket.emit('newRound', this.GameCode, this.maxRounds);
+  }
+
+  startAnswering() {
+    socket.emit('startAnswering', this.GameCode);
+  }
+
+  startVoting() {
+    socket.emit('startVoting', this.GameCode);
+  }
+
+  startResults() {
+    socket.emit('startResults', this.GameCode);
+  }
+
+  startEndGame() {
+    socket.emit('startEndGame', this.GameCode);
+  }
+
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.connectedPlayers !== this.props.connectedPlayers) {
       // Actualizar jugadoresConectados en el estado
@@ -55,19 +76,28 @@ class Juego extends Component {
   }
 
   // Métodos para renderizar diferentes estados del juego
-  renderInicio() {
+  renderLobby() {
     return (
       <div>
         <h1>Placeholder inicio</h1>
-        <button onClick={() => this.setState({ estadoJuego: 'jugando' })}>Comenzar</button>
+        <button onClick={() => this.startGame()}>Comenzar</button>
       </div>
+    );
+  }
+
+  renderIntro() {
+    return (
+        <div>
+          <h1>Placeholder introducción</h1>
+          <button onClick={() => this.startAnswering()}>Comenzar</button>
+        </div>
     );
   }
 
   renderRespondiendo() {
     return (
-      <div>
-        <h1>Placeholder respondiendo propio prompt</h1>
+        <div>
+          <h1>Placeholder respondiendo propio prompt</h1>
       </div>
     );
   }
@@ -81,15 +111,37 @@ class Juego extends Component {
     );
   }
 
+  renderPuntuacion () {
+    return (
+      <div>
+        <h1>Placeholder puntuación</h1>
+      </div>
+    );
+  }
+
+  renderFin () {
+    return (
+      <div>
+        <h1>Placeholder fin</h1>
+      </div>
+    );
+  }
+
   render() {
 
     switch (this.state.estadoJuego) {
       case 'inicio':
-        return this.renderInicio();
+        return this.renderLobby();
+      case 'start':
+        return this.renderIntro();
       case 'respondiendo':
         return this.renderRespondiendo();
       case 'jugando':
         return this.renderJugando();
+      case 'fin':
+        return this.renderFin();
+      case 'puntuaje':
+        return this.renderPuntuacion();
       default:
         return null;
     }

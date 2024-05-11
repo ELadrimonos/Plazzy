@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from '../css/menuPrincipal.module.css';
 import * as THREE from 'three';
 import {FontLoader} from 'three/examples/jsm/loaders/FontLoader';
@@ -8,6 +8,7 @@ import Chatbot from "./juegos/Chatbot";
 import Quiplash from "./juegos/Quiplash";
 import {socket} from "../scripts/cliente";
 import {log} from "three/nodes";
+import {useNavigate, useLocation} from "react-router-dom";
 
 
 // TODO Refactorizar estilos por clases del styles
@@ -183,7 +184,7 @@ function MenuPrincipal({onCreate, onJoin}) {
     );
 }
 
-function Index() {
+function Index({gameCodeRef = null, playerRef = null}) {
     const [game, setGame] = useState(null);
     const [player, setPlayer] = useState(null);
     const [playersInLobby, setPlayersInLobby] = useState([]);
@@ -197,8 +198,28 @@ function Index() {
     socket.on('disconnectPlayer', (playerId, players) => {
         if (player === players[playerId]){
             returnToLobby();
+            if (isInGameRoute){
+                navigate('/');
+            }
         }
     });
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [isInGameRoute, setIsInGameRoute] = useState(false);
+
+    //TODO: Evitar la conexion duplicada mediante codigo QR
+
+    useEffect(() => {
+        // Verifica si la ruta actual incluye "/game/"
+        setIsInGameRoute(location.pathname.startsWith('/game/'));
+    }, [location]);
+
+    useEffect(() => {
+        if (gameCodeRef && playerRef) {
+            handleJoin(playerRef, gameCodeRef);
+        }
+    }, [gameCodeRef,playerRef]);
 
     function returnToLobby() {
         setPlayer(null);
@@ -227,8 +248,12 @@ function Index() {
 
     // Si refresca la pagina se desconecta
     window.onbeforeunload = function (){
-        if (player)
-       socket.emit('disconnect');
+        if (player){
+            socket.emit('disconnect');
+            if (isInGameRoute){
+                navigate('/');
+            }
+        }
        return null;
     }
 
