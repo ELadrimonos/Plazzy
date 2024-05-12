@@ -208,7 +208,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
     const navigate = useNavigate();
     const [isInGameRoute, setIsInGameRoute] = useState(false);
 
-    //TODO: Evitar la conexion duplicada mediante codigo QR
+    //TODO: Evitar la conexion en intervalo mediante codigo QR
 
     useEffect(() => {
         // Verifica si la ruta actual incluye "/game/"
