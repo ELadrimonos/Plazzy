@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from "react";
 
-export function IconoJugador({nombreClase, nombre, rutaImagen}) {
+export function IconoJugador({nombreClase, nombre, rutaImagen, style}) {
     return (
-        <div className={nombreClase}>
+        <div className={nombreClase} style={style}>
             <img src={rutaImagen} alt="icono jugador"/>
             <h4>{nombre}</h4>
         </div>);
@@ -48,11 +48,12 @@ export function Contador({ tiempoInicial, onTiempoTerminado }) {
 }
 
 
-export function InputRespuestaLimitado({socket, playerID, gameCode, styles, maxLength = 30}) {
+export function InputRespuestaLimitado({socket, playerID, gameCode, onHandleSubmitRef ,styles, maxLength = 30}) {
     const [respuesta, setRespuesta] = useState('');
 
     function enviarRespuesta() {
         socket.emit('answer', gameCode, playerID, respuesta);
+        onHandleSubmitRef();
         setRespuesta('');
     }
 

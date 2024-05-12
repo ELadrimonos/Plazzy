@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
 
 // Crear sala
     socket.on('create', (nombreHost, juego) => {
-        const newLobby = {code: generateRandomCode(), players: [], game: juego};
+        const newLobby = {code: generateRandomCode(), players: [], game: juego, data: []};
         lobbies.push(newLobby);
 
         // Aqui es donde realmente se conecta al lobby
@@ -101,6 +101,7 @@ io.on('connection', (socket) => {
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
         }
+
     });
 
     socket.on('startAnswering', (lobbyCode) => {
@@ -159,4 +160,29 @@ const closeLobby = (lobbyCode) => {
 
 function generateRandomCode() {
     return Math.random().toString(36).substring(2, 6).toUpperCase();
+}
+
+
+const fs = require('fs');
+
+
+function generatePromptsForPlayers(lobbyCode) {
+    const lobby = lobbies.find((l) => l.code === lobbyCode);
+    if (lobby) {
+        const jsonData = fs.readFileSync('Quiplash_Prompts.json', 'utf8');
+        const promptsData = JSON.parse(jsonData);
+
+        const lobbySize = lobby.players.length;
+        const selectedPrompts = [];
+        for (let i = 0; i < lobbySize; i++) {
+
+        }
+
+        lobby.players.forEach(playerRef => {
+
+            const dataArray = {playerId: playerRef.id, prompts: [], answers: []};
+            lobby.data.push(dataArray);
+
+        });
+    } else console.error('No se encontro la sala: ' +  lobbyCode);
 }
