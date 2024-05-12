@@ -20,7 +20,11 @@ class Juego extends Component {
 
   }
 
-
+  static importAllImages = (r) => {
+    let images = {};
+    r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
+    return images;
+  }
 
   componentDidMount() {
     // Llamar a la función aquí de que el componente se haya montado

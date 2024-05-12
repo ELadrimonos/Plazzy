@@ -4,7 +4,14 @@ import {CodigoPartida, Contador, IconoJugador, IconoLobby, InputRespuestaLimitad
 import styles from '../../css/Quiplash.module.css';
 import {useSpring, animated} from '@react-spring/web'
 import {socket} from "../../scripts/cliente";
-
+import logo0 from '../../assets/img/player_icons/Quiplash/0.webp';
+import logo1 from '../../assets/img/player_icons/Quiplash/1.webp';
+import logo2 from '../../assets/img/player_icons/Quiplash/2.webp';
+import logo3 from '../../assets/img/player_icons/Quiplash/3.webp';
+import logo4 from '../../assets/img/player_icons/Quiplash/4.webp';
+import logo5 from '../../assets/img/player_icons/Quiplash/5.webp';
+import logo6 from '../../assets/img/player_icons/Quiplash/6.webp';
+import logo7 from '../../assets/img/player_icons/Quiplash/7.webp';
 
 class Quiplash extends Juego {
     constructor(props) {
@@ -148,18 +155,20 @@ function Prompt({texto}) {
 
 const Noria = React.memo(function Noria({ jugadores }) {
       const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
-
     useEffect(() => {
         setConnectedPlayers(jugadores);
     }, [jugadores]);
 
+    let counter = 0;
+  const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
+
 
     const iconosJugadores = connectedPlayers.map((jugador) => (
         <div className={styles.palo} key={jugador.id}>
-            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={jugador.rutaImagen} />
+            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]} />
         </div>
     ));
-    console.log()
+    console.log(counter);
 
     // Rellenar los espacios restantes con IconoJugador vacíos
     for (let i = connectedPlayers.length; i < 8; i++) {
