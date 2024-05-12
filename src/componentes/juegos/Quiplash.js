@@ -99,27 +99,29 @@ class Quiplash extends Juego {
             </>);
     }
 
-    renderRespondiendo() {
+   renderRespondiendo() {
+    this.state.promptIndex = 0;
 
-        function handleSubmit() {
-            //TODO Obtener nuevo prompt del servidor
-        }
-
-        return (
-            <>
-                <section className={styles.answerScreen}>
-                    <Contador tiempoInicial={90}/>
-                    <Prompt texto={'PRUEBA'}/>
-                    <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode}
-                                            styles={styles} onHandleSubmitRef={handleSubmit}/>
-                    <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
-                    <section className={styles.jugadores}>
-                        <div className={styles.sombraJugadores}></div>
-                    </section>
-                </section>
-            </>
-        );
+    const handleSubmit = () => {
+        this.setState({promptIndex: this.state.promptIndex + 1});
     }
+
+    return (
+        <>
+            <section className={styles.answerScreen}>
+                <Contador tiempoInicial={90}/>
+                <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
+                <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode}
+                                        styles={styles} onHandleSubmitRef={handleSubmit}/>
+                <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
+                <section className={styles.jugadores}>
+                    <div className={styles.sombraJugadores}></div>
+                </section>
+            </section>
+        </>
+    );
+}
+
 
     renderJugando() {
         return (

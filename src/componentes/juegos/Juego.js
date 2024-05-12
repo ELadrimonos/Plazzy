@@ -9,6 +9,7 @@ class Juego extends Component {
       estadoJuego: 'inicio', // estado inicial del juego
       rondaActual: 1, // ronda inicial del juego
       jugadoresConectados:  props.connectedPlayers,
+      prompts: [],
     };
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
@@ -18,12 +19,11 @@ class Juego extends Component {
         this.setState({ estadoJuego: pantalla });
     });
 
-  }
+    socket.on('getPrompts', (prompts) => {
+      this.setState({prompts: prompts});
+      console.log("NUEVOS PROMOTS: " + prompts);
+    });
 
-  static importAllImages = (r) => {
-    let images = {};
-    r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
-    return images;
   }
 
   componentDidMount() {
@@ -43,10 +43,12 @@ class Juego extends Component {
   }
 
   startNewRound() {
+    socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
     socket.emit('newRound', this.GameCode, this.maxRounds);
   }
 
   startAnswering() {
+    socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
     socket.emit('startAnswering', this.GameCode);
   }
 
@@ -69,6 +71,9 @@ class Juego extends Component {
     }
     if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
       this.generarQRLobby();
+    }
+    if (this.state.estadoJuego === 'respondiendo' && prevState.estadoJuego !== 'respondiendo') {
+      socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
     }
   }
 

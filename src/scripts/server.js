@@ -47,7 +47,6 @@ io.on('connection', (socket) => {
             socket.emit('sharePlayer', player);
             socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
-            console.log(io.sockets.adapter.rooms)
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
         }
@@ -100,8 +99,28 @@ io.on('connection', (socket) => {
         const lobby = lobbies.find((l) => l.code === lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+            generatePromptsForPlayers(lobbyCode);
+            console.log(lobbies);
         }
 
+    });
+
+    socket.on('newRound', (lobbyCode) => {
+        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        if (lobby) {
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
+            generatePromptsForPlayers(lobbyCode);
+            console.log(lobbies.data);
+
+        }
+    });
+
+    socket.on('getPlayerPrompts', (gameCode, playerID) => {
+        const lobby = lobbies.find((l) => l.code === gameCode);
+        if (lobby) {
+            const playerPrompts = lobby.data.find((data) => data.playerId === playerID).prompts;
+            socket.emit('getPrompts', playerPrompts);
+        }
     });
 
     socket.on('startAnswering', (lobbyCode) => {
@@ -164,23 +183,44 @@ function generateRandomCode() {
 
 
 const fs = require('fs');
+const path = require('path');
 
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
-function generatePromptsForPlayers(lobbyCode) {
+function generatePromptsForPlayers(lobbyCode, language = 'es') {
     const lobby = lobbies.find((l) => l.code === lobbyCode);
     if (lobby) {
-        const jsonData = fs.readFileSync('Quiplash_Prompts.json', 'utf8');
-        const promptsData = JSON.parse(jsonData);
+        const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
+        const jsonData = fs.readFileSync(absolutePath, 'utf8');
+        const parsedJsonData = JSON.parse(jsonData);
+        const promptsData = parsedJsonData[language]["prompts"];
+
 
         const lobbySize = lobby.players.length;
-        const selectedPrompts = [];
+        let selectedPrompts = [];
         for (let i = 0; i < lobbySize; i++) {
-
+            let randIndex = randInt(0, 7);
+            while (selectedPrompts.includes(randIndex)) {
+                randIndex = randInt(0, 7);
+            }
+            selectedPrompts.push(randIndex);
         }
+
+        selectedPrompts = [...selectedPrompts, ...selectedPrompts];
+
+        console.log(lobby.players);
 
         lobby.players.forEach(playerRef => {
 
             const dataArray = {playerId: playerRef.id, prompts: [], answers: []};
+
+            for (let i = 0; i < 2; i++) {
+                const randIndex = randInt(0, selectedPrompts.length - 1);
+                dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
+                selectedPrompts.splice(randIndex, 1);
+            }
             lobby.data.push(dataArray);
 
         });
