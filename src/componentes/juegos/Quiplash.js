@@ -21,6 +21,8 @@ class Quiplash extends Juego {
             senalMostrarRespuestas: false,
             senalMostrarPropietarios: false,
             colorNoria: this.colorAleatorio(),
+            offsetNoria: 0,
+            prevOffsetNoria: 0,
         };
     }
 
@@ -34,11 +36,22 @@ class Quiplash extends Juego {
         this.setState({senalMostrarPropietarios: true});
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        super.componentDidUpdate(prevProps, prevState);
+        if (prevState.offsetNoria !== this.state.offsetNoria) {
+            this.setState({prevOffsetNoria: prevState.offsetNoria});
+        }
+    }
+
 
     componentDidMount() {
         super.componentDidMount();
         this.interval = setInterval(
-            () => this.setState({colorNoria: this.colorAleatorio()}),
+            () => {
+                const prevOffset = this.state.prevOffsetNoria; // Obtener el offset previo
+                const newOffset = prevOffset + 20;
+                this.setState({colorNoria: this.colorAleatorio(), offsetNoria: newOffset});
+            },
             1000
         );
     }
@@ -73,7 +86,8 @@ class Quiplash extends Juego {
                     </header>
                     <div style={{position: "relative"}}>
                         <article className={styles.jugadores} style={{backgroundColor: this.state.colorNoria}}>
-<Noria key={this.state.jugadoresConectados.map(jugador => jugador.id).join('_')} jugadores={this.state.jugadoresConectados} />
+                            <Noria key={this.state.jugadoresConectados.map(jugador => jugador.id).join('_')}
+                                   jugadores={this.state.jugadoresConectados} offset={this.state.offsetNoria}/>
 
                         </article>
                         <img className={styles.QRcode} id="QRcode" src="" alt="codigoQR"/>
@@ -86,10 +100,9 @@ class Quiplash extends Juego {
     }
 
     renderRespondiendo() {
-        this.state.respuesta = '';
 
-        function enviarRespuesta() {
-            // Enviar respuesta al servidor
+        function handleSubmit() {
+            //TODO Obtener nuevo prompt del servidor
         }
 
         return (
@@ -98,7 +111,7 @@ class Quiplash extends Juego {
                     <Contador tiempoInicial={90}/>
                     <Prompt texto={'PRUEBA'}/>
                     <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode}
-                                            styles={styles}/>
+                                            styles={styles} onHandleSubmitRef={handleSubmit}/>
                     <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
                     <section className={styles.jugadores}>
                         <div className={styles.sombraJugadores}></div>
@@ -111,7 +124,7 @@ class Quiplash extends Juego {
     renderJugando() {
         return (
             <section className={styles.round}>
-            <header className={styles.promptHeader}>
+                <header className={styles.promptHeader}>
                     <Contador tiempoInicial={10}/>
                     <Prompt texto={'PRUEBA'}/>
                     <IconoLobby gameCode={this.GameCode}/>
@@ -128,23 +141,6 @@ class Quiplash extends Juego {
             </section>
         );
     }
-
-    // render() {
-    //     // Determinar qué método de renderizado llamar según el estado del juego
-    //     switch (this.state.estadoJuego) {
-    //         case 'inicio':
-    //             return this.renderLobby();
-    //         case 'start':
-    //             return 'EMPEZADO';
-    //         case 'respondiendo':
-    //             return this.renderRespondiendo();
-    //         case 'jugando':
-    //             return this.renderJugando();
-    //         // Puedes agregar más casos para otros estados del juego si es necesario
-    //         default:
-    //             return null;
-    //     }
-    // }
 }
 
 function Prompt({texto}) {
@@ -153,19 +149,26 @@ function Prompt({texto}) {
     );
 }
 
-const Noria = React.memo(function Noria({ jugadores }) {
-      const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
+const Noria = React.memo(function Noria({jugadores, offset = 0}) {
+    const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
+    const [springStyles, setSpringStyles] = useSpring(() => ({
+        transform: `rotate(${offset * 45}deg)` // 45 grados por jugador
+    }));
+
     useEffect(() => {
         setConnectedPlayers(jugadores);
+        setSpringStyles({transform: `rotate(${offset * 45}deg)`});
+        console.log("offset effect: " + offset);
     }, [jugadores]);
 
     let counter = 0;
-  const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
+    const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
 
     const iconosJugadores = connectedPlayers.map((jugador) => (
         <div className={styles.palo} key={jugador.id}>
-            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]} />
+            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]}
+                          style={springStyles}/>
         </div>
     ));
     console.log(counter);
@@ -173,14 +176,15 @@ const Noria = React.memo(function Noria({ jugadores }) {
     // Rellenar los espacios restantes con IconoJugador vacíos
     for (let i = connectedPlayers.length; i < 8; i++) {
         iconosJugadores.push(
-            <div className={styles.palo} key={i} style={{ visibility: 'hidden' }}>
-                <IconoJugador />
+            <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
+                <IconoJugador/>
             </div>
         );
     }
 
     return <>{iconosJugadores}</>;
 });
+
 function RespuestaPrompt({texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios}) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},

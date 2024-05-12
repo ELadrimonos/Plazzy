@@ -1,41 +1,89 @@
 {
-  "es" : {
-    "round" : {
-      "0" : "El mayor amigo del perro es ...",
-      "1" : "Estás en 1945, Berlín. Lo primero que haces es ...",
-      "2" : "Después de ganar la lotería, decides...",
-      "3" : "En un mundo habitado por unicornios y dragones, tu misión es...",
-      "4" : "Tu superpoder recién descubierto es...",
-      "5" : "El hashtag que usarías en un golpe de estado"
+  "es": {
+    "prompts": {
+      "0": "El mayor amigo del perro es ...",
+      "1": "Estás en 1945, Berlín. Lo primero que haces es ...",
+      "2": "Después de ganar la lotería, decides...",
+      "3": "En un mundo habitado por unicornios y dragones, tu misión es...",
+      "4": "Tu superpoder recién descubierto es...",
+      "5": "El hashtag que usarías en un golpe de estado",
+      "6": "Si pudieras viajar en el tiempo, irías a...",
+      "7": "En un mundo sin tecnología, tu habilidad más valiosa sería..."
     },
-    "safety_quip" : {
-      "0" : {
-        "0" : "su pelota",
-        "1" : "su hueso"
+    "safety_answer": {
+      "0": {
+        "0": "su pelota",
+        "1": "su hueso"
       },
-      "1" : {
-        "0" : "huir",
-        "1" : "cortarte el bigote"
+      "1": {
+        "0": "huir",
+        "1": "cortarte el bigote"
+      },
+      "2": {
+        "0": "pedir un préstamo",
+        "1": "compartir el premio"
+      },
+      "3": {
+        "0": "crear una granja de dragones",
+        "1": "rescatar al rey unicornio"
+      },
+      "4": {
+        "0": "atraer riquezas",
+        "1": "nadar en lava"
+      },
+      "5": {
+        "0": "#ComoLosViejosTiempos",
+        "1": "#MañanaLoDestituyeJuan"
+      },
+      "6": {
+        "0": "evitar hacer el TFG",
+        "1": "evitar convalidarme empresa"
+      },
+      "7": {
+        "0": "hacer el gusano",
+        "1": "enseñar trucos a cerdos"
       }
     }
   },
-  "en" : {
-    "round" : {
-      "0" : "Dog's best friend is ...",
-      "1" : "You're in 1945, Berlin. First thing you do is ...",
-      "2" : "After winning the lottery, you decide to ...",
-      "3" : "In a world inhabited by unicorns and dragons, your mission is ...",
-      "4" : "Your newly discovered superpower is ...",
-      "5" : "The hashtag you'd use in a coup d'etat"
+  "en": {
+    "prompts": {
+      "0": "Dog's best friend is ...",
+      "1": "You're in 1945, Berlin. First thing you do is ...",
+      "2": "After winning the lottery, you decide to ...",
+      "3": "In a world inhabited by unicorns and dragons, your mission is ...",
+      "4": "Your newly discovered superpower is ...",
+      "5": "The hashtag you'd use in a coup d'etat",
+      "6": "If you could travel in time, you'd go to ...",
+      "7": "In a world without technology, your most important skill would be ..."
     },
-    "safety_quip" : {
-      "0" : {
-        "0" : "its ball",
-        "1" : "its bone"
+    "safety_answer": {
+      "1": {
+        "0": "run away",
+        "1": "shave your moustache"
       },
-      "1" : {
-        "0" : "run away",
-        "1" : "shave your moustache"
+      "2": {
+        "0": "ask for a loan",
+        "1": "share the prize"
+      },
+      "3": {
+        "0": "create a dragon farm",
+        "1": "rescue the unicorn king"
+      },
+      "4": {
+        "0": "attract wealth",
+        "1": "swim in lava"
+      },
+      "5": {
+        "0": "#LikeTheOldDays",
+        "1": "#TomorrowJuanOustsHim"
+      },
+      "6": {
+        "0": "avoid doing the Final Degree Project",
+        "1": "avoid validating the business assignment"
+      },
+      "7": {
+        "0": "do the worm",
+        "1": "teach tricks to pigs"
       }
     }
   }
