@@ -23,7 +23,10 @@ class Quiplash extends Juego {
             colorNoria: this.colorAleatorio(),
             offsetNoria: 0,
             prevOffsetNoria: 0,
+            promptIndex: 0,
+            bloquearRespuestas: false
         };
+
     }
 
     // Método para emitir señal para mostrar respuestas
@@ -99,28 +102,36 @@ class Quiplash extends Juego {
             </>);
     }
 
-   renderRespondiendo() {
-    this.state.promptIndex = 0;
+    renderRespondiendo() {
+        // this.setState({promptIndex: 0, bloquearRespuestas: false});
 
-    const handleSubmit = () => {
-        this.setState({promptIndex: this.state.promptIndex + 1});
-    }
+        const handleSubmit = () => {
+            if (this.state.promptIndex < this.state.prompts.length - 1)
+                this.setState({promptIndex: this.state.promptIndex + 1});
+            else
+                this.setState({bloquearRespuestas: true});
+        }
 
-    return (
-        <>
-            <section className={styles.answerScreen}>
-                <Contador tiempoInicial={90}/>
-                <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
-                <InputRespuestaLimitado socket={socket} playerID={this.playerReference} gameCode={this.GameCode}
-                                        styles={styles} onHandleSubmitRef={handleSubmit}/>
-                <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
-                <section className={styles.jugadores}>
-                    <div className={styles.sombraJugadores}></div>
+        return (
+            <>
+                <section className={styles.answerScreen}>
+                    <Contador tiempoInicial={90}/>
+                    {!this.state.bloquearRespuestas && (
+                        <>
+                            <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
+                            <InputRespuestaLimitado socket={socket} playerID={this.playerReference}
+                                                    gameCode={this.GameCode}
+                                                    styles={styles} onHandleSubmitRef={handleSubmit}/>
+                        </>)}
+
+                    <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
+                    <section className={styles.jugadores}>
+                        <div className={styles.sombraJugadores}></div>
+                    </section>
                 </section>
-            </section>
-        </>
-    );
-}
+            </>
+        );
+    }
 
 
     renderJugando() {
