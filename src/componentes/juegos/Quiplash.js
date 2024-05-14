@@ -119,7 +119,7 @@ class Quiplash extends Juego {
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
-                            <InputRespuestaLimitado socket={socket} playerID={this.playerReference}
+                            <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
                         </>)}
