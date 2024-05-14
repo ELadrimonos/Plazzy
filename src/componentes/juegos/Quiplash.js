@@ -12,6 +12,7 @@ import logo4 from '../../assets/img/player_icons/Quiplash/4.webp';
 import logo5 from '../../assets/img/player_icons/Quiplash/5.webp';
 import logo6 from '../../assets/img/player_icons/Quiplash/6.webp';
 import logo7 from '../../assets/img/player_icons/Quiplash/7.webp';
+import ModeloJugador from "../ModeloJugador";
 
 class Quiplash extends Juego {
     constructor(props) {
@@ -103,13 +104,19 @@ class Quiplash extends Juego {
     }
 
     renderRespondiendo() {
-        // this.setState({promptIndex: 0, bloquearRespuestas: false});
+
+        const modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
 
         const handleSubmit = () => {
             if (this.state.promptIndex < this.state.prompts.length - 1)
                 this.setState({promptIndex: this.state.promptIndex + 1});
             else
                 this.setState({bloquearRespuestas: true});
+        }
+
+        const handleRunOutOfTime = () => {
+            this.setState({bloquearRespuestas: true});
+            socket.emit('playerRanOutOfTimeToAnswer', this.GameCode, this.playerReference.id);
         }
 
         return (
@@ -122,10 +129,22 @@ class Quiplash extends Juego {
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
+                            <button onClick={() => {
+                                socket.emit('playerUseSafetyAnswer', this.GameCode, this.playerReference.id);
+                                handleSubmit();
+                            }
+                            }
+                            >¡Ayudame!
+                            </button>
                         </>)}
 
-                    <button onClick={() => this.setState({estadoJuego: 'jugando'})}>Juego</button>
+
                     <section className={styles.jugadores}>
+                        <div className={styles.listaJugadores}>
+                            {/*{this.state.jugadoresConectados.map((jugador, index) => (*/}
+                            {/*    <ModeloJugador modeloPath={modelos[index]} animationName="idle" />*/}
+                            {/*))}*/}
+                        </div>
                         <div className={styles.sombraJugadores}></div>
                     </section>
                 </section>
@@ -135,10 +154,22 @@ class Quiplash extends Juego {
 
 
     renderJugando() {
+
+        const handleTimeout = () => {
+            console.log('SIN TIEMPO');
+        };
+
+        const mostrarSiguientesRespuestas = () => {
+            setTimeout(() => {
+                this.setState({senalMostrarRespuestas: true})
+            }, 2000);
+
+        }
+
         return (
             <section className={styles.round}>
                 <header className={styles.promptHeader}>
-                    <Contador tiempoInicial={10}/>
+                    <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
                     <Prompt texto={'PRUEBA'}/>
                     <IconoLobby gameCode={this.GameCode}/>
                 </header>
