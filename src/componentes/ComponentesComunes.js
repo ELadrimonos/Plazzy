@@ -52,7 +52,7 @@ export function InputRespuestaLimitado({socket, playerID, gameCode, onHandleSubm
     const [respuesta, setRespuesta] = useState('');
 
     function enviarRespuesta() {
-        // socket.emit('answer', gameCode, playerID, respuesta);
+        socket.emit('answer', gameCode, playerID, respuesta);
         onHandleSubmitRef();
         setRespuesta('');
     }

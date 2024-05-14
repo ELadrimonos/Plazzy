@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
 
 // Unirse a sala
     socket.on('joinGame', (nombreJug, lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
 
         if (lobby && lobby.players.length < 8) {
             socket.join(lobbyCode);
@@ -95,28 +95,44 @@ io.on('connection', (socket) => {
         // console.log('Usuario desconectado:', socket.id);
     });
 
+    socket.on('answer', (lobbyCode, playerID, answer) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            const playerData = lobby.data.find((d) => d.playerId === playerID);
+            console.log(lobby.data)
+            if (playerData) {
+                playerData.answers.push(answer);
+                console.log('Respuesta recibida:', answer);
+                console.log('Datos del jugador actualizados:', playerData);
+            } else {
+                console.error('No se encontraron datos del jugador con ID:', playerID);
+            }
+        } else {
+            console.error('No se encontró la sala con el código:', lobbyCode);
+        }
+    });
+
+
     socket.on('startGame', (lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
             generatePromptsForPlayers(lobbyCode);
-            console.log(lobbies);
         }
 
     });
 
     socket.on('newRound', (lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
             generatePromptsForPlayers(lobbyCode);
-            console.log(lobbies.data);
 
         }
     });
 
-    socket.on('getPlayerPrompts', (gameCode, playerID) => {
-        const lobby = lobbies.find((l) => l.code === gameCode);
+    socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             const playerPrompts = lobby.data.find((data) => data.playerId === playerID).prompts;
             socket.emit('getPrompts', playerPrompts);
@@ -124,28 +140,28 @@ io.on('connection', (socket) => {
     });
 
     socket.on('startAnswering', (lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
         }
     });
 
     socket.on('startVoting', (lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
         }
     });
 
     socket.on('startResults', (lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
         }
     });
 
     socket.on('startEndGame', (lobbyCode) => {
-        const lobby = lobbies.find((l) => l.code === lobbyCode);
+        const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
         }
@@ -154,7 +170,7 @@ io.on('connection', (socket) => {
 });
 
 const closeLobby = (lobbyCode) => {
-    const lobby = lobbies.find((l) => l.code === lobbyCode);
+    const lobby = getLobby(lobbyCode);
     if (lobby) {
         io.to(lobby.code).emit('closeLobby');
     }
@@ -181,6 +197,7 @@ function generateRandomCode() {
     return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
+const getLobby = (lobbyCode) => lobbies.find((l) => l.code === lobbyCode);
 
 const fs = require('fs');
 const path = require('path');
@@ -190,7 +207,7 @@ function randInt(min, max) {
 }
 
 function generatePromptsForPlayers(lobbyCode, language = 'es') {
-    const lobby = lobbies.find((l) => l.code === lobbyCode);
+    const lobby = getLobby(lobbyCode);
     if (lobby) {
         const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
         const jsonData = fs.readFileSync(absolutePath, 'utf8');
@@ -210,7 +227,6 @@ function generatePromptsForPlayers(lobbyCode, language = 'es') {
 
         selectedPrompts = [...selectedPrompts, ...selectedPrompts];
 
-        console.log(lobby.players);
 
         lobby.players.forEach(playerRef => {
 
