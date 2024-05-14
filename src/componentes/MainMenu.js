@@ -9,6 +9,7 @@ import Quiplash from "./juegos/Quiplash";
 import {socket} from "../scripts/cliente";
 import {log} from "three/nodes";
 import {useNavigate, useLocation} from "react-router-dom";
+import ModeloJugador from "./ModeloJugador";
 
 
 // TODO Refactorizar estilos por clases del styles
@@ -249,7 +250,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
     // Si refresca la pagina se desconecta
     window.onbeforeunload = function (){
         if (player){
-            socket.emit('disconnect');
+            socket.emit('disconnectPlayer', player.id);
             if (isInGameRoute){
                 navigate('/');
             }

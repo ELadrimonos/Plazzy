@@ -1,8 +1,10 @@
-const http = require('http').createServer();
-
+const express = require('express');
+const app = express();
+const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*"
+        origin: "*", // Permitir solicitudes desde localhost:3000
+        methods: ["GET", "POST"]
     }
 });
 
@@ -29,6 +31,7 @@ const lobbies = [];
 
 
 http.listen(8080, () => console.log("LISTENING ON 8080"));
+
 
 io.on('connection', (socket) => {
     // console.log('Usuario conectado:', socket.id);
@@ -103,7 +106,7 @@ io.on('connection', (socket) => {
             if (playerData) {
                 playerData.answers.push(answer);
                 console.log('Respuesta recibida:', answer);
-                console.log('Datos del jugador actualizados:', playerData);
+                comprobarNumeroDeRespuestas(lobbyCode);
             } else {
                 console.error('No se encontraron datos del jugador con ID:', playerID);
             }
@@ -129,6 +132,26 @@ io.on('connection', (socket) => {
             generatePromptsForPlayers(lobbyCode);
 
         }
+    });
+
+    socket.on('playerRanOutOfTimeToAnswer', (lobbyCode, playerID) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            const playerData = lobby.data.find((d) => d.playerId === playerID);
+            if (playerData) {
+                const totalPlayerAnswers = playerData.answers.length;
+                for (let i = 0; i < totalPlayerAnswers; i++) {
+                    playerUseSafetyAnswer(lobbyCode,playerID);
+                }
+            } else {
+                console.error('No se encontraron datos del jugador con ID:', playerID);
+            }
+        }
+    });
+
+    socket.on('playerUseSafetyAnswer', (lobbyCode, playerID) => {
+        playerUseSafetyAnswer(lobbyCode, playerID);
+        comprobarNumeroDeRespuestas(lobbyCode);
     });
 
     socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
@@ -178,18 +201,18 @@ const closeLobby = (lobbyCode) => {
     const room = io.sockets.adapter.rooms.get(lobbyCode);
 
 
-     if (room) {
-            // Eliminar la sala de la lista de lobbies
-            const index = lobbies.findIndex(lobby => lobby.code === lobbyCode);
-            if (index !== -1) {
-                lobbies.splice(index, 1);
-                console.log("Sala cerrada:", lobbyCode);
-            } else {
-                console.error("No se encontró la sala para cerrar:", lobbyCode);
-            }
+    if (room) {
+        // Eliminar la sala de la lista de lobbies
+        const index = lobbies.findIndex(lobby => lobby.code === lobbyCode);
+        if (index !== -1) {
+            lobbies.splice(index, 1);
+            console.log("Sala cerrada:", lobbyCode);
         } else {
-            console.error("La sala no existe:", lobbyCode);
+            console.error("No se encontró la sala para cerrar:", lobbyCode);
         }
+    } else {
+        console.error("La sala no existe:", lobbyCode);
+    }
 
 }
 
@@ -240,5 +263,70 @@ function generatePromptsForPlayers(lobbyCode, language = 'es') {
             lobby.data.push(dataArray);
 
         });
-    } else console.error('No se encontro la sala: ' +  lobbyCode);
+    } else console.error('No se encontro la sala: ' + lobbyCode);
+}
+
+function getPromptID(prompt, language = 'es') {
+    const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
+    const jsonData = fs.readFileSync(absolutePath, 'utf8');
+    const parsedJsonData = JSON.parse(jsonData);
+    const prompts = parsedJsonData[language]["prompts"];
+
+    return Object.values(prompts).find((value) => value === prompt) ?? -1;
+}
+
+
+function getSafetyAnswer(id, language = 'es') {
+    const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
+    const jsonData = fs.readFileSync(absolutePath, 'utf8');
+    const parsedJsonData = JSON.parse(jsonData);
+
+    // Verificar si el idioma y el id existen en el objeto JSON
+    if (parsedJsonData[language] && parsedJsonData[language]["safety_answer"] && parsedJsonData[language]["safety_answer"][id.toString()]) {
+        const safetyAnswers = parsedJsonData[language]["safety_answer"][id.toString()];
+
+        const randomAnswer = Math.floor(Math.random() * 2);
+
+        // Verificar si el objeto safetyAnswers[id.toString()] existe y si randomAnswer está presente
+        if (safetyAnswers && safetyAnswers[randomAnswer.toString()]) {
+            return safetyAnswers[randomAnswer.toString()];
+        } else {
+            return "Respuesta aleatoria no encontrada para el ID dado";
+        }
+    } else {
+        return "ID no encontrado en safetyAnswers";
+    }
+}
+
+
+function playerUseSafetyAnswer(lobbyCode, playerID) {
+    const lobby = getLobby(lobbyCode);
+    if (lobby) {
+        const playerData = lobby.data.find((d) => d.playerId === playerID);
+        if (playerData) {
+            const totalPlayerAnswers = playerData.answers.length;
+            const playerPrompt = playerData.prompts[totalPlayerAnswers];
+            const promptID = getPromptID(playerPrompt);
+            if (promptID === -1) {
+                return;
+            }
+            playerData.answers.push(getSafetyAnswer(promptID));
+
+        } else {
+            console.error('No se encontraron datos del jugador con ID:', playerID);
+        }
+    }
+}
+
+function comprobarNumeroDeRespuestas(lobbyCode) {
+    const lobby = getLobby(lobbyCode);
+    let count = 0;
+    lobby.data.forEach((d) => {
+        if (d.answers.length === 2) count++;
+    });
+    console.log("CONTADOR: ", count);
+    if (count === lobby.data.length) {
+        console.log("SE CAMBIA A VOTAR");
+        io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
+    }
 }
