@@ -6,7 +6,7 @@ class Juego extends Component {
     super(props);
     this.state = {
       // Estado común del juego
-      estadoJuego: 'inicio', // estado inicial del juego
+      estadoJuego: 'lobby', // estado inicial del juego
       rondaActual: 1, // ronda inicial del juego
       jugadoresConectados:  props.connectedPlayers,
       prompts: [],
@@ -28,7 +28,7 @@ class Juego extends Component {
 
   componentDidMount() {
     // Llamar a la función aquí de que el componente se haya montado
-    if (this.state.estadoJuego === 'inicio') {
+    if (this.state.estadoJuego === 'lobby') {
       this.generarQRLobby();
     }
   }
@@ -69,7 +69,7 @@ class Juego extends Component {
       // Actualizar jugadoresConectados en el estado
       this.setState({ jugadoresConectados: this.props.connectedPlayers });
     }
-    if (this.state.estadoJuego === 'inicio' && prevState.estadoJuego !== 'inicio') {
+    if (this.state.estadoJuego === 'lobby' && prevState.estadoJuego !== 'lobby') {
       this.generarQRLobby();
     }
     if (this.state.estadoJuego === 'respondiendo' && prevState.estadoJuego !== 'respondiendo') {
@@ -139,7 +139,7 @@ class Juego extends Component {
   render() {
 
     switch (this.state.estadoJuego) {
-      case 'inicio':
+      case 'lobby':
         return this.renderLobby();
       case 'start':
         return this.renderIntro();
