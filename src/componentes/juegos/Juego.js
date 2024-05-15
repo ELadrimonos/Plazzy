@@ -10,6 +10,8 @@ class Juego extends Component {
       rondaActual: 1, // ronda inicial del juego
       jugadoresConectados:  props.connectedPlayers,
       prompts: [],
+      ganador: undefined,
+
     };
     this.GameCode = props.gameCode;
     this.playerReference = props.player;
@@ -21,7 +23,6 @@ class Juego extends Component {
 
     socket.on('getPrompts', (prompts) => {
       this.setState({prompts: prompts});
-      console.log("NUEVOS PROMOTS: " + prompts);
     });
 
   }
