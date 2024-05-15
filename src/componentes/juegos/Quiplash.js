@@ -17,7 +17,7 @@ import ModeloJugador from "../ModeloJugador";
 class Quiplash extends Juego {
     constructor(props) {
         super(props);
- this.state = {
+        this.state = {
             ...this.state, // Así obtengo los estados de la clase padre
             senalMostrarRespuestas: false,
             senalMostrarPropietarios: false,
@@ -151,10 +151,10 @@ class Quiplash extends Juego {
 
                     <section className={styles.jugadores}>
                         <div className={styles.listaJugadores}>
-                            {/*{this.state.jugadoresConectados.map((jugador, index) => (*/}
-                            {/*    <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]} animationName="idle" />*/}
-                            {/*))}*/}
-                <ModeloJugador modeloPath={'/Burger.glb'} animationName="idle"/>
+                            {/* TODO: Arreglar context lost*/}
+                            {this.state.jugadoresConectados.map((jugador, index) => (
+                                <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]} animationName="idle"/>
+                            ))}
 
                         </div>
                         <div className={styles.sombraJugadores}></div>
@@ -168,72 +168,83 @@ class Quiplash extends Juego {
     renderJugando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
+            if (this.isPlayerHost()) {
+                socket.emit('loadNextVotingData', this.GameCode);
+            }
         };
 
         const mostrarSiguientesRespuestas = () => {
             setTimeout(() => {
-                this.setState({ senalMostrarRespuestas: true })
+                this.setState({senalMostrarRespuestas: true})
             }, 2000);
 
         }
 
+        socket.on('getVotingData', (data) => {
+            this.setState({
+                prompt: data.prompt, respuestaPrompt1: data.answer1, propietarioRespuesta1: data.player1,
+            });
+        });
+
+        mostrarSiguientesRespuestas();
+
         const handleClickRespuesta = (propietario) => {
             if (!this.state.respuestaSeleccionada) {
                 socket.emit('playerVote', this.GameCode, propietario);
-                this.setState({ respuestaSeleccionada: true });
+                this.setState({respuestaSeleccionada: true});
             }
         };
 
         return (
             <section className={styles.round}>
                 <header className={styles.promptHeader}>
-                    <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout} />
-                    <Prompt texto={this.state.prompt} />
-                    <IconoLobby gameCode={this.GameCode} />
+                    <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
+                    <Prompt texto={this.state.prompt}/>
+                    <IconoLobby gameCode={this.GameCode}/>
                 </header>
                 <div className={styles.promptMessages}>
                     <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
-                        propietario={this.state.propietarioRespuesta1}
-                        senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                        senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                        onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)} />
+                                     propietario={this.state.propietarioRespuesta1}
+                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)}/>
                     <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
-                        propietario={this.state.propietarioRespuesta2}
-                        senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                        senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                        onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)} />
+                                     propietario={this.state.propietarioRespuesta2}
+                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)}/>
                 </div>
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
                 <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
             </section>
         );
     }
+
     renderFin() {
 
         socket.on('getWinner', (data) => {
-           this.setState({ganador: {name: this.state.jugadoresConectados[data].name, index: data}});
+            this.setState({ganador: {name: this.state.jugadoresConectados[data].name, index: data}});
         });
 
         return (
-          <section>
-              <h1>Fin de la partida</h1>
-              {
-                  this.isPlayerHost() && (
-                      <>
-                          <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
-                          <button onClick={() => window.location.reload()}>Regresar al menú</button>
-                      </>
-                  )
-              }
-              {
-                  this.state.ganador &&
-                  <>
-                      <h2>GANADOR: {this.state.ganador.name}</h2>
-                      <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
-                  </>
-              }
+            <section>
+                <h1>Fin de la partida</h1>
+                {
+                    this.isPlayerHost() && (
+                        <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
+                    )
+                }
+                <button onClick={() => window.location.reload()}>Regresar al menú</button>
 
-          </section>
+                {
+                    this.state.ganador &&
+                    <>
+                        <h2>GANADOR: {this.state.ganador.name}</h2>
+                        <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
+                    </>
+                }
+
+            </section>
         );
     }
 }
@@ -283,10 +294,17 @@ const Noria = React.memo(function Noria({jugadores, offset = 0}) {
     return <>{iconosJugadores}</>;
 });
 
-function RespuestaPrompt({ texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios, onClick }) {
+function RespuestaPrompt({
+                             texto,
+                             propietario,
+                             desdeIzquierda,
+                             senalMostrarRespuestas,
+                             senalMostrarPropietarios,
+                             onClick
+                         }) {
     const [springs, api] = useSpring(() => ({
-        from: { x: desdeIzquierda ? -100 : 100 },
-        config: { duration: senalMostrarRespuestas ? 1000 : 500 },
+        from: {x: desdeIzquierda ? -100 : 100},
+        config: {duration: senalMostrarRespuestas ? 1000 : 500},
         delay: senalMostrarRespuestas ? 0 : 200, // Ajusta el retraso en la animación si no se muestran las respuestas
         visibility: senalMostrarRespuestas ? 'visible' : 'hidden', // Define la visibilidad inicial
     }));
@@ -294,8 +312,8 @@ function RespuestaPrompt({ texto, propietario, desdeIzquierda, senalMostrarRespu
     useEffect(() => {
         if (senalMostrarRespuestas) {
             api.start({
-                from: { x: desdeIzquierda ? -100 : 100 },
-                to: { x: 0 },
+                from: {x: desdeIzquierda ? -100 : 100},
+                to: {x: 0},
             });
         }
     }, [senalMostrarRespuestas]);
@@ -309,12 +327,13 @@ function RespuestaPrompt({ texto, propietario, desdeIzquierda, senalMostrarRespu
             onClick={onClick} // Aquí se pasa la función onClick
         >
             <p>{texto}</p>
-            <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios} senalMostrarRespuestas={senalMostrarRespuestas} />
+            <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios}
+                                 senalMostrarRespuestas={senalMostrarRespuestas}/>
         </animated.div>
     );
 }
 
-function AnimatedPropietario({ propietario, senalMostrarPropietarios, senalMostrarRespuestas }) {
+function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostrarRespuestas}) {
     const props = useSpring({
         opacity: senalMostrarPropietarios && senalMostrarRespuestas ? 1 : 0,
         visibility: senalMostrarPropietarios && senalMostrarRespuestas ? 'visible' : 'hidden',
