@@ -104,7 +104,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
                 <legend>Crear Partida</legend>
                 <form onSubmit={handleSubmit}>
                     <label htmlFor="nombreHost">Nombre: </label>
-                    <input type="text" name="username" id="nombreHost" required/>
+                    <input type="text" name="username" id="nombreHost" maxLength={10} required/>
                     <label htmlFor="modoDeJuego">Modo de juego: </label>
                     <select name="juego" id="modoDeJuego">
                         <option value="quiplash" defaultValue={true}>Quiplash</option>
@@ -141,7 +141,7 @@ function MenuUnirse({menuCrear, unirsePartida}) {
                 <legend>Unirse A Partida</legend>
                 <form onSubmit={handleSubmit}>
                     <label htmlFor="nombreJugador">Nombre: </label>
-                    <input type="text" name="username" id="nombreJugador" required/>
+                    <input type="text" name="username" id="nombreJugador" maxLength={10} required/>
                     <label htmlFor="gameCode">Código partida: </label>
                     <input type="text" name="code" id="gameCode" minLength="4" maxLength="4" required/>
                     <input type="submit" value="Unirse" id="unirsePartida"/>
