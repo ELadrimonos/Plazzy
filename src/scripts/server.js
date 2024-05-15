@@ -57,13 +57,13 @@ io.on('connection', (socket) => {
 
 // Crear sala
     socket.on('create', (nombreHost, juego) => {
-        const newLobby = {code: generateRandomCode(), players: [], game: juego, data: []};
+        const newLobby = {id: generateUUID(),code: generateRandomCode(), players: [], game: juego, data: [], round: 1};
         lobbies.push(newLobby);
 
         // Aqui es donde realmente se conecta al lobby
         socket.join(newLobby.code);
 
-        let player = {id: socket.id, name: nombreHost};
+        let player = {id: socket.id, name: nombreHost, score: 0};
         newLobby.players.push(player);
         socket.emit('lobbyCreated', newLobby);
         socket.emit('joinGame', newLobby);
@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
             if (playerData) {
                 const totalPlayerAnswers = playerData.answers.length;
                 for (let i = 0; i < totalPlayerAnswers; i++) {
-                    playerUseSafetyAnswer(lobbyCode,playerID);
+                    playerUseSafetyAnswer(lobbyCode, playerID);
                 }
             } else {
                 console.error('No se encontraron datos del jugador con ID:', playerID);
@@ -152,6 +152,16 @@ io.on('connection', (socket) => {
     socket.on('playerUseSafetyAnswer', (lobbyCode, playerID) => {
         playerUseSafetyAnswer(lobbyCode, playerID);
         comprobarNumeroDeRespuestas(lobbyCode);
+    });
+
+    socket.on('playerVote', (lobbyCode, playerName) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            const player = lobby.players.find((p) => p.name === playerName);
+            if (player) {
+                player.score += 100 * lobby.round;
+            }
+        }
     });
 
     socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
@@ -187,6 +197,20 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
+
+            io.to(lobbyCode).emit('getWinner', devolverJugadoresPorPuntuacion(lobby.players)[0].name);
+        }
+    });
+
+
+    socket.on('startLobby', (lobbyCode) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            //TODO: Guardar todos los datos en la BBDD y cambiar id de este lobby
+            lobby.id = generateUUID();
+            lobby.round = 1;
+            clearLobbyData(lobby);
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.LOBBY);
         }
     });
 
@@ -218,6 +242,12 @@ const closeLobby = (lobbyCode) => {
 
 function generateRandomCode() {
     return Math.random().toString(36).substring(2, 6).toUpperCase();
+}
+
+const crypto = require("crypto");
+
+function generateUUID() {
+    return crypto.randomUUID();
 }
 
 const getLobby = (lobbyCode) => lobbies.find((l) => l.code === lobbyCode);
@@ -273,6 +303,15 @@ function getPromptID(prompt, language = 'es') {
     const prompts = parsedJsonData[language]["prompts"];
 
     return Object.values(prompts).find((value) => value === prompt) ?? -1;
+}
+
+function clearLobbyData(lobby) {
+    //TODO: Guardar en la base de datos
+    lobby.data = [];
+}
+
+function devolverJugadoresPorPuntuacion(jugadores) {
+    return jugadores.slice().sort((a, b) => b.score - a.score);
 }
 
 

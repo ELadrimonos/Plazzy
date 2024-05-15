@@ -17,27 +17,34 @@ import ModeloJugador from "../ModeloJugador";
 class Quiplash extends Juego {
     constructor(props) {
         super(props);
-        this.state = {
+ this.state = {
             ...this.state, // Así obtengo los estados de la clase padre
             senalMostrarRespuestas: false,
             senalMostrarPropietarios: false,
+            prompt: 'PRUEBA',
+            respuestaPrompt1: 'UNO',
+            respuestaPrompt2: 'DOS',
+            propietarioRespuesta1: '',
+            propietarioRespuesta2: '',
             colorNoria: this.colorAleatorio(),
             offsetNoria: 0,
             prevOffsetNoria: 0,
             promptIndex: 0,
-            bloquearRespuestas: false
+            bloquearRespuestas: false,
+            respuestaSeleccionada: false
         };
+        this.interval = null;
 
     }
 
     // Método para emitir señal para mostrar respuestas
-    emitirSenalMostrarRespuestas = () => {
-        this.setState({senalMostrarRespuestas: true});
+    emitirSenalMostrarRespuestas = (valor) => {
+        this.setState({senalMostrarRespuestas: valor});
     }
 
     // Método para emitir señal para mostrar propietarios
-    emitirSenalMostrarPropietarios = () => {
-        this.setState({senalMostrarPropietarios: true});
+    emitirSenalMostrarPropietarios = (valor) => {
+        this.setState({senalMostrarPropietarios: valor});
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -50,14 +57,17 @@ class Quiplash extends Juego {
 
     componentDidMount() {
         super.componentDidMount();
-        this.interval = setInterval(
-            () => {
-                const prevOffset = this.state.prevOffsetNoria; // Obtener el offset previo
-                const newOffset = prevOffset + 20;
-                this.setState({colorNoria: this.colorAleatorio(), offsetNoria: newOffset});
-            },
-            1000
-        );
+        if (this.state.estadoJuego === 'lobby') {
+            this.interval = setInterval(
+                () => {
+                    const prevOffset = this.state.prevOffsetNoria; // Obtener el offset previo
+                    const newOffset = prevOffset + 20;
+                    this.setState({colorNoria: this.colorAleatorio(), offsetNoria: newOffset});
+                },
+                1000
+            );
+        }
+
     }
 
     colorAleatorio = () => {
@@ -154,43 +164,80 @@ class Quiplash extends Juego {
 
 
     renderJugando() {
-
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
         };
 
         const mostrarSiguientesRespuestas = () => {
             setTimeout(() => {
-                this.setState({senalMostrarRespuestas: true})
+                this.setState({ senalMostrarRespuestas: true })
             }, 2000);
 
         }
 
+        const handleClickRespuesta = (propietario) => {
+            if (!this.state.respuestaSeleccionada) {
+                socket.emit('playerVote', this.GameCode, propietario);
+                this.setState({ respuestaSeleccionada: true });
+            }
+        };
+
         return (
             <section className={styles.round}>
                 <header className={styles.promptHeader}>
-                    <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
-                    <Prompt texto={'PRUEBA'}/>
-                    <IconoLobby gameCode={this.GameCode}/>
+                    <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout} />
+                    <Prompt texto={this.state.prompt} />
+                    <IconoLobby gameCode={this.GameCode} />
                 </header>
                 <div className={styles.promptMessages}>
-                    <RespuestaPrompt desdeIzquierda={true} texto={'UNO'}
-                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}/>
-                    <RespuestaPrompt desdeIzquierda={false} texto={'DOS'}
-                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}/>
+                    <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
+                        propietario={this.state.propietarioRespuesta1}
+                        senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                        senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                        onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)} />
+                    <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
+                        propietario={this.state.propietarioRespuesta2}
+                        senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                        senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                        onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)} />
                 </div>
-                <button onClick={() => this.setState({estadoJuego: 'inicio'})}>Comenzar</button>
+                <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
+                <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
             </section>
+        );
+    }
+    renderFin() {
+        let winner;
+
+        socket.on('getWinner', (data) => {
+           winner = data;
+        });
+
+        return (
+          <section>
+              <h1>Fin de la partida</h1>
+              {
+                  this.isPlayerHost() && (
+                      <>
+                          <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
+                          <button onClick={() => socket.emit('disconnect')}>Regresar al menú</button>
+                      </>
+                  )
+              }
+              <h2>GANADOR: {winner}</h2>
+
+          </section>
         );
     }
 }
 
 function Prompt({texto}) {
-    return (
-        <h1 className={styles.prompt}>{texto}</h1>
-    );
+    const props = useSpring({
+        from: {opacity: 0, transform: 'scale(0)'},
+        to: {opacity: 1, transform: 'scale(1)'},
+    });
+
+    return <animated.h1 style={{...props}}>{texto}</animated.h1>;
 }
 
 const Noria = React.memo(function Noria({jugadores, offset = 0}) {
@@ -229,32 +276,22 @@ const Noria = React.memo(function Noria({jugadores, offset = 0}) {
     return <>{iconosJugadores}</>;
 });
 
-function RespuestaPrompt({texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios}) {
+function RespuestaPrompt({ texto, propietario, desdeIzquierda, senalMostrarRespuestas, senalMostrarPropietarios, onClick }) {
     const [springs, api] = useSpring(() => ({
-        from: {x: desdeIzquierda ? -100 : 100},
+        from: { x: desdeIzquierda ? -100 : 100 },
+        config: { duration: senalMostrarRespuestas ? 1000 : 500 },
+        delay: senalMostrarRespuestas ? 0 : 200, // Ajusta el retraso en la animación si no se muestran las respuestas
+        visibility: senalMostrarRespuestas ? 'visible' : 'hidden', // Define la visibilidad inicial
     }));
-
-    const [visibilidadUsuario, setVisibilidadUsuario] = useState('hidden');
-
-    const estiloPropietario = {
-        visibility: visibilidadUsuario,
-    }
 
     useEffect(() => {
         if (senalMostrarRespuestas) {
             api.start({
-                from: {x: desdeIzquierda ? -100 : 100},
-                to: {x: 0},
+                from: { x: desdeIzquierda ? -100 : 100 },
+                to: { x: 0 },
             });
         }
     }, [senalMostrarRespuestas]);
-
-    useEffect(() => {
-        if (senalMostrarPropietarios) {
-            // Aquí puedes manejar la animación para mostrar propietarios, si es necesario
-            console.log("Mostrar propietarios");
-        }
-    }, [senalMostrarPropietarios]);
 
     return (
         <animated.div
@@ -262,11 +299,24 @@ function RespuestaPrompt({texto, propietario, desdeIzquierda, senalMostrarRespue
                 ...springs,
             }}
             className={styles.promptResponse}
+            onClick={onClick} // Aquí se pasa la función onClick
         >
             <p>{texto}</p>
-            <h5 style={estiloPropietario}>{propietario}</h5> {/* Ocultar propietario por ahora */}
+            <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios} senalMostrarRespuestas={senalMostrarRespuestas} />
         </animated.div>
     );
 }
+
+function AnimatedPropietario({ propietario, senalMostrarPropietarios, senalMostrarRespuestas }) {
+    const props = useSpring({
+        opacity: senalMostrarPropietarios && senalMostrarRespuestas ? 1 : 0,
+        visibility: senalMostrarPropietarios && senalMostrarRespuestas ? 'visible' : 'hidden',
+    });
+
+    return (
+        <animated.h5 style={props}>{propietario}</animated.h5>
+    );
+}
+
 
 export default Quiplash;

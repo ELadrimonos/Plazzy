@@ -18,7 +18,7 @@ export function IconoLobby({gameCode}){
 }
 
 export function CodigoPartida({gameCode}) {
-    return <h2 className="gameCode">{gameCode}</h2>
+    return <h2 style={{textTransform: 'uppercase'}} className="gameCode">{gameCode}</h2>
 }
 
 // onTiempoTerminado es una función que se ejecuta cuando termina
@@ -26,14 +26,17 @@ export function Contador({ tiempoInicial, onTiempoTerminado }) {
   const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
 
   useEffect(() => {
+    let temporizador;
+
     const contarTiempo = () => {
       if (tiempoActual > 0) {
-        setTimeout(() => {
-          setTiempoActual(tiempoActual - 1);
+        temporizador = setTimeout(() => {
+          setTiempoActual(tiempo => tiempo - 1);
         }, 1000);
       } else {
         // Cuando el tiempo llega a cero, emitir la señal de tiempo terminado
         onTiempoTerminado();
+        clearTimeout(temporizador);
       }
     };
 
@@ -41,12 +44,11 @@ export function Contador({ tiempoInicial, onTiempoTerminado }) {
     contarTiempo();
 
     // Limpiar el temporizador al desmontar el componente
-    return () => clearTimeout(contarTiempo);
+    return () => clearTimeout(temporizador);
   }, [tiempoActual, onTiempoTerminado]);
 
   return <h2>{tiempoActual}</h2>;
 }
-
 
 export function InputRespuestaLimitado({socket, playerID, gameCode, onHandleSubmitRef ,styles, maxLength = 30}) {
     const [respuesta, setRespuesta] = useState('');
