@@ -7,6 +7,10 @@ const io = require('socket.io')(http, {
         methods: ["GET", "POST"]
     }
 });
+const apiRoutes = require('./api');
+
+app.use(express.json());
+app.use('/api', apiRoutes);
 
 // Enum de pantallas de juego
 const GameScreens = Object.freeze({
@@ -18,13 +22,6 @@ const GameScreens = Object.freeze({
     FINAL_SCREEN: 'fin',
 });
 
-// const mysql = require('mysql');
-// const db = mysql.createConnection({
-//     host: '192.168.18.33',
-//     user: 'root',
-//     password: 'root',
-//     database: 'jackbox'
-// });
 
 
 const lobbies = [];
@@ -57,7 +54,7 @@ io.on('connection', (socket) => {
 
 // Crear sala
     socket.on('create', (nombreHost, juego) => {
-        const newLobby = {id: generateUUID(),code: generateRandomCode(), players: [], game: juego, data: [], round: 1};
+        const newLobby = {id: generateUUID(), code: generateRandomCode(), players: [], game: juego, data: [], round: 1, promptsOrder: []};
         lobbies.push(newLobby);
 
         // Aqui es donde realmente se conecta al lobby
@@ -102,7 +99,6 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             const playerData = lobby.data.find((d) => d.playerId === playerID);
-            console.log(lobby.data)
             if (playerData) {
                 playerData.answers.push(answer);
                 comprobarNumeroDeRespuestas(lobbyCode);
@@ -148,6 +144,14 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('loadNextVotingData', (lobbyCode) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+
+            socket.emit('getVotingData', lobby.data.prompts);
+        }
+    });
+
     socket.on('playerUseSafetyAnswer', (lobbyCode, playerID) => {
         playerUseSafetyAnswer(lobbyCode, playerID);
         comprobarNumeroDeRespuestas(lobbyCode);
@@ -181,6 +185,8 @@ io.on('connection', (socket) => {
     socket.on('startVoting', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            associateAnswersToUniquePrompt(lobby);
+            console.log(lobby)
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
         }
     });
@@ -231,7 +237,7 @@ const closeLobby = (lobbyCode) => {
         const index = lobbies.findIndex(lobby => lobby.code === lobbyCode);
         if (index !== -1) {
             lobbies.splice(index, 1);
-            console.log("Sala cerrada:", lobbyCode);
+            console.warn("Sala cerrada:", lobbyCode);
         } else {
             console.error("No se encontró la sala para cerrar:", lobbyCode);
         }
@@ -279,14 +285,16 @@ function generatePromptsForPlayers(lobbyCode, language = 'es') {
         }
 
         selectedPrompts = [...selectedPrompts, ...selectedPrompts];
-        console.log('PROMPTS BARAJADOS: ', selectedPrompts);
 
         lobby.players.forEach(playerRef => {
 
             const dataArray = {playerId: playerRef.id, prompts: [], answers: []};
 
             for (let i = 0; i < 2; i++) {
-                const randIndex = randInt(0, selectedPrompts.length - 1);
+                let randIndex = randInt(0, selectedPrompts.length - 1);
+                while (dataArray.prompts.includes(promptsData[selectedPrompts[randIndex]])) {
+                    randIndex = randInt(0, 7);
+                }
                 dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
                 selectedPrompts.splice(randIndex, 1);
             }
@@ -315,20 +323,21 @@ function devolverJugadoresPorPuntuacion(jugadores) {
 }
 
 
-function getSafetyAnswer(id, language = 'es') {
+function getSafetyAnswer(id, language = 'ES') {
     const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
     const jsonData = fs.readFileSync(absolutePath, 'utf8');
     const parsedJsonData = JSON.parse(jsonData);
+    id = id.toString();
 
     // Verificar si el idioma y el id existen en el objeto JSON
-    if (parsedJsonData[language] && parsedJsonData[language]["safety_answer"] && parsedJsonData[language]["safety_answer"][id.toString()]) {
-        const safetyAnswers = parsedJsonData[language]["safety_answer"][id.toString()];
+    if (parsedJsonData[language] && parsedJsonData[language]["safety_answer"] && parsedJsonData[language]["safety_answer"][id]) {
+        const safetyAnswers = parsedJsonData[language]["safety_answer"][id];
 
-        const randomAnswer = Math.floor(Math.random() * 2);
+        const randomAnswer = Math.floor(Math.random() * 2).toString();
 
         // Verificar si el objeto safetyAnswers[id.toString()] existe y si randomAnswer está presente
-        if (safetyAnswers && safetyAnswers[randomAnswer.toString()]) {
-            return safetyAnswers[randomAnswer.toString()];
+        if (safetyAnswers && safetyAnswers[randomAnswer]) {
+            return safetyAnswers[randomAnswer];
         } else {
             return "Respuesta aleatoria no encontrada para el ID dado";
         }
@@ -368,7 +377,7 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
     }
 }
 
-function getPromptsUnicos (lobby) {
+function getPromptsUnicos(lobby) {
     const prompts = lobby.data.prompts.slice();
     const promptsUnicos = [];
     prompts.forEach((prompt) => {
@@ -379,7 +388,7 @@ function getPromptsUnicos (lobby) {
     return promptsUnicos;
 }
 
-function getAnswersDePrompts (lobby, prompt) {
+function getAnswersDePrompts(lobby, prompt) {
     const answers = lobby.data.answers.slice();
     const answersDePrompts = [];
     answers.forEach((answer) => {
@@ -391,4 +400,16 @@ function getAnswersDePrompts (lobby, prompt) {
         }
     });
     return answersDePrompts;
+}
+
+function associateAnswersToUniquePrompt(lobby) {
+    lobby.data.forEach((data) => {
+        const promptsUnicos = getPromptsUnicos(lobby);
+        const answersDePrompts = [];
+        promptsUnicos.forEach((prompt) => {
+            answersDePrompts.push(getAnswersDePrompts(lobby, prompt));
+        });
+        data.answers = answersDePrompts;
+    });
+    console.log('Datos individualizados: ', lobby.data);
 }
