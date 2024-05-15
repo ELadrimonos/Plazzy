@@ -132,7 +132,7 @@ class Quiplash extends Juego {
         return (
             <>
                 <section className={styles.answerScreen}>
-                    <Contador tiempoInicial={90}/>
+                    <Contador tiempoInicial={90} onTiempoTerminado={handleRunOutOfTime}/>
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
@@ -207,7 +207,7 @@ class Quiplash extends Juego {
         );
     }
     renderFin() {
-        let winner;
+        let winner = 'pepe';
 
         socket.on('getWinner', (data) => {
            winner = data;
@@ -220,7 +220,7 @@ class Quiplash extends Juego {
                   this.isPlayerHost() && (
                       <>
                           <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
-                          <button onClick={() => socket.emit('disconnect')}>Regresar al menú</button>
+                          <button onClick={() => window.location.reload()}>Regresar al menú</button>
                       </>
                   )
               }

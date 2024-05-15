@@ -197,8 +197,9 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
-
-            io.to(lobbyCode).emit('getWinner', devolverJugadoresPorPuntuacion(lobby.players)[0].name);
+            let ganador = devolverJugadoresPorPuntuacion(lobby.players)[0].name;
+            console.log('GANADOR: ', ganador);
+            io.to(lobbyCode).emit('getWinner', ganador);
         }
     });
 
