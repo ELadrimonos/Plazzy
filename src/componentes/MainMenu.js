@@ -180,6 +180,8 @@ function MenuPrincipal({onCreate, onJoin}) {
             <main>
                 {!mostrarCrearPartida && <MenuUnirse menuCrear={mostrarCrearPartidaHandler} unirsePartida={onJoin}/>}
                 {mostrarCrearPartida && <MenuCrear volverAlMenu={volverAlMenuHandler} crearPartida={onCreate}/>}
+                <ModeloJugador modeloPath={'/Burger.glb'} animationName="idle"/>
+                <ModeloJugador modeloPath={'/Barrel.glb'} animationName="idle"/>
             </main>
         </>
     );

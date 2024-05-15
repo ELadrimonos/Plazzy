@@ -31,9 +31,10 @@ class Quiplash extends Juego {
             prevOffsetNoria: 0,
             promptIndex: 0,
             bloquearRespuestas: false,
-            respuestaSeleccionada: false
+            respuestaSeleccionada: false,
         };
         this.interval = null;
+        this.modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
 
     }
 
@@ -115,7 +116,6 @@ class Quiplash extends Juego {
 
     renderRespondiendo() {
 
-        const modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
 
         const handleSubmit = () => {
             if (this.state.promptIndex < this.state.prompts.length - 1)
@@ -152,8 +152,10 @@ class Quiplash extends Juego {
                     <section className={styles.jugadores}>
                         <div className={styles.listaJugadores}>
                             {/*{this.state.jugadoresConectados.map((jugador, index) => (*/}
-                            {/*    <ModeloJugador modeloPath={modelos[index]} animationName="idle" />*/}
+                            {/*    <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]} animationName="idle" />*/}
                             {/*))}*/}
+                <ModeloJugador modeloPath={'/Burger.glb'} animationName="idle"/>
+
                         </div>
                         <div className={styles.sombraJugadores}></div>
                     </section>
@@ -207,10 +209,9 @@ class Quiplash extends Juego {
         );
     }
     renderFin() {
-        let winner = 'pepe';
 
         socket.on('getWinner', (data) => {
-           winner = data;
+           this.setState({ganador: {name: this.state.jugadoresConectados[data].name, index: data}});
         });
 
         return (
@@ -224,7 +225,13 @@ class Quiplash extends Juego {
                       </>
                   )
               }
-              <h2>GANADOR: {winner}</h2>
+              {
+                  this.state.ganador &&
+                  <>
+                      <h2>GANADOR: {this.state.ganador.name}</h2>
+                      <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
+                  </>
+              }
 
           </section>
         );
@@ -237,7 +244,7 @@ function Prompt({texto}) {
         to: {opacity: 1, transform: 'scale(1)'},
     });
 
-    return <animated.h1 style={{...props}}>{texto}</animated.h1>;
+    return <animated.h1 className={styles.prompt} style={{...props}}>{texto}</animated.h1>;
 }
 
 const Noria = React.memo(function Noria({jugadores, offset = 0}) {

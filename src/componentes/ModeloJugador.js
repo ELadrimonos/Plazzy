@@ -1,13 +1,31 @@
-import React, {useEffect, useRef} from "react";
+import React, { useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import {useGLTF, Stage, useAnimations, OrthographicCamera} from "@react-three/drei";
+import { useGLTF, Stage, useAnimations, OrthographicCamera } from "@react-three/drei";
 
 const ModeloJugador = ({ modeloPath, animationName }) => {
+  function restoreContext() {
+    const canvas = document.querySelector('canvas');
+    canvas.addEventListener(
+      'webglcontextlost',
+      function (event) {
+        event.preventDefault();
+        setTimeout(function () {
+          canvas.getContext('webgl', {preserveDrawingBuffer: true});
+        }, 1);
+      },
+      false
+    );
+  }
+
+  useEffect(() => {
+    restoreContext();
+  }, []);
+
   return (
     <Canvas style={{ width: '200px', height: '200px' }} key={modeloPath + '_' + animationName + '_canvas_' + Math.random()}>
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 10]} intensity={1} />
-<OrthographicCamera makeDefault position={[0, 0, 100]} zoom={0} />
+      <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={0} />
 
       <PlayerMesh modeloPath={modeloPath} animationName={animationName} />
     </Canvas>

@@ -98,14 +98,13 @@ io.on('connection', (socket) => {
         // console.log('Usuario desconectado:', socket.id);
     });
 
-    socket.on('answer', (lobbyCode, playerID, answer) => {
+    socket.on('playerAnswer', (lobbyCode, playerID, answer) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             const playerData = lobby.data.find((d) => d.playerId === playerID);
             console.log(lobby.data)
             if (playerData) {
                 playerData.answers.push(answer);
-                console.log('Respuesta recibida:', answer);
                 comprobarNumeroDeRespuestas(lobbyCode);
             } else {
                 console.error('No se encontraron datos del jugador con ID:', playerID);
@@ -197,9 +196,10 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
-            let ganador = devolverJugadoresPorPuntuacion(lobby.players)[0].name;
-            console.log('GANADOR: ', ganador);
-            io.to(lobbyCode).emit('getWinner', ganador);
+            const ganador = devolverJugadoresPorPuntuacion(lobby.players)[0];
+            const indexGanador = lobby.players.findIndex((p) => p.id === ganador.id);
+            console.log('GANADOR: ', indexGanador);
+            io.to(lobbyCode).emit('getWinner', indexGanador);
         }
     });
 
@@ -268,7 +268,6 @@ function generatePromptsForPlayers(lobbyCode, language = 'es') {
         const parsedJsonData = JSON.parse(jsonData);
         const promptsData = parsedJsonData[language]["prompts"];
 
-
         const lobbySize = lobby.players.length;
         let selectedPrompts = [];
         for (let i = 0; i < lobbySize; i++) {
@@ -280,7 +279,7 @@ function generatePromptsForPlayers(lobbyCode, language = 'es') {
         }
 
         selectedPrompts = [...selectedPrompts, ...selectedPrompts];
-
+        console.log('PROMPTS BARAJADOS: ', selectedPrompts);
 
         lobby.players.forEach(playerRef => {
 
@@ -351,7 +350,7 @@ function playerUseSafetyAnswer(lobbyCode, playerID) {
                 return;
             }
             playerData.answers.push(getSafetyAnswer(promptID));
-
+            console.log(lobby.data)
         } else {
             console.error('No se encontraron datos del jugador con ID:', playerID);
         }
@@ -364,9 +363,32 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
     lobby.data.forEach((d) => {
         if (d.answers.length === 2) count++;
     });
-    console.log("CONTADOR: ", count);
     if (count === lobby.data.length) {
-        console.log("SE CAMBIA A VOTAR");
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
     }
+}
+
+function getPromptsUnicos (lobby) {
+    const prompts = lobby.data.prompts.slice();
+    const promptsUnicos = [];
+    prompts.forEach((prompt) => {
+        if (!promptsUnicos.includes(prompt)) {
+            promptsUnicos.push(prompt);
+        }
+    });
+    return promptsUnicos;
+}
+
+function getAnswersDePrompts (lobby, prompt) {
+    const answers = lobby.data.answers.slice();
+    const answersDePrompts = [];
+    answers.forEach((answer) => {
+        if (answer === prompt) {
+            answersDePrompts.push(answer);
+        }
+        if (answersDePrompts.length > 2) {
+            console.error('EXISTEN MÁS DE 2 RESPUESTAS DE UN MISMO PROMPT: ' + prompt + '\n LOBBY: ' + lobby);
+        }
+    });
+    return answersDePrompts;
 }
