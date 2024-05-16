@@ -8,3 +8,4 @@ create table juegos
 );
 
 INSERT INTO plazzy.juegos (id_juego, nombre, min_jugadores, max_jugadores) VALUES (0, 'QUIPLASH', 3, 8);
+INSERT INTO plazzy.juegos (id_juego, nombre, min_jugadores, max_jugadores) VALUES (1, 'CHATBOT', 4, 8);

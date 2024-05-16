@@ -4,7 +4,7 @@ create table prompts
     id_juego  int                            not null,
     text      varchar(100)                   null,
     idioma    enum ('ES', 'EN') default 'ES' not null,
-    primary key (id_prompt, id_juego),
+    primary key (id_prompt, id_juego, idioma),
     constraint fk_juego_prompts
         foreign key (id_juego) references juegos (id_juego)
 );

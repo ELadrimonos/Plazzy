@@ -23,7 +23,6 @@ const GameScreens = Object.freeze({
 });
 
 
-
 const lobbies = [];
 
 
@@ -63,7 +62,15 @@ io.on('connection', (socket) => {
                 idJuego = 1;
                 break;
         }
-        const newLobby = {id: generateUUID(), code: generateRandomCode(), players: [], game: idJuego, data: [], round: 1, promptsOrder: []};
+        const newLobby = {
+            id: generateUUID(),
+            code: generateRandomCode(),
+            players: [],
+            game: idJuego,
+            data: [],
+            round: 1,
+            promptsOrder: []
+        };
         lobbies.push(newLobby);
 
         // Aqui es donde realmente se conecta al lobby
@@ -184,7 +191,7 @@ io.on('connection', (socket) => {
             const textPrompts = [];
             playerPrompts.forEach(objeto => {
                 console.log(objeto)
-                textPrompts.push(objeto['text']);
+                textPrompts.push(objeto["text"]);
             });
             socket.emit('getPrompts', textPrompts);
         }
@@ -232,6 +239,7 @@ io.on('connection', (socket) => {
             lobby.id = generateUUID();
             lobby.round = 1;
             clearLobbyData(lobby);
+
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.LOBBY);
         }
     });
@@ -286,7 +294,6 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
     if (lobby) {
         try {
             const fetch = (await import('node-fetch')).default;
-            //TODO Arreglar esto
             const url = `http://localhost:8080/api/prompts/${lobby.game}/${language}`; // Cambiar la URL por la correcta
             const response = await fetch(url);
             if (response.ok) {
@@ -329,13 +336,19 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
         console.error('No se encontró la sala:', lobbyCode);
     }
 }
-function getPromptID(prompt, language = 'es') {
-    const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
-    const jsonData = fs.readFileSync(absolutePath, 'utf8');
-    const parsedJsonData = JSON.parse(jsonData);
-    const prompts = parsedJsonData[language]["prompts"];
 
-    return Object.values(prompts).find((value) => value === prompt) ?? -1;
+async function getPromptID(prompt, language = 'ES') {
+
+    const url = `http://localhost:8080/api/prompts/get/${language}/${prompt}`; // Cambiar la URL por la correcta
+    const response = await fetch(url);
+    if (response.ok) {
+        const promptsData = await response.json();
+        return promptsData[0]['id_prompt'];
+    } else
+    {
+        console.error(`Error al obtener las prompts en el idioma ${language}: ${response.status} - ${response.statusText}`);
+        return -1;
+    }
 }
 
 function clearLobbyData(lobby) {
@@ -380,7 +393,9 @@ function playerUseSafetyAnswer(lobbyCode, playerID) {
             const totalPlayerAnswers = playerData.answers.length;
             const playerPrompt = playerData.prompts[totalPlayerAnswers];
             const promptID = getPromptID(playerPrompt);
+
             if (promptID === -1) {
+                console.error('Prompt no encontrado:', playerPrompt);
                 return;
             }
             playerData.answers.push(getSafetyAnswer(promptID));
@@ -400,6 +415,7 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
     if (count === lobby.data.length) {
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
     }
+    console.log('CONTADOR DE JUGADORES LISTOS: ', count)
 }
 
 function getPromptsUnicos(lobby) {

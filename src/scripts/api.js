@@ -25,6 +25,23 @@ router.get('/prompts/:gameId/:language', (req, res) => {
     });
 });
 
+router.get('/prompts/get/:language/:promptText', (req, res) => {
+    const {language, promptText} = req.params;
+    const query = 'SELECT id_prompt, text FROM prompts WHERE idioma = ? AND text = ?';
+    db.query(query, [language, promptText], (error, results) => {
+        if (error) {
+            console.error(error);
+            res.status(500).json({error: 'Error al obtener el prompt'});
+            return;
+        }
+        if (results.length === 0) {
+            res.status(404).json({error: 'No se encontró el prompt'});
+            return;
+        }
+        res.json(results);
+    });
+});
+
 // Obtener una respuesta de emergencia para un prompt específico
 router.get('/safety-answers/:promptId/:language', (req, res) => {
     const {promptId, language} = req.params;
