@@ -180,7 +180,13 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             const playerPrompts = lobby.data.find((data) => data.playerId === playerID).prompts;
-            socket.emit('getPrompts', playerPrompts);
+            console.log('Player prompts:', playerPrompts);
+            const textPrompts = [];
+            playerPrompts.forEach(objeto => {
+                console.log(objeto)
+                textPrompts.push(objeto['text']);
+            });
+            socket.emit('getPrompts', textPrompts);
         }
     });
 
@@ -281,7 +287,7 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
         try {
             const fetch = (await import('node-fetch')).default;
             //TODO Arreglar esto
-            const url = `http://localhost:8080/prompts/${lobby.game}/${language}`; // Cambiar la URL por la correcta
+            const url = `http://localhost:8080/api/prompts/${lobby.game}/${language}`; // Cambiar la URL por la correcta
             const response = await fetch(url);
             if (response.ok) {
                 const promptsData = await response.json();
