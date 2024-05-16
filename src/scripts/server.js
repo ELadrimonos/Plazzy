@@ -54,7 +54,16 @@ io.on('connection', (socket) => {
 
 // Crear sala
     socket.on('create', (nombreHost, juego) => {
-        const newLobby = {id: generateUUID(), code: generateRandomCode(), players: [], game: juego, data: [], round: 1, promptsOrder: []};
+        let idJuego;
+        switch (juego) {
+            case 'quiplash':
+                idJuego = 0;
+                break;
+            case 'chatbot':
+                idJuego = 1;
+                break;
+        }
+        const newLobby = {id: generateUUID(), code: generateRandomCode(), players: [], game: idJuego, data: [], round: 1, promptsOrder: []};
         lobbies.push(newLobby);
 
         // Aqui es donde realmente se conecta al lobby
@@ -266,44 +275,54 @@ function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function generatePromptsForPlayers(lobbyCode, language = 'es') {
+async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
     const lobby = getLobby(lobbyCode);
     if (lobby) {
-        const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
-        const jsonData = fs.readFileSync(absolutePath, 'utf8');
-        const parsedJsonData = JSON.parse(jsonData);
-        const promptsData = parsedJsonData[language]["prompts"];
+        try {
+            const fetch = (await import('node-fetch')).default;
+            //TODO Arreglar esto
+            const url = `http://localhost:8080/prompts/${lobby.game}/${language}`; // Cambiar la URL por la correcta
+            const response = await fetch(url);
+            if (response.ok) {
+                const promptsData = await response.json();
 
-        const lobbySize = lobby.players.length;
-        let selectedPrompts = [];
-        for (let i = 0; i < lobbySize; i++) {
-            let randIndex = randInt(0, 7);
-            while (selectedPrompts.includes(randIndex)) {
-                randIndex = randInt(0, 7);
-            }
-            selectedPrompts.push(randIndex);
-        }
-
-        selectedPrompts = [...selectedPrompts, ...selectedPrompts];
-
-        lobby.players.forEach(playerRef => {
-
-            const dataArray = {playerId: playerRef.id, prompts: [], answers: []};
-
-            for (let i = 0; i < 2; i++) {
-                let randIndex = randInt(0, selectedPrompts.length - 1);
-                while (dataArray.prompts.includes(promptsData[selectedPrompts[randIndex]])) {
-                    randIndex = randInt(0, 7);
+                const lobbySize = lobby.players.length;
+                let selectedPrompts = [];
+                for (let i = 0; i < lobbySize; i++) {
+                    let randIndex = randInt(0, 7);
+                    while (selectedPrompts.includes(randIndex)) {
+                        randIndex = randInt(0, 7);
+                    }
+                    selectedPrompts.push(randIndex);
                 }
-                dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
-                selectedPrompts.splice(randIndex, 1);
+
+                selectedPrompts = [...selectedPrompts, ...selectedPrompts];
+
+                lobby.players.forEach(playerRef => {
+
+                    const dataArray = {playerId: playerRef.id, prompts: [], answers: []};
+
+                    for (let i = 0; i < 2; i++) {
+                        let randIndex = randInt(0, selectedPrompts.length - 1);
+                        while (dataArray.prompts.includes(promptsData[selectedPrompts[randIndex]])) {
+                            randIndex = randInt(0, 7);
+                        }
+                        dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
+                        selectedPrompts.splice(randIndex, 1);
+                    }
+                    lobby.data.push(dataArray);
+
+                });
+            } else {
+                console.error(`Error al obtener las prompts en el idioma ${language}: ${response.status} - ${response.statusText}`);
             }
-            lobby.data.push(dataArray);
-
-        });
-    } else console.error('No se encontro la sala: ' + lobbyCode);
+        } catch (error) {
+            console.error('Error al procesar la solicitud:', error);
+        }
+    } else {
+        console.error('No se encontró la sala:', lobbyCode);
+    }
 }
-
 function getPromptID(prompt, language = 'es') {
     const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
     const jsonData = fs.readFileSync(absolutePath, 'utf8');

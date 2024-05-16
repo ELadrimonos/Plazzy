@@ -238,7 +238,16 @@ function Index({gameCodeRef = null, playerRef = null}) {
     });
 
     socket.on('shareGameMode', (gameMode) => {
-        setGame(gameMode);
+        let gameName;
+        switch (gameMode) {
+            case 0:
+                gameName = 'quiplash';
+                break;
+            case 1:
+                gameName = 'chatbot';
+                break;
+        }
+        setGame(gameName);
     });
 
     socket.on('sharePlayer', (player) => {
