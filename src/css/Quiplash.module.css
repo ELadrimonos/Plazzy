@@ -61,7 +61,7 @@
     user-select: text !important;
 }
 
-.icono {
+.lobby .icono {
     width: 100px;
     aspect-ratio: 1/1;
     background-color: #ad2424;
@@ -70,7 +70,7 @@
     position: relative;
     box-shadow: 3px 3px black;
 }
-.icono > h4 {
+.lobby .icono > h4 {
     position: absolute;
     bottom: calc(0% - 65px);
     width: 100px;
@@ -338,6 +338,23 @@
     gap: 20px;
     width: 100%;
 }
+
+.answerScreen .jugadores .listaJugadores .icono {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: left;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.answerScreen .jugadores .listaJugadores .icono > h4{
+    margin: 0;
+    backdrop-filter: brightness(80%) blur(5px);
+    padding: 5px;
+}
+
 .answerScreen .jugadores .listaJugadores > * {
     width: 100px;
     height: 100px;

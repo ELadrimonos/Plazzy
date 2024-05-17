@@ -116,6 +116,7 @@ class Quiplash extends Juego {
 
     renderRespondiendo() {
 
+        const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
         const handleSubmit = () => {
             if (this.state.promptIndex < this.state.prompts.length - 1)
@@ -132,7 +133,8 @@ class Quiplash extends Juego {
         return (
             <>
                 <section className={styles.answerScreen}>
-                    <Contador tiempoInicial={90} onTiempoTerminado={handleRunOutOfTime}/>
+                    {/* Pasando la funcion por referencia se congela*/}
+                    <Contador tiempoInicial={90} onRunOutOfTime={() => handleRunOutOfTime()}/>
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
@@ -152,9 +154,10 @@ class Quiplash extends Juego {
                     <section className={styles.jugadores}>
                         <div className={styles.listaJugadores}>
                             {/* TODO: Arreglar context lost*/}
-                            {this.state.jugadoresConectados.map((jugador, index) => (
-                                <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]} animationName="idle"/>
-                            ))}
+                            {/*{this.state.jugadoresConectados.map((jugador, index) => (*/}
+                            {/*    // <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]} animationName="idle"/>*/}
+                            {/*    // <IconoJugador key={jugador.id} nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[index]}/>*/}
+                            {/*))}*/}
 
                         </div>
                         <div className={styles.sombraJugadores}></div>
@@ -198,7 +201,7 @@ class Quiplash extends Juego {
         return (
             <section className={styles.round}>
                 <header className={styles.promptHeader}>
-                    <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
+                    <Contador tiempoInicial={10}/>
                     <Prompt texto={this.state.prompt}/>
                     <IconoLobby gameCode={this.GameCode}/>
                 </header>

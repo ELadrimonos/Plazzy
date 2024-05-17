@@ -3,7 +3,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*", // Permitir solicitudes desde localhost:3000
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
@@ -145,20 +145,27 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('playerRanOutOfTimeToAnswer', (lobbyCode, playerID) => {
-        const lobby = getLobby(lobbyCode);
-        if (lobby) {
-            const playerData = lobby.data.find((d) => d.playerId === playerID);
-            if (playerData) {
-                const totalPlayerAnswers = playerData.answers.length;
-                for (let i = 0; i < totalPlayerAnswers; i++) {
+socket.on('playerRanOutOfTimeToAnswer', (lobbyCode, playerID) => {
+    const lobby = getLobby(lobbyCode);
+    if (lobby) {
+        const playerData = lobby.data.find((d) => d.playerId === playerID);
+        if (playerData) {
+            const totalPlayerAnswers = playerData.answers.length;
+            // Calcular cuántas respuestas de seguridad se necesitan para completar las dos respuestas requeridas
+            const remainingSafetyAnswers = 2 - totalPlayerAnswers;
+            // Si aún faltan respuestas de seguridad por agregar
+            if (remainingSafetyAnswers > 0) {
+                // Llamar a playerUseSafetyAnswer para cada respuesta de seguridad necesaria
+                for (let i = 0; i < remainingSafetyAnswers; i++) {
                     playerUseSafetyAnswer(lobbyCode, playerID);
                 }
-            } else {
-                console.error('No se encontraron datos del jugador con ID:', playerID);
             }
+        } else {
+            console.error('No se encontraron datos del jugador con ID:', playerID);
         }
-    });
+    }
+});
+
 
     socket.on('loadNextVotingData', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
@@ -183,19 +190,24 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
-        const lobby = getLobby(lobbyCode);
-        if (lobby) {
-            const playerPrompts = lobby.data.find((data) => data.playerId === playerID).prompts;
-            console.log('Player prompts:', playerPrompts);
+socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
+    const lobby = getLobby(lobbyCode);
+    if (lobby) {
+        const playerData = lobby.data.find((data) => data.playerId === playerID);
+        if (playerData) {
+            const playerPrompts = playerData.prompts;
             const textPrompts = [];
             playerPrompts.forEach(objeto => {
-                console.log(objeto)
-                textPrompts.push(objeto["text"]);
+                if (objeto) { // Verificar si el objeto no es undefined
+                    console.log('OBJETO:', objeto);
+                    textPrompts.push(objeto.text); // Acceder a la propiedad text del objeto
+                }
             });
             socket.emit('getPrompts', textPrompts);
         }
-    });
+    }
+});
+
 
     socket.on('startAnswering', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
@@ -208,7 +220,6 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             associateAnswersToUniquePrompt(lobby);
-            console.log(lobby)
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
         }
     });
@@ -282,8 +293,6 @@ function generateUUID() {
 
 const getLobby = (lobbyCode) => lobbies.find((l) => l.code === lobbyCode);
 
-const fs = require('fs');
-const path = require('path');
 
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -344,8 +353,7 @@ async function getPromptID(prompt, language = 'ES') {
     if (response.ok) {
         const promptsData = await response.json();
         return promptsData[0]['id_prompt'];
-    } else
-    {
+    } else {
         console.error(`Error al obtener las prompts en el idioma ${language}: ${response.status} - ${response.statusText}`);
         return -1;
     }
@@ -361,45 +369,36 @@ function devolverJugadoresPorPuntuacion(jugadores) {
 }
 
 
-function getSafetyAnswer(id, language = 'ES') {
-    const absolutePath = path.resolve(__dirname, './Quiplash_Prompts.json');
-    const jsonData = fs.readFileSync(absolutePath, 'utf8');
-    const parsedJsonData = JSON.parse(jsonData);
-    id = id.toString();
-
-    // Verificar si el idioma y el id existen en el objeto JSON
-    if (parsedJsonData[language] && parsedJsonData[language]["safety_answer"] && parsedJsonData[language]["safety_answer"][id]) {
-        const safetyAnswers = parsedJsonData[language]["safety_answer"][id];
-
+async function getRandomSafetyAnswer(id, language = 'ES') {
+    const url = `http://localhost:8080/api/safety-answers/${id}/${language}`;
+    const response = await fetch(url);
+    if (response.ok) {
+        const safetyAnswers = await response.json();
         const randomAnswer = Math.floor(Math.random() * 2).toString();
-
-        // Verificar si el objeto safetyAnswers[id.toString()] existe y si randomAnswer está presente
-        if (safetyAnswers && safetyAnswers[randomAnswer]) {
-            return safetyAnswers[randomAnswer];
-        } else {
-            return "Respuesta aleatoria no encontrada para el ID dado";
-        }
+        const randomText = safetyAnswers.find(object => object.id_answer === randomAnswer)?.text;
+        return randomText || "Respuesta aleatoria no encontrada para el ID dado";
     } else {
-        return "ID no encontrado en safetyAnswers";
+        return "Error al obtener la respuesta de seguridad: " + response.status + " - " + response.statusText;
     }
 }
 
 
-function playerUseSafetyAnswer(lobbyCode, playerID) {
+async function playerUseSafetyAnswer(lobbyCode, playerID) {
     const lobby = getLobby(lobbyCode);
     if (lobby) {
         const playerData = lobby.data.find((d) => d.playerId === playerID);
         if (playerData) {
+            //TODO Arreglar esto
             const totalPlayerAnswers = playerData.answers.length;
             const playerPrompt = playerData.prompts[totalPlayerAnswers];
-            const promptID = getPromptID(playerPrompt);
-
+            const promptID = await getPromptID(playerPrompt); // Esperar la resolución de la promesa
             if (promptID === -1) {
                 console.error('Prompt no encontrado:', playerPrompt);
                 return;
             }
-            playerData.answers.push(getSafetyAnswer(promptID));
-            console.log(lobby.data)
+            const safetyAnswer = await getRandomSafetyAnswer(promptID); // Esperar la resolución de la promesa
+            playerData.answers.push(safetyAnswer);
+            console.log(lobby.data);
         } else {
             console.error('No se encontraron datos del jugador con ID:', playerID);
         }
