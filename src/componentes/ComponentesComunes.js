@@ -22,29 +22,33 @@ export function CodigoPartida({gameCode}) {
 }
 
 // onTiempoTerminado es una función que se ejecuta cuando termina
+
 export function Contador({ tiempoInicial, onTiempoTerminado }) {
   const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
 
   useEffect(() => {
-    let temporizador;
+    let intervalo;
 
     const contarTiempo = () => {
       if (tiempoActual > 0) {
-        temporizador = setTimeout(() => {
+        intervalo = setInterval(() => {
           setTiempoActual(tiempo => tiempo - 1);
         }, 1000);
       } else {
         // Cuando el tiempo llega a cero, emitir la señal de tiempo terminado
-        onTiempoTerminado();
-        clearTimeout(temporizador);
+          if (onTiempoTerminado !== undefined) {
+            onTiempoTerminado();
+
+          }
+        clearInterval(intervalo);
       }
     };
 
     // Comenzar a contar el tiempo al cargar el componente
     contarTiempo();
 
-    // Limpiar el temporizador al desmontar el componente
-    return () => clearTimeout(temporizador);
+    // Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(intervalo);
   }, [tiempoActual, onTiempoTerminado]);
 
   return <h2>{tiempoActual}</h2>;

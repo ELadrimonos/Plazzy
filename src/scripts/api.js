@@ -5,7 +5,6 @@ const db = require('./db'); // Importa tu módulo de conexión a la base de dato
 // Obtener todos los prompts en un idioma específico
 router.get('/prompts/:gameId/:language', (req, res) => {
     const {gameId, language} = req.params;
-    console.log('ID JUEGO EN CONSULTA: ', gameId);
 
     const query = 'SELECT id_prompt, text FROM prompts WHERE id_juego = ? AND idioma = ?';
     db.query(query, [gameId, language], (err, results, fields) => {
@@ -52,9 +51,7 @@ router.get('/safety-answers/:promptId/:language', (req, res) => {
             res.status(500).json({error: 'Error al obtener la respuesta de seguridad'});
             return;
         }
-        const randomIndex = Math.floor(Math.random() * answers.length);
-        const randomAnswer = answers[randomIndex];
-        res.json(randomAnswer);
+        res.json(answers);
     });
 });
 

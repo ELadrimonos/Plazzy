@@ -7,12 +7,8 @@ import {useSpring, animated} from '@react-spring/web'
 import Chatbot from "./juegos/Chatbot";
 import Quiplash from "./juegos/Quiplash";
 import {socket} from "../scripts/cliente";
-import {log} from "three/nodes";
 import {useNavigate, useLocation} from "react-router-dom";
-import ModeloJugador from "./ModeloJugador";
-
-
-// TODO Refactorizar estilos por clases del styles
+import {Contador} from "./ComponentesComunes";
 
 
 // Cambiar por iconos de los juegos
@@ -180,6 +176,7 @@ function MenuPrincipal({onCreate, onJoin}) {
             <main>
                 {!mostrarCrearPartida && <MenuUnirse menuCrear={mostrarCrearPartidaHandler} unirsePartida={onJoin}/>}
                 {mostrarCrearPartida && <MenuCrear volverAlMenu={volverAlMenuHandler} crearPartida={onCreate}/>}
+                <Contador tiempoInicial={3} ></Contador>
             </main>
         </>
     );
