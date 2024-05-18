@@ -5,7 +5,7 @@ import {FontLoader} from 'three/examples/jsm/loaders/FontLoader';
 import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry';
 import {useSpring, animated} from '@react-spring/web'
 import Chatbot from "./juegos/Chatbot";
-import Quiplash from "./juegos/Quiplash";
+import JokeBattle from "./juegos/JokeBattle";
 import {socket} from "../scripts/cliente";
 import {useNavigate, useLocation} from "react-router-dom";
 import {Contador} from "./ComponentesComunes";
@@ -103,7 +103,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
                     <input type="text" name="username" id="nombreHost" maxLength={10} required/>
                     <label htmlFor="modoDeJuego">Modo de juego: </label>
                     <select name="juego" id="modoDeJuego">
-                        <option value="quiplash" defaultValue={true}>Quiplash</option>
+                        <option value="jokebattle" defaultValue={true}>JokeBattle</option>
                         <option value="chatbot">Chatbot</option>
                     </select>
                     <input type="submit" value="Crear" id="crearPartida"/>
@@ -236,7 +236,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
         let gameName;
         switch (gameMode) {
             case 0:
-                gameName = 'quiplash';
+                gameName = 'jokebattle';
                 break;
             case 1:
                 gameName = 'chatbot';
@@ -269,8 +269,8 @@ function Index({gameCodeRef = null, playerRef = null}) {
         socket.emit('joinGame', userName, gameCode);
     };
 
-    if (game === 'quiplash' && gameCode && player) {
-        return <Quiplash gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
+    if (game === 'jokebattle' && gameCode && player) {
+        return <JokeBattle gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
     } else if (game === 'chatbot' && gameCode) {
         return <Chatbot gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
     } else {
