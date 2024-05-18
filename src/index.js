@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  //   StrictMode hace que recargue dos veces
   <React.StrictMode>
     <App />
   </React.StrictMode>

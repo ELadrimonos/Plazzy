@@ -13,6 +13,8 @@ import logo5 from '../../assets/img/player_icons/JokeBattle/5.webp';
 import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
 import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
+import {Canvas} from "@react-three/fiber";
+import {OrthographicCamera} from "@react-three/drei";
 
 class JokeBattle extends Juego {
     constructor(props) {
@@ -152,14 +154,15 @@ class JokeBattle extends Juego {
 
 
                     <section className={styles.jugadores}>
-                        <div className={styles.listaJugadores}>
-                            {/* TODO: Arreglar context lost*/}
-                            {/*{this.state.jugadoresConectados.map((jugador, index) => (*/}
-                            {/*    // <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]} animationName="idle"/>*/}
-                            {/*    // <IconoJugador key={jugador.id} nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[index]}/>*/}
-                            {/*))}*/}
-
-                        </div>
+                        <Canvas className={styles.listaJugadores}>
+                            <ambientLight intensity={0.5}/>
+                            <directionalLight position={[10, 10, 10]} intensity={1}/>
+                            <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20}/>
+                            {this.state.jugadoresConectados.map((jugador, index) => (
+                                <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]}
+                                               animationName="idle" position={[0, index * 10, 0]}/>
+                            ))}
+                        </Canvas>
                         <div className={styles.sombraJugadores}></div>
                     </section>
                 </section>
@@ -169,72 +172,72 @@ class JokeBattle extends Juego {
 
 
     renderJugando() {
-    const handleTimeout = () => {
-        console.log('SIN TIEMPO');
-        if (this.isPlayerHost()) {
-            socket.emit('loadNextVotingData', this.GameCode);
-            // Reiniciar el contador y las animaciones
+        const handleTimeout = () => {
+            console.log('SIN TIEMPO');
+            if (this.isPlayerHost()) {
+                socket.emit('loadNextVotingData', this.GameCode);
+                // Reiniciar el contador y las animaciones
+                this.setState({
+                    senalMostrarRespuestas: false,
+                    senalMostrarPropietarios: false,
+                    respuestaSeleccionada: false
+                });
+                // Volver a cargar los datos de votación
+                mostrarSiguientesRespuestas();
+            }
+        };
+
+        const mostrarSiguientesRespuestas = () => {
+            setTimeout(() => {
+                this.setState({senalMostrarRespuestas: true})
+            }, 2000);
+        };
+
+        // Cargar los datos de votación inicial
+        socket.on('getVotingData', (data) => {
             this.setState({
-                senalMostrarRespuestas: false,
-                senalMostrarPropietarios: false,
-                respuestaSeleccionada: false
+                prompt: data.prompt,
+                respuestaPrompt1: data.answer1,
+                propietarioRespuesta1: data.player1,
+                respuestaPrompt2: data.answer2,
+                propietarioRespuesta2: data.player2 // Asumiendo que tienes dos respuestas
             });
-            // Volver a cargar los datos de votación
-            mostrarSiguientesRespuestas();
-        }
-    };
-
-    const mostrarSiguientesRespuestas = () => {
-        setTimeout(() => {
-            this.setState({senalMostrarRespuestas: true})
-        }, 2000);
-    };
-
-    // Cargar los datos de votación inicial
-    socket.on('getVotingData', (data) => {
-        this.setState({
-            prompt: data.prompt,
-            respuestaPrompt1: data.answer1,
-            propietarioRespuesta1: data.player1,
-            respuestaPrompt2: data.answer2,
-            propietarioRespuesta2: data.player2 // Asumiendo que tienes dos respuestas
         });
-    });
 
-    // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
-    mostrarSiguientesRespuestas();
+        // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
+        mostrarSiguientesRespuestas();
 
-    const handleClickRespuesta = (propietario) => {
-        if (!this.state.respuestaSeleccionada) {
-            socket.emit('playerVote', this.GameCode, propietario);
-            this.setState({respuestaSeleccionada: true});
-        }
-    };
+        const handleClickRespuesta = (propietario) => {
+            if (!this.state.respuestaSeleccionada) {
+                socket.emit('playerVote', this.GameCode, propietario);
+                this.setState({respuestaSeleccionada: true});
+            }
+        };
 
-    return (
-        <section className={styles.round}>
-            <header className={styles.promptHeader}>
-                <Contador tiempoInicial={10} onTimeout={handleTimeout} />
-                <Prompt texto={this.state.prompt} />
-                <IconoLobby gameCode={this.GameCode} />
-            </header>
-            <div className={styles.promptMessages}>
-                <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
-                                 propietario={this.state.propietarioRespuesta1}
-                                 senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                 senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                 onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)} />
-                <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
-                                 propietario={this.state.propietarioRespuesta2}
-                                 senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                 senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                 onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)} />
-            </div>
-            <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
-            <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
-        </section>
-    );
-}
+        return (
+            <section className={styles.round}>
+                <header className={styles.promptHeader}>
+                    <Contador tiempoInicial={10} onTimeout={handleTimeout}/>
+                    <Prompt texto={this.state.prompt}/>
+                    <IconoLobby gameCode={this.GameCode}/>
+                </header>
+                <div className={styles.promptMessages}>
+                    <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
+                                     propietario={this.state.propietarioRespuesta1}
+                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)}/>
+                    <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
+                                     propietario={this.state.propietarioRespuesta2}
+                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)}/>
+                </div>
+                <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
+                <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
+            </section>
+        );
+    }
 
     renderFin() {
 

@@ -1,53 +1,41 @@
 import React, { useEffect, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
-import { useGLTF, Stage, useAnimations, OrthographicCamera } from "@react-three/drei";
+import { useGLTF, Stage, useAnimations } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 
-const ModeloJugador = ({ modeloPath, animationName }) => {
-  function restoreContext() {
-    const canvas = document.querySelector('canvas');
-    canvas.addEventListener(
-      'webglcontextlost',
-      function (event) {
-        event.preventDefault();
-        setTimeout(function () {
-          canvas.getContext('webgl', {preserveDrawingBuffer: true});
-        }, 1);
-      },
-      false
-    );
-  }
-
-  useEffect(() => {
-    restoreContext();
-  }, []);
-
-  return (
-    <Canvas style={{ width: '200px', height: '200px' }} key={modeloPath + '_' + animationName + '_canvas_' + Math.random()}>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 10]} intensity={1} />
-      <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={0} />
-
-      <PlayerMesh modeloPath={modeloPath} animationName={animationName} />
-    </Canvas>
-  );
-};
-
-const PlayerMesh = ({ modeloPath, animationName }) => {
+const ModeloJugador = ({ modeloPath, animationName, position }) => {
   const { scene, animations } = useGLTF(modeloPath);
   const { actions } = useAnimations(animations, scene);
   const meshRef = useRef();
 
-  // Ejecutar la animación al cargar el componente
   useEffect(() => {
+    function restoreContext() {
+      const canvas = document.querySelector('canvas');
+      canvas.addEventListener(
+        'webglcontextlost',
+        function (event) {
+          event.preventDefault();
+          setTimeout(function () {
+            canvas.getContext('webgl', {preserveDrawingBuffer: true});
+          }, 1);
+        },
+        false
+      );
+    }
+    restoreContext();
+
     const action = actions[animationName];
     if (action) {
       action.play();
     }
-  }, [actions, animationName]);
+  }, [animationName, actions]);
+
+  useFrame(() => {
+    // This is where you can update animations or perform other per-frame logic
+  });
 
   return (
-    <Stage environment={null} key={modeloPath + '_' + animationName + '_stage_' + Math.random()}>
-      <primitive object={scene} scale={0.2} ref={meshRef} key={modeloPath + '_' + animationName + '_mesh_' + Math.random()} />
+    <Stage environment={null}>
+      <primitive object={scene} scale={[0.2, 0.2, 0.2]} position={position} ref={meshRef} />
     </Stage>
   );
 };
