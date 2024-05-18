@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import styles from '../css/unirseJuego.module.css';
 import { useNavigate, useParams } from "react-router-dom";
 import Index from "./MainMenu";
-import { socket } from "../scripts/cliente";
 
 const GamePage = () => {
   const { gameLobbyCode } = useParams();
