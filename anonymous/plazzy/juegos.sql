@@ -7,5 +7,5 @@ create table juegos
     max_jugadores int default 8 not null
 );
 
-INSERT INTO plazzy.juegos (id_juego, nombre, min_jugadores, max_jugadores) VALUES (0, 'QUIPLASH', 3, 8);
+INSERT INTO plazzy.juegos (id_juego, nombre, min_jugadores, max_jugadores) VALUES (0, 'JOKEBATTLE', 3, 8);
 INSERT INTO plazzy.juegos (id_juego, nombre, min_jugadores, max_jugadores) VALUES (1, 'CHATBOT', 4, 8);
