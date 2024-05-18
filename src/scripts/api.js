@@ -86,6 +86,48 @@ router.post('/send-answer', (req, res) => {
     });
 });
 
+router.post('/lobby/store', (req, res) => {
+    const {lobbyId, answers} = req.body;
+    db.query('SELECT * FROM salas  WHERE id_sala = ?', [lobbyId], (error) => {
+        if (error) {
+            console.error(error);
+            res.status(500).json({error: 'Error al obtener el id de la sala'});
+            return;
+        }
+
+        db.query('INSERT INTO respuestas (id_prompt, texto, id_jugador, ronda, id_sala) VALUES (?, ?, ?, ?, ?)', [answers.promptId, answers.value, answers.playerId, answers.ronda, lobbyId], (error) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({error: 'Error al registrar la respuesta'});
+                return;
+            }
+            res.sendStatus(200);
+        });
+
+    })
+});
+
+router.post('players/create', (req, res) => {
+    const {lobbyId, id, name, score} = req.body;
+
+    db.query('SELECT * FROM salas  WHERE id_sala = ?', [lobbyId], (error) => {
+        if (error) {
+            console.error(error);
+            res.status(500).json({error: 'Error al obtener el id de la sala'});
+            return;
+        }
+
+        db.query('INSERT INTO jugadores (id_jugador, id_sala, nombre_jugador, puntuacion) VALUES (?, ?, ?, ?)', [id, lobbyId, name, score], (error) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({error: 'Error al registrar el jugador'});
+                return;
+            }
+            res.sendStatus(200);
+        });
+    })
+});
+
 // Este bloque servirá para poder crear respuestas por defecto personalizadas
 router.post('/safety-answers/create', (req, res) => {
     const {answerId, promptId, text, language} = req.body;
@@ -124,8 +166,8 @@ router.post('/prompts/create', (req, res) => {
 });
 
 router.post('/lobby/create', (req, res) => {
-    const {lobbyId, lobbyCode, gameId} = req.body;
-    db.query('INSERT INTO salas (id_sala, id_modoJuego, codigo_sala) VALUES (?)', [lobbyId, gameId, lobbyCode], (error) => {
+    const {id, code, game} = req.body;
+    db.query('INSERT INTO salas (id_sala, id_modoJuego, codigo_sala) VALUES (?, ?, ?)', [id, game, code], (error) => {
         if (error) {
             console.error(error);
             res.status(500).json({error: 'Error al registrar la sala'});

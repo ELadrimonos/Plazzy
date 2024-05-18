@@ -39,7 +39,7 @@ io.on('connection', (socket) => {
         if (lobby && lobby.players.length < 8) {
             socket.join(lobbyCode);
 
-            let player = {id: socket.id, name: nombreJug};
+            let player = {id: socket.id, name: nombreJug, score: 0};
             lobby.players.push(player);
             socket.emit('joinGame', lobby);
             socket.emit('shareGameMode', lobby.game);
@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
     socket.on('create', (nombreHost, juego) => {
         let idJuego;
         switch (juego) {
-            case 'quiplash':
+            case 'jokebattle':
                 idJuego = 0;
                 break;
             case 'chatbot':
@@ -127,44 +127,48 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('startGame', (lobbyCode) => {
+    socket.on('startGame', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            await crearLobbyBBDD(lobby);
+            lobby.players.forEach((p) => {
+                crearJugadoresBBDD(lobby.id, p);
+            })
+            await generatePromptsForPlayers(lobbyCode);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
-            generatePromptsForPlayers(lobbyCode);
         }
 
     });
 
-    socket.on('newRound', (lobbyCode) => {
+    socket.on('newRound', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            await generatePromptsForPlayers(lobbyCode);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
-            generatePromptsForPlayers(lobbyCode);
 
         }
     });
 
-socket.on('playerRanOutOfTimeToAnswer', (lobbyCode, playerID) => {
-    const lobby = getLobby(lobbyCode);
-    if (lobby) {
-        const playerData = lobby.data.find((d) => d.playerId === playerID);
-        if (playerData) {
-            const totalPlayerAnswers = playerData.answers.length;
-            // Calcular cuántas respuestas de seguridad se necesitan para completar las dos respuestas requeridas
-            const remainingSafetyAnswers = 2 - totalPlayerAnswers;
-            // Si aún faltan respuestas de seguridad por agregar
-            if (remainingSafetyAnswers > 0) {
-                // Llamar a playerUseSafetyAnswer para cada respuesta de seguridad necesaria
-                for (let i = 0; i < remainingSafetyAnswers; i++) {
-                    playerUseSafetyAnswer(lobbyCode, playerID);
+    socket.on('playerRanOutOfTimeToAnswer', async (lobbyCode, playerID) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            const playerData = lobby.data.find((d) => d.playerId === playerID);
+            if (playerData) {
+                const totalPlayerAnswers = playerData.answers.length;
+                // Calcular cuántas respuestas de seguridad se necesitan para completar las dos respuestas requeridas
+                const remainingSafetyAnswers = 2 - totalPlayerAnswers;
+                // Si aún faltan respuestas de seguridad por agregar
+                if (remainingSafetyAnswers > 0) {
+                    // Llamar a playerUseSafetyAnswer para cada respuesta de seguridad necesaria
+                    for (let i = 0; i < remainingSafetyAnswers; i++) {
+                        await playerUseSafetyAnswer(lobbyCode, playerID);
+                    }
                 }
+            } else {
+                console.error('No se encontraron datos del jugador con ID:', playerID);
             }
-        } else {
-            console.error('No se encontraron datos del jugador con ID:', playerID);
         }
-    }
-});
+    });
 
 
     socket.on('loadNextVotingData', (lobbyCode) => {
@@ -175,12 +179,12 @@ socket.on('playerRanOutOfTimeToAnswer', (lobbyCode, playerID) => {
         }
     });
 
-    socket.on('playerUseSafetyAnswer', (lobbyCode, playerID) => {
-        playerUseSafetyAnswer(lobbyCode, playerID);
+    socket.on('playerUseSafetyAnswer', async (lobbyCode, playerID) => {
+        await playerUseSafetyAnswer(lobbyCode, playerID);
         comprobarNumeroDeRespuestas(lobbyCode);
     });
 
-    socket.on('playerVote', (lobbyCode, playerName) => {
+    socket.on('playerVote', (lobbyCode, playerName, answer) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             const player = lobby.players.find((p) => p.name === playerName);
@@ -190,23 +194,23 @@ socket.on('playerRanOutOfTimeToAnswer', (lobbyCode, playerID) => {
         }
     });
 
-socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
-    const lobby = getLobby(lobbyCode);
-    if (lobby) {
-        const playerData = lobby.data.find((data) => data.playerId === playerID);
-        if (playerData) {
-            const playerPrompts = playerData.prompts;
-            const textPrompts = [];
-            playerPrompts.forEach(objeto => {
-                if (objeto) { // Verificar si el objeto no es undefined
-                    console.log('OBJETO:', objeto);
-                    textPrompts.push(objeto.text); // Acceder a la propiedad text del objeto
-                }
-            });
-            socket.emit('getPrompts', textPrompts);
+    socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            const playerData = lobby.data.find((data) => data.playerId === playerID);
+            if (playerData) {
+                const playerPrompts = playerData.prompts;
+                const textPrompts = [];
+                playerPrompts.forEach(objeto => {
+                    if (objeto) { // Verificar si el objeto no es undefined
+                        console.log('OBJETO:', objeto);
+                        textPrompts.push(objeto.text); // Acceder a la propiedad text del objeto
+                    }
+                });
+                socket.emit('getPrompts', textPrompts);
+            }
         }
-    }
-});
+    });
 
 
     socket.on('startAnswering', (lobbyCode) => {
@@ -329,6 +333,7 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
                         while (dataArray.prompts.includes(promptsData[selectedPrompts[randIndex]])) {
                             randIndex = randInt(0, 7);
                         }
+                        console.log('INDEX: ', randIndex, ' PROMPT: ', promptsData[selectedPrompts[randIndex]]);
                         dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
                         selectedPrompts.splice(randIndex, 1);
                     }
@@ -356,6 +361,39 @@ async function getPromptID(prompt, language = 'ES') {
     } else {
         console.error(`Error al obtener las prompts en el idioma ${language}: ${response.status} - ${response.statusText}`);
         return -1;
+    }
+}
+
+async function crearLobbyBBDD(lobby) {
+    const url = `http://localhost:8080/api/lobby/create`;
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(lobby)
+    };
+    const response = await fetch(url, requestOptions);
+    if (!response.ok) {
+        console.error(`Error al registrar sala en la base de datos: ${response.status} - ${response.statusText}`);
+    }
+}
+
+async function crearJugadoresBBDD(lobbyId, player) {
+    const url = `http://localhost:8080/api/players/create`;
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            ...player,
+            lobbyId: lobbyId
+        })
+    };
+    const response = await fetch(url, requestOptions);
+    if (!response.ok) {
+        console.error(`Error al registrar sala en la base de datos: ${response.status} - ${response.statusText}`);
     }
 }
 

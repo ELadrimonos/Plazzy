@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import Juego from './Juego';
 import {CodigoPartida, Contador, IconoJugador, IconoLobby, InputRespuestaLimitado} from "../ComponentesComunes";
-import styles from '../../css/Quiplash.module.css';
+import styles from '../../css/JokeBattle.module.css';
 import {useSpring, animated} from '@react-spring/web'
 import {socket} from "../../scripts/cliente";
-import logo0 from '../../assets/img/player_icons/Quiplash/0.webp';
-import logo1 from '../../assets/img/player_icons/Quiplash/1.webp';
-import logo2 from '../../assets/img/player_icons/Quiplash/2.webp';
-import logo3 from '../../assets/img/player_icons/Quiplash/3.webp';
-import logo4 from '../../assets/img/player_icons/Quiplash/4.webp';
-import logo5 from '../../assets/img/player_icons/Quiplash/5.webp';
-import logo6 from '../../assets/img/player_icons/Quiplash/6.webp';
-import logo7 from '../../assets/img/player_icons/Quiplash/7.webp';
+import logo0 from '../../assets/img/player_icons/JokeBattle/0.webp';
+import logo1 from '../../assets/img/player_icons/JokeBattle/1.webp';
+import logo2 from '../../assets/img/player_icons/JokeBattle/2.webp';
+import logo3 from '../../assets/img/player_icons/JokeBattle/3.webp';
+import logo4 from '../../assets/img/player_icons/JokeBattle/4.webp';
+import logo5 from '../../assets/img/player_icons/JokeBattle/5.webp';
+import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
+import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 
-class Quiplash extends Juego {
+class JokeBattle extends Juego {
     constructor(props) {
         super(props);
         this.state = {
@@ -86,7 +86,7 @@ class Quiplash extends Juego {
             <>
                 <section className={styles.lobby}>
                     <header>
-                        <h1>Quiplash</h1>
+                        <h1>JokeBattle</h1>
                         <h2>Código de sala</h2>
                         <CodigoPartida gameCode={this.GameCode}/>
                         {/* Hacer un botón para iniciar partida por el Host que arrancará el juego a todos los clientes*/}
@@ -169,59 +169,72 @@ class Quiplash extends Juego {
 
 
     renderJugando() {
-        const handleTimeout = () => {
-            console.log('SIN TIEMPO');
-            if (this.isPlayerHost()) {
-                socket.emit('loadNextVotingData', this.GameCode);
-            }
-        };
-
-        const mostrarSiguientesRespuestas = () => {
-            setTimeout(() => {
-                this.setState({senalMostrarRespuestas: true})
-            }, 2000);
-
-        }
-
-        socket.on('getVotingData', (data) => {
+    const handleTimeout = () => {
+        console.log('SIN TIEMPO');
+        if (this.isPlayerHost()) {
+            socket.emit('loadNextVotingData', this.GameCode);
+            // Reiniciar el contador y las animaciones
             this.setState({
-                prompt: data.prompt, respuestaPrompt1: data.answer1, propietarioRespuesta1: data.player1,
+                senalMostrarRespuestas: false,
+                senalMostrarPropietarios: false,
+                respuestaSeleccionada: false
             });
+            // Volver a cargar los datos de votación
+            mostrarSiguientesRespuestas();
+        }
+    };
+
+    const mostrarSiguientesRespuestas = () => {
+        setTimeout(() => {
+            this.setState({senalMostrarRespuestas: true})
+        }, 2000);
+    };
+
+    // Cargar los datos de votación inicial
+    socket.on('getVotingData', (data) => {
+        this.setState({
+            prompt: data.prompt,
+            respuestaPrompt1: data.answer1,
+            propietarioRespuesta1: data.player1,
+            respuestaPrompt2: data.answer2,
+            propietarioRespuesta2: data.player2 // Asumiendo que tienes dos respuestas
         });
+    });
 
-        mostrarSiguientesRespuestas();
+    // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
+    mostrarSiguientesRespuestas();
 
-        const handleClickRespuesta = (propietario) => {
-            if (!this.state.respuestaSeleccionada) {
-                socket.emit('playerVote', this.GameCode, propietario);
-                this.setState({respuestaSeleccionada: true});
-            }
-        };
+    const handleClickRespuesta = (propietario) => {
+        if (!this.state.respuestaSeleccionada) {
+            socket.emit('playerVote', this.GameCode, propietario);
+            this.setState({respuestaSeleccionada: true});
+        }
+    };
 
-        return (
-            <section className={styles.round}>
-                <header className={styles.promptHeader}>
-                    <Contador tiempoInicial={10}/>
-                    <Prompt texto={this.state.prompt}/>
-                    <IconoLobby gameCode={this.GameCode}/>
-                </header>
-                <div className={styles.promptMessages}>
-                    <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
-                                     propietario={this.state.propietarioRespuesta1}
-                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)}/>
-                    <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
-                                     propietario={this.state.propietarioRespuesta2}
-                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)}/>
-                </div>
-                <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
-                <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
-            </section>
-        );
-    }
+    return (
+        <section className={styles.round}>
+            <header className={styles.promptHeader}>
+                <Contador tiempoInicial={10} onTimeout={handleTimeout} />
+                <Prompt texto={this.state.prompt} />
+                <IconoLobby gameCode={this.GameCode} />
+            </header>
+            <div className={styles.promptMessages}>
+                <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
+                                 propietario={this.state.propietarioRespuesta1}
+                                 senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                 senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                 onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)} />
+                <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
+                                 propietario={this.state.propietarioRespuesta2}
+                                 senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                 senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                 onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)} />
+            </div>
+            <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
+            <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
+        </section>
+    );
+}
 
     renderFin() {
 
@@ -348,4 +361,4 @@ function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostra
 }
 
 
-export default Quiplash;
+export default JokeBattle;
