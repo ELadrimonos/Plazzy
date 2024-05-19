@@ -259,7 +259,12 @@ class JokeBattle extends Juego {
                     this.state.ganador &&
                     <>
                         <h2>GANADOR: {this.state.ganador.name}</h2>
-                        <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
+                        <Canvas>
+                            <ambientLight intensity={0.5}/>
+                            <directionalLight position={[10, 10, 10]} intensity={1}/>
+                            <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20}/>
+                            <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
+                        </Canvas>
                     </>
                 }
 

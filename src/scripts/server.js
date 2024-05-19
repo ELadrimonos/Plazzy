@@ -399,6 +399,7 @@ async function crearJugadoresBBDD(lobbyId, player) {
 
 function clearLobbyData(lobby) {
     //TODO: Guardar en la base de datos
+    // Usando la ronda actual y llamarlo al cambio de ronda
     lobby.data = [];
 }
 

@@ -176,7 +176,6 @@ function MenuPrincipal({onCreate, onJoin}) {
             <main>
                 {!mostrarCrearPartida && <MenuUnirse menuCrear={mostrarCrearPartidaHandler} unirsePartida={onJoin}/>}
                 {mostrarCrearPartida && <MenuCrear volverAlMenu={volverAlMenuHandler} crearPartida={onCreate}/>}
-                <Contador tiempoInicial={3} ></Contador>
             </main>
         </>
     );
@@ -206,8 +205,6 @@ function Index({gameCodeRef = null, playerRef = null}) {
     const navigate = useNavigate();
     const [isInGameRoute, setIsInGameRoute] = useState(false);
 
-    //TODO: Evitar la conexion en intervalo mediante codigo QR
-
     useEffect(() => {
         // Verifica si la ruta actual incluye "/game/"
         setIsInGameRoute(location.pathname.startsWith('/game/'));
@@ -224,6 +221,9 @@ function Index({gameCodeRef = null, playerRef = null}) {
         setPlayersInLobby([]);
         setGame(null);
         setGameCode(null);
+        if (isInGameRoute) {
+            navigate('/');
+        }
     }
 
     socket.on('closeLobby', returnToLobby);

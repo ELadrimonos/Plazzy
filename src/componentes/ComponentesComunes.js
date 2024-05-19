@@ -11,7 +11,7 @@ export function IconoJugador({nombreClase, nombre, rutaImagen, style}) {
 export function IconoLobby({gameCode}){
     return (
         <div>
-            <h3>plazzy.tv</h3>
+            <h3>plazzy.es</h3>
             <CodigoPartida gameCode={gameCode}/>
         </div>
     );
