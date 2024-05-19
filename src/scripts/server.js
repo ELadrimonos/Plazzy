@@ -203,10 +203,10 @@ io.on('connection', (socket) => {
                 const textPrompts = [];
                 playerPrompts.forEach(objeto => {
                     if (objeto) { // Verificar si el objeto no es undefined
-                        console.log('OBJETO:', objeto);
                         textPrompts.push(objeto.text); // Acceder a la propiedad text del objeto
                     }
                 });
+                console.log('Player prompts (on getPlayerPrompts):', textPrompts);
                 socket.emit('getPrompts', textPrompts);
             }
         }
@@ -238,6 +238,7 @@ io.on('connection', (socket) => {
     socket.on('startEndGame', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            clearLobbyData(lobby);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
             const ganador = devolverJugadoresPorPuntuacion(lobby.players)[0];
             const indexGanador = lobby.players.findIndex((p) => p.id === ganador.id);
@@ -333,10 +334,10 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
                         while (dataArray.prompts.includes(promptsData[selectedPrompts[randIndex]])) {
                             randIndex = randInt(0, 7);
                         }
-                        console.log('INDEX: ', randIndex, ' PROMPT: ', promptsData[selectedPrompts[randIndex]]);
                         dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
                         selectedPrompts.splice(randIndex, 1);
                     }
+                    console.log('DATA ARRAY (generatePromptsForPlayers): ', dataArray);
                     lobby.data.push(dataArray);
 
                 });
@@ -408,12 +409,13 @@ function devolverJugadoresPorPuntuacion(jugadores) {
 }
 
 
+//TODO Arreglar esta función
 async function getRandomSafetyAnswer(id, language = 'ES') {
     const url = `http://localhost:8080/api/safety-answers/${id}/${language}`;
     const response = await fetch(url);
     if (response.ok) {
         const safetyAnswers = await response.json();
-        const randomAnswer = Math.floor(Math.random() * 2).toString();
+        const randomAnswer = Math.floor(Math.random() * 2); // Mantener como número
         const randomText = safetyAnswers.find(object => object.id_answer === randomAnswer)?.text;
         return randomText || "Respuesta aleatoria no encontrada para el ID dado";
     } else {
@@ -422,22 +424,21 @@ async function getRandomSafetyAnswer(id, language = 'ES') {
 }
 
 
+
 async function playerUseSafetyAnswer(lobbyCode, playerID) {
     const lobby = getLobby(lobbyCode);
     if (lobby) {
         const playerData = lobby.data.find((d) => d.playerId === playerID);
         if (playerData) {
-            //TODO Arreglar esto
             const totalPlayerAnswers = playerData.answers.length;
             const playerPrompt = playerData.prompts[totalPlayerAnswers];
-            const promptID = await getPromptID(playerPrompt); // Esperar la resolución de la promesa
+            const promptID = await getPromptID(playerPrompt.text);
             if (promptID === -1) {
                 console.error('Prompt no encontrado:', playerPrompt);
                 return;
             }
             const safetyAnswer = await getRandomSafetyAnswer(promptID); // Esperar la resolución de la promesa
             playerData.answers.push(safetyAnswer);
-            console.log(lobby.data);
         } else {
             console.error('No se encontraron datos del jugador con ID:', playerID);
         }
@@ -453,7 +454,6 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
     if (count === lobby.data.length) {
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
     }
-    console.log('CONTADOR DE JUGADORES LISTOS: ', count)
 }
 
 function getPromptsUnicos(lobby) {
@@ -475,7 +475,7 @@ function getAnswersDePrompts(lobby, prompt) {
             answersDePrompts.push(answer);
         }
         if (answersDePrompts.length > 2) {
-            console.error('EXISTEN MÁS DE 2 RESPUESTAS DE UN MISMO PROMPT: ' + prompt + '\n LOBBY: ' + lobby);
+            console.warn('EXISTEN MÁS DE 2 RESPUESTAS DE UN MISMO PROMPT: ' + prompt + '\n LOBBY: ' + lobby);
         }
     });
     return answersDePrompts;
