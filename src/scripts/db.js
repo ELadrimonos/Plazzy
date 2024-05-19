@@ -1,10 +1,12 @@
 const mysql = require('mysql');
+require('dotenv').config(); // Cargar las variables de entorno desde .env
 
 const db = mysql.createConnection({
-    host: '192.168.18.33',
-    user: 'root',
-    password: 'root',
-    database: 'plazzy'
+    host: process.env.BBDD_IP,
+    user: process.env.BBDD_USER,
+    password: process.env.BBDD_PSWD,
+    database: 'plazzy',
+    port: process.env.BBDD_PORT
 });
 
 db.connect((err) => {
