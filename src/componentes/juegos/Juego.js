@@ -44,12 +44,10 @@ class Juego extends Component {
   }
 
   startNewRound() {
-    socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
     socket.emit('newRound', this.GameCode, this.maxRounds);
   }
 
   startAnswering() {
-    socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
     socket.emit('startAnswering', this.GameCode);
   }
 

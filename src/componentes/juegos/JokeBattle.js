@@ -118,8 +118,6 @@ class JokeBattle extends Juego {
 
     renderRespondiendo() {
 
-        const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
-
         const handleSubmit = () => {
             if (this.state.promptIndex < this.state.prompts.length - 1)
                 this.setState({promptIndex: this.state.promptIndex + 1});
@@ -234,8 +232,21 @@ class JokeBattle extends Juego {
                                      onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)}/>
                 </div>
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
+                <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
                 <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
             </section>
+        );
+    }
+
+    renderPuntuacion() {
+
+
+
+
+        return (
+            <div>
+                <h1>Placeholder puntuación</h1>
+            </div>
         );
     }
 

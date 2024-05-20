@@ -107,7 +107,7 @@ router.post('/lobby/store', (req, res) => {
     })
 });
 
-router.post('players/create', (req, res) => {
+router.post('/players/create', (req, res) => {
     const {lobbyId, id, name, score} = req.body;
 
     db.query('SELECT * FROM salas  WHERE id_sala = ?', [lobbyId], (error) => {
@@ -166,14 +166,14 @@ router.post('/prompts/create', (req, res) => {
 });
 
 router.post('/lobby/create', (req, res) => {
-    const {id, code, game} = req.body;
+    const { id, code, game } = req.body;
     db.query('INSERT INTO salas (id_sala, id_modoJuego, codigo_sala) VALUES (?, ?, ?)', [id, game, code], (error) => {
         if (error) {
-            console.error(error);
-            res.status(500).json({error: 'Error al registrar la sala'});
+            console.error('Error al registrar la sala:', error);
+            res.status(500).json({ error: 'Error al registrar la sala' });
             return;
         }
-        res.sendStatus(200);
+        res.status(200).json({ message: 'Sala creada exitosamente' });
     });
 });
 

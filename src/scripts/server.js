@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
             socket.emit('joinGame', lobby);
             socket.emit('shareGameMode', lobby.game);
             socket.emit('sharePlayer', player);
-            socket.emit('updatePlayers', lobby.players);
+            // socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
@@ -69,7 +69,8 @@ io.on('connection', (socket) => {
             game: idJuego,
             data: [],
             round: 1,
-            promptsOrder: []
+            promptsOrder: [],
+            isCreatedInDB: false
         };
         lobbies.push(newLobby);
 
@@ -130,8 +131,11 @@ io.on('connection', (socket) => {
     socket.on('startGame', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            await crearLobbyBBDD(lobby);
-            lobby.players.forEach((p) => {
+            if (!lobby.isCreatedInDB) {
+                await crearLobbyBBDD(lobby);
+                lobby.isCreatedInDB = true;
+            }
+            await lobby.players.forEach((p) => {
                 crearJugadoresBBDD(lobby.id, p);
             })
             await generatePromptsForPlayers(lobbyCode);
@@ -184,13 +188,10 @@ io.on('connection', (socket) => {
         comprobarNumeroDeRespuestas(lobbyCode);
     });
 
-    socket.on('playerVote', (lobbyCode, playerName, answer) => {
+    socket.on('playerVote', (lobbyCode, playerName) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            const player = lobby.players.find((p) => p.name === playerName);
-            if (player) {
-                player.score += 100 * lobby.round;
-            }
+            addScoreToPlayer(lobby, playerName);
         }
     });
 
@@ -199,15 +200,9 @@ io.on('connection', (socket) => {
         if (lobby) {
             const playerData = lobby.data.find((data) => data.playerId === playerID);
             if (playerData) {
-                const playerPrompts = playerData.prompts;
-                const textPrompts = [];
-                playerPrompts.forEach(objeto => {
-                    if (objeto) { // Verificar si el objeto no es undefined
-                        textPrompts.push(objeto.text); // Acceder a la propiedad text del objeto
-                    }
-                });
-                console.log('Player prompts (on getPlayerPrompts):', textPrompts);
-                socket.emit('getPrompts', textPrompts);
+                const playerPrompts = playerData.prompts.filter(objeto => objeto !== undefined).map(objeto => objeto.text);
+                console.log('Player prompts (on getPlayerPrompts) (Jugador ' + playerID + '):', playerPrompts);
+                socket.emit('getPrompts', playerPrompts);
             }
         }
     });
@@ -231,7 +226,10 @@ io.on('connection', (socket) => {
     socket.on('startResults', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            addScoreToPlayer(lobby, lobby.players[0].name);
+            io.to(lobbyCode).emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
+            clearLobbyData(lobby);
         }
     });
 
@@ -251,7 +249,7 @@ io.on('connection', (socket) => {
     socket.on('startLobby', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            //TODO: Guardar todos los datos en la BBDD y cambiar id de este lobby
+            //TODO: Guardar todos los datos en la BBDD
             lobby.id = generateUUID();
             lobby.round = 1;
             clearLobbyData(lobby);
@@ -316,9 +314,9 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
                 const lobbySize = lobby.players.length;
                 let selectedPrompts = [];
                 for (let i = 0; i < lobbySize; i++) {
-                    let randIndex = randInt(0, 7);
+                    let randIndex = randInt(0, promptsData.length - 1);
                     while (selectedPrompts.includes(randIndex)) {
-                        randIndex = randInt(0, 7);
+                        randIndex = randInt(0, promptsData.length - 1);
                     }
                     selectedPrompts.push(randIndex);
                 }
@@ -326,20 +324,23 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
                 selectedPrompts = [...selectedPrompts, ...selectedPrompts];
 
                 lobby.players.forEach(playerRef => {
-
                     const dataArray = {playerId: playerRef.id, prompts: [], answers: []};
 
                     for (let i = 0; i < 2; i++) {
                         let randIndex = randInt(0, selectedPrompts.length - 1);
-                        while (dataArray.prompts.includes(promptsData[selectedPrompts[randIndex]])) {
-                            randIndex = randInt(0, 7);
+                        let prompt = promptsData[selectedPrompts[randIndex]];
+
+                        while (!prompt || dataArray.prompts.includes(prompt)) {
+                            randIndex = randInt(0, selectedPrompts.length - 1);
+                            prompt = promptsData[selectedPrompts[randIndex]];
                         }
-                        dataArray.prompts.push(promptsData[selectedPrompts[randIndex]]);
-                        selectedPrompts.splice(randIndex, 1);
+
+                        dataArray.prompts.push(prompt);
+                        selectedPrompts.splice(randIndex, 1);  // Remove the selected index
                     }
+
                     console.log('DATA ARRAY (generatePromptsForPlayers): ', dataArray);
                     lobby.data.push(dataArray);
-
                 });
             } else {
                 console.error(`Error al obtener las prompts en el idioma ${language}: ${response.status} - ${response.statusText}`);
@@ -351,6 +352,7 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
         console.error('No se encontró la sala:', lobbyCode);
     }
 }
+
 
 async function getPromptID(prompt, language = 'ES') {
 
@@ -374,9 +376,14 @@ async function crearLobbyBBDD(lobby) {
         },
         body: JSON.stringify(lobby)
     };
-    const response = await fetch(url, requestOptions);
-    if (!response.ok) {
-        console.error(`Error al registrar sala en la base de datos: ${response.status} - ${response.statusText}`);
+    try {
+        const response = await fetch(url, requestOptions);
+        if (response.ok) {
+            const responseData = await response.json();
+            console.log('Sala registrada correctamente:', responseData);
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
     }
 }
 
@@ -394,7 +401,7 @@ async function crearJugadoresBBDD(lobbyId, player) {
     };
     const response = await fetch(url, requestOptions);
     if (!response.ok) {
-        console.error(`Error al registrar sala en la base de datos: ${response.status} - ${response.statusText}`);
+        console.error(`Error al registrar el jugador en la base de datos: ${response.status} - ${response.statusText}`);
     }
 }
 
@@ -422,7 +429,6 @@ async function getRandomSafetyAnswer(id, language = 'ES') {
         return "Error al obtener la respuesta de seguridad: " + response.status + " - " + response.statusText;
     }
 }
-
 
 
 async function playerUseSafetyAnswer(lobbyCode, playerID) {
@@ -491,4 +497,12 @@ function associateAnswersToUniquePrompt(lobby) {
         data.answers = answersDePrompts;
     });
     console.log('Datos individualizados: ', lobby.data);
+}
+
+function addScoreToPlayer(lobby, playerName) {
+    const player = lobby.players.find((d) => d.name === playerName);
+    if (player) {
+        player.score += 100 * lobby.round;
+        console.log('JUGADORES CON PUNTOS ACTUALIZADOS (addScoreToPlayer): ', lobby.players);
+    }
 }

@@ -193,9 +193,9 @@ function Index({gameCodeRef = null, playerRef = null}) {
     };
 
     socket.on('disconnectPlayer', (playerId, players) => {
-        if (player === players[playerId]){
+        if (player === players[playerId]) {
             returnToLobby();
-            if (isInGameRoute){
+            if (isInGameRoute) {
                 navigate('/');
             }
         }
@@ -214,7 +214,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
         if (gameCodeRef && playerRef) {
             handleJoin(playerRef, gameCodeRef);
         }
-    }, [gameCodeRef,playerRef]);
+    }, [gameCodeRef, playerRef]);
 
     function returnToLobby() {
         setPlayer(null);
@@ -254,14 +254,14 @@ function Index({gameCodeRef = null, playerRef = null}) {
     });
 
     // Si refresca la pagina se desconecta
-    window.onbeforeunload = function (){
-        if (player){
+    window.onbeforeunload = function () {
+        if (player) {
             socket.emit('disconnectPlayer', player.id);
-            if (isInGameRoute){
+            if (isInGameRoute) {
                 navigate('/');
             }
         }
-       return null;
+        return null;
     }
 
     const handleJoin = (userName, gameCode) => {
