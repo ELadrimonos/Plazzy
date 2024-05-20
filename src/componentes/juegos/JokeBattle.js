@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Juego from './Juego';
 import {CodigoPartida, Contador, IconoJugador, IconoLobby, InputRespuestaLimitado} from "../ComponentesComunes";
 import styles from '../../css/JokeBattle.module.css';
-import {useSpring, animated} from '@react-spring/web'
+import {useSpring, animated, useTrail, a} from '@react-spring/web'
 import {socket} from "../../scripts/cliente";
 import logo0 from '../../assets/img/player_icons/JokeBattle/0.webp';
 import logo1 from '../../assets/img/player_icons/JokeBattle/1.webp';
@@ -15,6 +15,7 @@ import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 import {Canvas} from "@react-three/fiber";
 import {OrthographicCamera} from "@react-three/drei";
+import FondoColoresRandom from "../FondoColoresRandom";
 
 class JokeBattle extends Juego {
     constructor(props) {
@@ -132,6 +133,7 @@ class JokeBattle extends Juego {
 
         return (
             <>
+                <FondoColoresRandom/>
                 <section className={styles.answerScreen}>
                     {/* Pasando la funcion por referencia se congela*/}
                     <Contador tiempoInicial={90} onRunOutOfTime={() => handleRunOutOfTime()}/>
@@ -165,6 +167,17 @@ class JokeBattle extends Juego {
                     </section>
                 </section>
             </>
+        );
+    }
+
+    renderIntro() {
+
+
+        return (
+            <div style={{overflow: 'hidden'}}>
+            <IntroduccionJokeBattle/>
+          <button onClick={() => this.startAnswering()}>Comenzar</button>
+            </div>
         );
     }
 
@@ -239,9 +252,6 @@ class JokeBattle extends Juego {
     }
 
     renderPuntuacion() {
-
-
-
 
         return (
             <div>
@@ -378,6 +388,31 @@ function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostra
         <animated.h5 style={props}>{propietario}</animated.h5>
     );
 }
+
+const IntroduccionJokeBattle = () => {
+  const [open, setOpen] = useState(true);
+  const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
+
+  const trail = useTrail(title.length, {
+    config: { mass: 5, tension: 600, friction: 200 },
+    opacity: open ? 1 : 0,
+    x: open ? 0 : 20,
+    from: { opacity: 0, x: 20 },
+  });
+
+  return (
+    <section className={styles.intro}>
+      {trail.map((props, index) => (
+        <a.div key={index} style={props}>
+          {title[index]}
+        </a.div>
+      ))}
+      <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases recibidas y serán juzgados por el resto de jugadores.</p>
+    </section>
+  );
+};
+
+
 
 
 export default JokeBattle;

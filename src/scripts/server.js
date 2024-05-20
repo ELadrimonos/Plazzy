@@ -44,7 +44,6 @@ io.on('connection', (socket) => {
             socket.emit('joinGame', lobby);
             socket.emit('shareGameMode', lobby.game);
             socket.emit('sharePlayer', player);
-            // socket.emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
         } else {
             socket.emit('joinError', 'No se puede unir a la sala');
@@ -128,21 +127,26 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('startGame', async (lobbyCode) => {
-        const lobby = getLobby(lobbyCode);
-        if (lobby) {
-            if (!lobby.isCreatedInDB) {
-                await crearLobbyBBDD(lobby);
-                lobby.isCreatedInDB = true;
-            }
+socket.on('startGame', async (lobbyCode) => {
+    const lobby = getLobby(lobbyCode);
+    if (lobby) {
+        if (!lobby.isCreatedInDB) {
+            await crearLobbyBBDD(lobby);
             await lobby.players.forEach((p) => {
                 crearJugadoresBBDD(lobby.id, p);
             })
-            await generatePromptsForPlayers(lobbyCode);
-            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+            lobby.isCreatedInDB = true;
         }
 
-    });
+        console.log("Salas existentes:", io.adapter); // Registro de las salas existentes
+
+        await generatePromptsForPlayers(lobbyCode);
+        console.log("Enviando evento 'cambiarEscena' a la sala:", lobbyCode);
+        io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+    } else {
+        console.log("¡El lobby no existe!");
+    }
+});
 
     socket.on('newRound', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
@@ -192,6 +196,8 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             addScoreToPlayer(lobby, playerName);
+            io.to(lobbyCode).emit('updatePlayers', lobby.players);
+
         }
     });
 
@@ -227,7 +233,7 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             addScoreToPlayer(lobby, lobby.players[0].name);
-            io.to(lobbyCode).emit('updatePlayers', lobby.players);
+            socket.emit('playerVote', lobby.players);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
             clearLobbyData(lobby);
         }
