@@ -2,18 +2,62 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     width: 100vw;
     height: 100vh;
-    background-color: #966363;
+    background-color: #9ba3f6;
+}
+
+.plazzyTitle  {
+    font-size: 5rem;
+    color: #fffcfc;
+}
+
+.gameCode {
+    letter-spacing: 3px;
+    font-size: 4.5rem;
+    color: #fffcfc;
+    text-transform: uppercase;
+
 }
 
 .container {
     width: 50%;
     height: 25%;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
+
 
 .container span {
     font-size: 1.5em;
+}
+
+.nameInput {
+    max-width: 500px;
+    text-align: center;
+    font-size: 1.5em;
+    margin: 10px 0;
+}
+
+.buttonEnter {
+    font-size: 1.5em;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #fffcfc;
+    color: #9ba3f6;
+    box-shadow: #282c34 0 0 4px;
+}
+
+.buttonEnter:hover {
+    background-color: #4b4c6e;
+    color: #fffcfc;
+    cursor: pointer;
+}
+.buttonEnter:active {
+    background-color: #282c34;
+    color: #fffcfc;
+    cursor: pointer;
 }

@@ -31,11 +31,12 @@ const GamePage = () => {
   if (!isNameSet) {
     return (
       <div className={styles.raiz}>
-        <div className={styles.container}>
-          <h1>Introduce tu nombre para unirte a la partida:<br /> <span>{gameLobbyCode}</span></h1>
-          <input type="text" onChange={e => setPlayerName(e.target.value)} />
-          <button onClick={handleNameChange}>Entrar a la partida </button>
-        </div>
+        <h1 className={styles.plazzyTitle}>PLAZZY</h1>
+        <form className={styles.container}>
+          <h2>Introduce tu nombre para unirte a la partida:<br /> <span className={styles.gameCode}>{gameLobbyCode}</span></h2>
+          <input className={styles.nameInput} required={true} type="text" onChange={e => setPlayerName(e.target.value)} maxLength={10} />
+          <button className={styles.buttonEnter} onClick={handleNameChange}>Entrar a la partida </button>
+        </form>
       </div>
     );
   } else {

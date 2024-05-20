@@ -23,7 +23,7 @@ export function CodigoPartida({gameCode}) {
 
 // onTiempoTerminado es una función que se ejecuta cuando termina
 
-export function Contador({ tiempoInicial, onTiempoTerminado }) {
+export function Contador({className, tiempoInicial, onTiempoTerminado }) {
   const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export function Contador({ tiempoInicial, onTiempoTerminado }) {
     return () => clearInterval(intervalo);
   }, [tiempoActual, onTiempoTerminado]);
 
-  return <h2>{tiempoActual}</h2>;
+  return <h2 className={className}>{tiempoActual}</h2>;
 }
 
 export function InputRespuestaLimitado({socket, playerID, gameCode, onHandleSubmitRef ,styles, maxLength = 30}) {

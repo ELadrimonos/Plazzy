@@ -127,26 +127,25 @@ io.on('connection', (socket) => {
     });
 
 
-socket.on('startGame', async (lobbyCode) => {
-    const lobby = getLobby(lobbyCode);
-    if (lobby) {
-        if (!lobby.isCreatedInDB) {
-            await crearLobbyBBDD(lobby);
-            await lobby.players.forEach((p) => {
-                crearJugadoresBBDD(lobby.id, p);
-            })
-            lobby.isCreatedInDB = true;
+    socket.on('startGame', async (lobbyCode) => {
+        const lobby = getLobby(lobbyCode);
+        if (lobby) {
+            if (!lobby.isCreatedInDB) {
+                await crearLobbyBBDD(lobby);
+                await lobby.players.forEach((p) => {
+                    crearJugadoresBBDD(lobby.id, p);
+                })
+                lobby.isCreatedInDB = true;
+            }
+
+
+            await generatePromptsForPlayers(lobbyCode);
+            console.log("Enviando evento 'cambiarEscena' a la sala:", lobbyCode);
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
+        } else {
+            console.log("¡El lobby no existe!");
         }
-
-        console.log("Salas existentes:", io.adapter); // Registro de las salas existentes
-
-        await generatePromptsForPlayers(lobbyCode);
-        console.log("Enviando evento 'cambiarEscena' a la sala:", lobbyCode);
-        io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
-    } else {
-        console.log("¡El lobby no existe!");
-    }
-});
+    });
 
     socket.on('newRound', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
@@ -207,7 +206,6 @@ socket.on('startGame', async (lobbyCode) => {
             const playerData = lobby.data.find((data) => data.playerId === playerID);
             if (playerData) {
                 const playerPrompts = playerData.prompts.filter(objeto => objeto !== undefined).map(objeto => objeto.text);
-                console.log('Player prompts (on getPlayerPrompts) (Jugador ' + playerID + '):', playerPrompts);
                 socket.emit('getPrompts', playerPrompts);
             }
         }

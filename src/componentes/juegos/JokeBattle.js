@@ -14,7 +14,8 @@ import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
 import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 import {Canvas} from "@react-three/fiber";
-import {OrthographicCamera} from "@react-three/drei";
+import {OrbitControls, OrthographicCamera} from "@react-three/drei";
+import {Flex, Box} from '@react-three/flex';
 import FondoColoresRandom from "../FondoColoresRandom";
 
 class JokeBattle extends Juego {
@@ -131,12 +132,22 @@ class JokeBattle extends Juego {
             socket.emit('playerRanOutOfTimeToAnswer', this.GameCode, this.playerReference.id);
         }
 
+        const indexJugador = this.state.jugadoresConectados.findIndex(jugador => jugador.id === this.playerReference.id);
+
         return (
             <>
-                <FondoColoresRandom/>
+
+               {(() => {
+                    try {
+                        return <FondoColoresRandom />;
+                    } catch (error) {
+                        console.error("An error occurred while rendering FondoColoresRandom:", error);
+                        return null;
+                    }
+                })()}
                 <section className={styles.answerScreen}>
                     {/* Pasando la funcion por referencia se congela*/}
-                    <Contador tiempoInicial={90} onRunOutOfTime={() => handleRunOutOfTime()}/>
+                    <Contador className={styles.contador} tiempoInicial={90} onRunOutOfTime={() => handleRunOutOfTime()}/>
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
@@ -157,11 +168,10 @@ class JokeBattle extends Juego {
                         <Canvas className={styles.listaJugadores}>
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
-                            <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20}/>
-                            {this.state.jugadoresConectados.map((jugador, index) => (
-                                <ModeloJugador key={jugador.id} modeloPath={this.modelos[index]}
-                                               animationName="idle" position={[0, index * 10, 0]}/>
-                            ))}
+                            <OrthographicCamera makeDefault position={[0, 0, 10020]} zoom={20}/>
+
+                                    <ModeloJugador modeloPath={this.modelos[indexJugador]}
+                                                   animationName="idle"/>
                         </Canvas>
                         <div className={styles.sombraJugadores}></div>
                     </section>
@@ -171,13 +181,11 @@ class JokeBattle extends Juego {
     }
 
     renderIntro() {
-
-
         return (
-            <div style={{overflow: 'hidden'}}>
-            <IntroduccionJokeBattle/>
-          <button onClick={() => this.startAnswering()}>Comenzar</button>
-            </div>
+            <section className={styles.intro}>
+                <IntroduccionJokeBattle/>
+                <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
+            </section>
         );
     }
 
@@ -390,29 +398,28 @@ function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostra
 }
 
 const IntroduccionJokeBattle = () => {
-  const [open, setOpen] = useState(true);
-  const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
+    const [open, setOpen] = useState(true);
+    const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
 
-  const trail = useTrail(title.length, {
-    config: { mass: 5, tension: 600, friction: 200 },
-    opacity: open ? 1 : 0,
-    x: open ? 0 : 20,
-    from: { opacity: 0, x: 20 },
-  });
+    const trail = useTrail(title.length, {
+        config: {mass: 5, tension: 600, friction: 200},
+        opacity: open ? 1 : 0,
+        x: open ? 0 : 20,
+        from: {opacity: 0, x: 20},
+    });
 
-  return (
-    <section className={styles.intro}>
-      {trail.map((props, index) => (
-        <a.div key={index} style={props}>
-          {title[index]}
-        </a.div>
-      ))}
-      <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases recibidas y serán juzgados por el resto de jugadores.</p>
-    </section>
-  );
+    return (
+        <div >
+            {trail.map((props, index) => (
+                <a.h1 className={styles.title} key={index} style={props}>
+                    {title[index]}
+                </a.h1>
+            ))}
+            <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases
+                recibidas y serán juzgados por el resto de jugadores.</p>
+        </div>
+    );
 };
-
-
 
 
 export default JokeBattle;
