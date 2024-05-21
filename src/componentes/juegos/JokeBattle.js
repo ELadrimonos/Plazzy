@@ -14,8 +14,7 @@ import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
 import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 import {Canvas} from "@react-three/fiber";
-import {OrbitControls, OrthographicCamera} from "@react-three/drei";
-import {Flex, Box} from '@react-three/flex';
+import { OrthographicCamera} from "@react-three/drei";
 import FondoColoresRandom from "../FondoColoresRandom";
 
 class JokeBattle extends Juego {
@@ -136,18 +135,17 @@ class JokeBattle extends Juego {
 
         return (
             <>
-
-               {(() => {
+                {(() => {
                     try {
-                        return <FondoColoresRandom />;
+                        return <FondoColoresRandom/>;
                     } catch (error) {
                         console.error("An error occurred while rendering FondoColoresRandom:", error);
                         return null;
                     }
                 })()}
                 <section className={styles.answerScreen}>
-                    {/* Pasando la funcion por referencia se congela*/}
-                    <Contador className={styles.contador} tiempoInicial={90} onRunOutOfTime={() => handleRunOutOfTime()}/>
+                    <Contador className={styles.contador} tiempoInicial={90}
+                              onRunOutOfTime={() => handleRunOutOfTime()}/>
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
@@ -162,16 +160,14 @@ class JokeBattle extends Juego {
                             >¡Ayudame!
                             </button>
                         </>)}
-
-
                     <section className={styles.jugadores}>
                         <Canvas className={styles.listaJugadores}>
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
-                            <OrthographicCamera makeDefault position={[0, 0, 10020]} zoom={20}/>
-
-                                    <ModeloJugador modeloPath={this.modelos[indexJugador]}
-                                                   animationName="idle"/>
+                            <OrthographicCamera makeDefault position={[0, 0, 50]} zoom={20}/>
+                            <ModeloJugador modeloPath={this.modelos[indexJugador]}
+                                           animationName={!this.state.bloquearRespuestas ? "idle" : null}
+                                           bloquearRespuestas={this.state.bloquearRespuestas}/>
                         </Canvas>
                         <div className={styles.sombraJugadores}></div>
                     </section>
@@ -209,6 +205,19 @@ class JokeBattle extends Juego {
         const mostrarSiguientesRespuestas = () => {
             setTimeout(() => {
                 this.setState({senalMostrarRespuestas: true})
+                this.setState({respuestaSeleccionada: false});
+                return <RespuestasPrompt prompt={this.state.prompt}
+                                         senalMostrarRespuestas={this.state.senalMostrarRespuestas}
+                                         senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                         handleTimeout={handleTimeout}
+                                         propietarioIzq={this.state.propietarioRespuesta1}
+                                         propietarioDer={this.state.propietarioRespuesta2}
+                                         respuestaIzq={this.state.respuestaPrompt1}
+                                         respuestaDer={this.state.respuestaPrompt2}
+                                         handleClickRespuesta={handleClickRespuesta}
+                                         gameCode={this.GameCode}
+                />
+
             }, 2000);
         };
 
@@ -224,7 +233,6 @@ class JokeBattle extends Juego {
         });
 
         // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
-        mostrarSiguientesRespuestas();
 
         const handleClickRespuesta = (propietario) => {
             if (!this.state.respuestaSeleccionada) {
@@ -235,23 +243,8 @@ class JokeBattle extends Juego {
 
         return (
             <section className={styles.round}>
-                <header className={styles.promptHeader}>
-                    <Contador tiempoInicial={10} onTimeout={handleTimeout}/>
-                    <Prompt texto={this.state.prompt}/>
-                    <IconoLobby gameCode={this.GameCode}/>
-                </header>
-                <div className={styles.promptMessages}>
-                    <RespuestaPrompt desdeIzquierda={true} texto={this.state.respuestaPrompt1}
-                                     propietario={this.state.propietarioRespuesta1}
-                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta1)}/>
-                    <RespuestaPrompt desdeIzquierda={false} texto={this.state.respuestaPrompt2}
-                                     propietario={this.state.propietarioRespuesta2}
-                                     senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                     senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                     onClick={() => handleClickRespuesta(this.state.propietarioRespuesta2)}/>
-                </div>
+                        mostrarSiguientesRespuestas();
+
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
                 <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
                 <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
@@ -386,6 +379,42 @@ function RespuestaPrompt({
     );
 }
 
+function RespuestasPrompt({
+                              gameCode,
+                              handleTimeout,
+                              handleClickRespuesta,
+                              prompt,
+                              respuestaIzq,
+                              respuestaDer,
+                              propietarioIzq,
+                              propietarioDer,
+                              senalMostrarRespuestas,
+                              senalMostrarPropietarios
+                          }) {
+    return (
+        <>
+            <header className={styles.promptHeader}>
+                <Contador tiempoInicial={10} onTimeout={handleTimeout}/>
+                <Prompt texto={prompt}/>
+                <IconoLobby gameCode={gameCode}/>
+            </header>
+            <div className={styles.promptMessages}>
+                <RespuestaPrompt desdeIzquierda={true} texto={respuestaIzq}
+                                 propietario={propietarioIzq}
+                                 senalMostrarRespuestas={senalMostrarRespuestas}
+                                 senalMostrarPropietarios={senalMostrarPropietarios}
+                                 onClick={() => handleClickRespuesta(propietarioIzq)}/>
+                <RespuestaPrompt desdeIzquierda={false} texto={respuestaDer}
+                                 propietario={propietarioDer}
+                                 senalMostrarRespuestas={senalMostrarRespuestas}
+                                 senalMostrarPropietarios={senalMostrarPropietarios}
+                                 onClick={() => handleClickRespuesta(propietarioDer)}/>
+            </div>
+        </>
+    );
+
+}
+
 function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostrarRespuestas}) {
     const props = useSpring({
         opacity: senalMostrarPropietarios && senalMostrarRespuestas ? 1 : 0,
@@ -409,7 +438,7 @@ const IntroduccionJokeBattle = () => {
     });
 
     return (
-        <div >
+        <div>
             {trail.map((props, index) => (
                 <a.h1 className={styles.title} key={index} style={props}>
                     {title[index]}

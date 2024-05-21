@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useGLTF, Stage, useAnimations } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
-const ModeloJugador = ({ modeloPath, animationName, position }) => {
+const ModeloJugador = ({ modeloPath, animationName, bloquearRespuestas }) => {
   const { scene, animations } = useGLTF(modeloPath);
   const { actions } = useAnimations(animations, scene);
   const meshRef = useRef();
@@ -10,32 +10,36 @@ const ModeloJugador = ({ modeloPath, animationName, position }) => {
   useEffect(() => {
     function restoreContext() {
       const canvas = document.querySelector('canvas');
-      canvas.addEventListener(
-        'webglcontextlost',
-        function (event) {
-          event.preventDefault();
-          setTimeout(function () {
-            canvas.getContext('webgl', {preserveDrawingBuffer: true});
-          }, 1);
-        },
-        false
-      );
+      if (canvas) {
+        canvas.addEventListener(
+          'webglcontextlost',
+          function (event) {
+            event.preventDefault();
+            setTimeout(() => {
+              canvas.getContext('webgl', { preserveDrawingBuffer: true });
+            }, 1);
+          },
+          false
+        );
+      }
     }
     restoreContext();
 
-    const action = actions[animationName];
-    if (action) {
-      action.play();
+    if (!bloquearRespuestas && actions && animationName && actions[animationName]) {
+      actions[animationName].play();
+    } else {
+      // Detener todas las animaciones si bloquearRespuestas es true
+      Object.values(actions).forEach(action => action.stop());
     }
-  }, [animationName, actions]);
+  }, [actions, animationName, bloquearRespuestas]);
 
   useFrame(() => {
-    // This is where you can update animations or perform other per-frame logic
+    // Aquí puedes actualizar animaciones u otras lógicas por cuadro
   });
 
   return (
     <Stage environment={null}>
-      <primitive object={scene} scale={[0.2, 0.2, 0.2]} position={position} ref={meshRef} />
+      <primitive object={scene} scale={[0.2, 0.2, 0.2]} ref={meshRef} />
     </Stage>
   );
 };
