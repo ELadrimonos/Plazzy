@@ -34,7 +34,9 @@ jobs:
       # Build the project
       - name: Build the project
         run: npm run build
-      
+        env:
+          CI: false
+          
       # Deploy to Azure Static Web Apps
       - name: Build And Deploy
         id: builddeploy
