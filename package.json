@@ -1,6 +1,11 @@
 {
   "name": "proyecto_final_daw_react",
   "version": "0.1.0",
+
+  "engines": {
+    "node": "20.x"
+  },
+
   "private": true,
   "dependencies": {
     "@react-spring/web": "^9.7.3",
@@ -29,7 +34,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "CI= react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -52,6 +57,7 @@
     ]
   },
   "devDependencies": {
-    "vite": "^5.1.4"
+    "vite": "^5.1.4",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.0"
   }
 }
