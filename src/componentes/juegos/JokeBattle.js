@@ -138,7 +138,7 @@ class JokeBattle extends Juego {
                 <FondoColoresRandom/>;
                 <section className={styles.answerScreen}>
                     <Contador className={styles.contador} tiempoInicial={90}
-                              onRunOutOfTime={() => handleRunOutOfTime()}/>
+                              onTiempoTerminado={handleRunOutOfTime}/>
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
@@ -171,15 +171,14 @@ class JokeBattle extends Juego {
 
     renderIntro() {
         return (
-            <section className={styles.intro}>
+            <section className={styles.introScreen}>
                 <IntroduccionJokeBattle/>
                 <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
             </section>
         );
     }
 
-
-    renderJugando() {
+    renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
             if (this.isPlayerHost()) {
@@ -296,7 +295,7 @@ function Prompt({texto}) {
 const Noria = React.memo(function Noria({jugadores, offset = 0}) {
     const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
     const [springStyles, setSpringStyles] = useSpring(() => ({
-        transform: `rotate(${offset * 45}deg)` // 45 grados por jugador
+        transform: `rotate(${offset * 45}deg)`
     }));
 
     useEffect(() => {
@@ -382,7 +381,7 @@ function RespuestasPrompt({
     return (
         <>
             <header className={styles.promptHeader}>
-                <Contador tiempoInicial={10} onTimeout={handleTimeout}/>
+                <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
                 <Prompt texto={prompt}/>
                 <IconoLobby gameCode={gameCode}/>
             </header>

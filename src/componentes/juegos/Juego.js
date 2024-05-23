@@ -111,7 +111,7 @@ class Juego extends Component {
   }
 
 
-  renderJugando() {
+  renderVotando() {
     return (
       <div>
         <h1>Placeholder jugando ronda</h1>
@@ -144,8 +144,8 @@ class Juego extends Component {
         return this.renderIntro();
       case 'respondiendo':
         return this.renderRespondiendo();
-      case 'jugando':
-        return this.renderJugando();
+      case 'votando':
+        return this.renderVotando();
       case 'fin':
         return this.renderFin();
       case 'puntuaje':

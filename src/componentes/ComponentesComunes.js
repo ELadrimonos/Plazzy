@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 
 export function IconoJugador({nombreClase, nombre, rutaImagen, style}) {
     return (
@@ -23,33 +23,28 @@ export function CodigoPartida({gameCode}) {
 
 // onTiempoTerminado es una función que se ejecuta cuando termina
 
-export function Contador({className, tiempoInicial, onTiempoTerminado }) {
+export function Contador({ className, tiempoInicial, onTiempoTerminado }) {
   const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
+  const intervaloRef = useRef(null);
 
   useEffect(() => {
-    let intervalo;
-
-    const contarTiempo = () => {
-      if (tiempoActual > 0) {
-        intervalo = setInterval(() => {
-          setTiempoActual(tiempo => tiempo - 1);
-        }, 1000);
-      } else {
-        // Cuando el tiempo llega a cero, emitir la señal de tiempo terminado
+    intervaloRef.current = setInterval(() => {
+      setTiempoActual(tiempo => {
+        if (tiempo > 0) {
+          return tiempo - 1;
+        } else {
+          clearInterval(intervaloRef.current);
           if (onTiempoTerminado !== undefined) {
             onTiempoTerminado();
-
           }
-        clearInterval(intervalo);
-      }
-    };
-
-    // Comenzar a contar el tiempo al cargar el componente
-    contarTiempo();
+          return tiempo;
+        }
+      });
+    }, 1000);
 
     // Limpiar el intervalo al desmontar el componente
-    return () => clearInterval(intervalo);
-  }, [tiempoActual, onTiempoTerminado]);
+    return () => clearInterval(intervaloRef.current);
+  }, [tiempoActual]);
 
   return <h2 className={className}>{tiempoActual}</h2>;
 }

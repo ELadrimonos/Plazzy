@@ -262,16 +262,18 @@
 }
 
 
-.intro {
+.introScreen {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 10%;
     width: 100%;
+    background-color: #b5e5f3;
+    height: 100vh;
 }
 
-.intro .title {
+.introScreen .title {
     font-weight: bold;
     font-size: 4rem;
     text-transform: uppercase;
@@ -279,17 +281,17 @@
     width: max-content;
 }
 
-.intro p {
+.introScreen p {
     font-size: 1.5rem;
     margin: 0;
 }
 
-.intro .startButton {
+.introScreen .startButton {
     background-color: #2323a1;
 }
 
 @media screen and (max-width: 767px) {
-    .intro {
+    .introScreen {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -297,14 +299,14 @@
         overflow-x: hidden;
     }
 
-    .intro .title {
+    .introScreen .title {
         font-size: 3.5rem;
         text-align: center;
         width: 100%;
         margin: 0;
     }
 
-    .intro p {
+    .introScreen p {
         font-size: 1.2rem;
         text-align: center;
         width: 100%;

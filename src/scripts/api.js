@@ -128,6 +128,27 @@ router.post('/players/create', (req, res) => {
     })
 });
 
+router.post('/players/update-score', (req, res) => {
+    const {lobbyId, playerId, score} = req.body;
+
+    db.query('SELECT * FROM salas  WHERE id_sala = ?', [lobbyId], (error) => {
+        if (error) {
+            console.error(error);
+            res.status(500).json({error: 'Error al obtener el id de la sala'});
+            return;
+        }
+
+        db.query('UPDATE jugadores SET puntuacion = ? WHERE id_jugador = ? AND id_sala = ? ', [score, playerId, lobbyId], (error) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({error: 'Error al actualizar la puntuacion del jugador'});
+                return;
+            }
+            res.sendStatus(200);
+        });
+    })
+});
+
 // Este bloque servirá para poder crear respuestas por defecto personalizadas
 router.post('/safety-answers/create', (req, res) => {
     const {answerId, promptId, text, language} = req.body;

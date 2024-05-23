@@ -60,7 +60,7 @@ class Chatbot extends Juego {
         );
   }
 
-  renderJugando() {
+  renderVotando() {
     return (
       <section id="round">
         <header id="promptHeader">
@@ -81,7 +81,7 @@ class Chatbot extends Juego {
       case 'respondiendo':
         return this.renderRespondiendo();
       case 'jugando':
-        return this.renderJugando();
+        return this.renderVotando();
       // Puedes agregar más casos para otros estados del juego si es necesario
       default:
         return null;

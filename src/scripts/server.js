@@ -17,7 +17,7 @@ const GameScreens = Object.freeze({
     LOBBY: 'lobby',
     START: 'start',
     ANSWER: 'respondiendo',
-    VOTING: 'jugando',
+    VOTING: 'votando',
     SCOREBOARD: 'puntuaje',
     FINAL_SCREEN: 'fin',
 });
@@ -126,7 +126,6 @@ io.on('connection', (socket) => {
         }
     });
 
-
     socket.on('startGame', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
@@ -151,6 +150,7 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             await generatePromptsForPlayers(lobbyCode);
+            clearLobbyData(lobby);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
 
         }
@@ -171,10 +171,13 @@ io.on('connection', (socket) => {
                         await playerUseSafetyAnswer(lobbyCode, playerID);
                     }
                 }
+                io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
+                console.log('Se ha terminado el tiempo de respuesta para el jugador con ID (playerRanOutOfTime):', playerID);
             } else {
                 console.error('No se encontraron datos del jugador con ID:', playerID);
             }
-        }
+        } else console.warn("¡El lobby no existe! (playerRanOutOfTimeToAnswer)");
+
     });
 
 
@@ -191,10 +194,12 @@ io.on('connection', (socket) => {
         comprobarNumeroDeRespuestas(lobbyCode);
     });
 
-    socket.on('playerVote', (lobbyCode, playerName) => {
+    socket.on('playerVote', async (lobbyCode, playerName) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            addScoreToPlayer(lobby, playerName);
+            const player = lobby.players.find((p) => p.name === playerName);
+            console.log('LLAMADA A EVENTO SOCKET playerVote')
+            await addScoreToPlayer(lobby, player);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
 
         }
@@ -211,7 +216,6 @@ io.on('connection', (socket) => {
         }
     });
 
-
     socket.on('startAnswering', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
@@ -227,11 +231,13 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('startResults', (lobbyCode) => {
+    socket.on('startResults', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            addScoreToPlayer(lobby, lobby.players[0].name);
-            socket.emit('playerVote', lobby.players);
+            await addScoreToPlayer(lobby, lobby.players[0]);
+            io.to(lobbyCode).emit('updatePlayers', lobby.players);
+            // No se llama por alguna razon
+            // socket.emit('playerVote', lobbyCode, lobby.players[1].name);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
             clearLobbyData(lobby);
         }
@@ -343,7 +349,7 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
                         selectedPrompts.splice(randIndex, 1);  // Remove the selected index
                     }
 
-                    console.log('DATA ARRAY (generatePromptsForPlayers): ', dataArray);
+                    // console.log('DATA ARRAY (generatePromptsForPlayers): ', dataArray);
                     lobby.data.push(dataArray);
                 });
             } else {
@@ -426,7 +432,7 @@ async function getRandomSafetyAnswer(id, language = 'ES') {
     const response = await fetch(url);
     if (response.ok) {
         const safetyAnswers = await response.json();
-        const randomAnswer = Math.floor(Math.random() * 2); // Mantener como número
+        const randomAnswer = Math.floor(Math.random() * 2);
         const randomText = safetyAnswers.find(object => object.id_answer === randomAnswer)?.text;
         return randomText || "Respuesta aleatoria no encontrada para el ID dado";
     } else {
@@ -447,7 +453,7 @@ async function playerUseSafetyAnswer(lobbyCode, playerID) {
                 console.error('Prompt no encontrado:', playerPrompt);
                 return;
             }
-            const safetyAnswer = await getRandomSafetyAnswer(promptID); // Esperar la resolución de la promesa
+            const safetyAnswer = await getRandomSafetyAnswer(promptID);
             playerData.answers.push(safetyAnswer);
         } else {
             console.error('No se encontraron datos del jugador con ID:', playerID);
@@ -503,10 +509,25 @@ function associateAnswersToUniquePrompt(lobby) {
     console.log('Datos individualizados: ', lobby.data);
 }
 
-function addScoreToPlayer(lobby, playerName) {
-    const player = lobby.players.find((d) => d.name === playerName);
+async function addScoreToPlayer(lobby, player) {
     if (player) {
         player.score += 100 * lobby.round;
         console.log('JUGADORES CON PUNTOS ACTUALIZADOS (addScoreToPlayer): ', lobby.players);
+        const url = `http://localhost:8080/api/players/update-score`;
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                playerId: player.id,
+                score: player.score,
+                lobbyId: lobby.lobbyId
+            })
+        };
+        const response = await fetch(url, requestOptions);
+        if (!response.ok) {
+            console.error(`Error actualizar puntuación del jugador ${playerName} (addScoreToPlayer): ${response.status} - ${response.statusText}`);
+        }
     }
 }
