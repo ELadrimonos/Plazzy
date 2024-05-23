@@ -1,20 +1,16 @@
 {
   "name": "proyecto_final_daw_react",
   "version": "0.1.0",
-
   "engines": {
     "node": "20.x"
   },
-
   "private": true,
   "dependencies": {
     "@react-spring/web": "^9.7.3",
     "@react-three/drei": "^9.105.6",
     "@react-three/fiber": "^8.16.6",
     "@react-three/flex": "^1.0.1",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "canvas": "^2.11.2",
     "dotenv": "^16.4.5",
     "easing-coordinates": "^2.0.2",
     "express": "^4.19.2",
@@ -35,13 +31,11 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
@@ -57,7 +51,7 @@
     ]
   },
   "devDependencies": {
-    "vite": "^5.1.4",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.0"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
+    "vite": "^5.1.4"
   }
 }
