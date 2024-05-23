@@ -297,14 +297,14 @@
         overflow-x: hidden;
     }
 
-    .intro .title{
+    .intro .title {
         font-size: 3.5rem;
         text-align: center;
         width: 100%;
         margin: 0;
     }
 
-    .intro p{
+    .intro p {
         font-size: 1.2rem;
         text-align: center;
         width: 100%;
@@ -415,6 +415,36 @@
     font-size: 1.5em;
 }
 
+.answerScreen .safetySendButton {
+    max-width: 500px;
+    font-size: 1.3em;
+    background: none;
+    transition: 300ms;
+    width: max-content;
+    padding: 15px 30px;
+    background: #d2b638;
+}
+
+.answerScreen .safetySendButton:active {
+    transform: skewX(20deg);
+    background: #fffb00;
+    font-weight: bold;
+
+}
+
+.answerScreen .safetySendButton:active::before {
+    font-size: 1.6em;
+
+}
+
+.answerScreen .safetySendButton::before {
+    content: "!";
+    color: red;
+    font-weight: bold;
+    transition: 300ms;
+
+}
+
 .answerScreen .prompt {
     padding: 10px;
     backdrop-filter: brightness(80%) blur(5px);
@@ -429,6 +459,7 @@
     border-radius: 50%;
     color: white;
     padding: 10px;
+    margin: 0;
 }
 
 
@@ -510,4 +541,105 @@
     height: 25%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1;
+}
+
+.puntuacion {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 60%;
+    flex-flow: row wrap;
+    margin: 0 auto;
+    gap: 20px;
+
+}
+
+.puntuacion .posicionPodio {
+    border-radius: 15px;
+    text-align: center;
+    background-color: rgba(35, 35, 161, 0.25);
+    padding: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    align-items: center;
+    color: white;
+}
+
+
+.puntuacion .posicionPodio .numeroPodio {
+    aspect-ratio: 1/1;
+    align-items: center;
+    background-color: #282c34;
+    color: white;
+    display: flex;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.puntuacion .posicionPodio .numeroPodio h2 {
+    margin: 0;
+}
+
+.puntuacion .posicionPodio:first-child .numeroPodio {
+    color: gold;
+    font-size: 1.6em;
+    text-decoration: gold underline;
+}
+
+.puntuacion .posicionPodio:nth-child(2) .numeroPodio {
+    color: silver;
+    font-size: 1.4em;
+
+}
+
+.puntuacion .posicionPodio:nth-child(-n+3) .numeroPodio > h2 {
+    animation: brillo 1.5s infinite;
+}
+
+
+.puntuacion .posicionPodio:nth-child(3) .numeroPodio {
+    color: #ad6727;
+    font-size: 1.2em;
+
+}
+
+.puntuacion .icono {
+    width: 100%;
+}
+
+.puntuacion .icono h4 {
+    font-size: 1.5em;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.scoreScreen{
+    text-align: center;
+    background-color: #0f181e;
+    margin: 0;
+    height: 100vh;
+    color: white;
+    overflow: hidden;
+}
+
+@keyframes brillo {
+    0% {
+        opacity: 1;
+        filter: brightness(110%);
+        text-shadow: white 5px 5px 10px;
+    }
+    50% {
+        opacity: 0.5;
+        filter: brightness(40%);
+        text-shadow: grey -5px -5px 10px;
+
+    }
+    100% {
+        opacity: 1;
+        filter: brightness(110%);
+        text-shadow: white 5px 5px 10px;
+
+    }
 }

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import Juego from './Juego';
 import {CodigoPartida, Contador, IconoJugador, IconoLobby, InputRespuestaLimitado} from "../ComponentesComunes";
 import styles from '../../css/JokeBattle.module.css';
-import {useSpring, animated, useTrail, a} from '@react-spring/web'
+import {useSpring, animated, useTrail, a, useSprings} from '@react-spring/web'
 import {socket} from "../../scripts/cliente";
 import logo0 from '../../assets/img/player_icons/JokeBattle/0.webp';
 import logo1 from '../../assets/img/player_icons/JokeBattle/1.webp';
@@ -14,7 +14,7 @@ import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
 import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 import {Canvas} from "@react-three/fiber";
-import { OrthographicCamera} from "@react-three/drei";
+import {OrthographicCamera} from "@react-three/drei";
 import FondoColoresRandom from "../FondoColoresRandom";
 
 class JokeBattle extends Juego {
@@ -135,14 +135,7 @@ class JokeBattle extends Juego {
 
         return (
             <>
-                {(() => {
-                    try {
-                        return <FondoColoresRandom/>;
-                    } catch (error) {
-                        console.error("An error occurred while rendering FondoColoresRandom:", error);
-                        return null;
-                    }
-                })()}
+                <FondoColoresRandom/>;
                 <section className={styles.answerScreen}>
                     <Contador className={styles.contador} tiempoInicial={90}
                               onRunOutOfTime={() => handleRunOutOfTime()}/>
@@ -152,7 +145,7 @@ class JokeBattle extends Juego {
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
-                            <button onClick={() => {
+                            <button className={styles.safetySendButton} onClick={() => {
                                 socket.emit('playerUseSafetyAnswer', this.GameCode, this.playerReference.id);
                                 handleSubmit();
                             }
@@ -243,7 +236,7 @@ class JokeBattle extends Juego {
 
         return (
             <section className={styles.round}>
-                        mostrarSiguientesRespuestas();
+                mostrarSiguientesRespuestas();
 
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
                 <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
@@ -253,13 +246,9 @@ class JokeBattle extends Juego {
     }
 
     renderPuntuacion() {
+        return <PodioPuntuacion jugadores={this.state.jugadoresConectados}/>
+    };
 
-        return (
-            <div>
-                <h1>Placeholder puntuación</h1>
-            </div>
-        );
-    }
 
     renderFin() {
 
@@ -314,7 +303,7 @@ const Noria = React.memo(function Noria({jugadores, offset = 0}) {
         setConnectedPlayers(jugadores);
         setSpringStyles({transform: `rotate(${offset * 45}deg)`});
         console.log("offset effect: " + offset);
-    }, [jugadores]);
+    }, [jugadores, offset, setSpringStyles]);
 
     let counter = 0;
     const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
@@ -326,7 +315,6 @@ const Noria = React.memo(function Noria({jugadores, offset = 0}) {
                           style={springStyles}/>
         </div>
     ));
-    console.log(counter);
 
     // Rellenar los espacios restantes con IconoJugador vacíos
     for (let i = connectedPlayers.length; i < 8; i++) {
@@ -362,7 +350,7 @@ function RespuestaPrompt({
                 to: {x: 0},
             });
         }
-    }, [senalMostrarRespuestas]);
+    }, [senalMostrarRespuestas, api, desdeIzquierda]);
 
     return (
         <animated.div
@@ -427,13 +415,12 @@ function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostra
 }
 
 const IntroduccionJokeBattle = () => {
-    const [open, setOpen] = useState(true);
     const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
 
     const trail = useTrail(title.length, {
         config: {mass: 5, tension: 600, friction: 200},
-        opacity: open ? 1 : 0,
-        x: open ? 0 : 20,
+        opacity: 1,
+        x: 0,
         from: {opacity: 0, x: 20},
     });
 
@@ -450,5 +437,59 @@ const IntroduccionJokeBattle = () => {
     );
 };
 
+function PodioPuntuacion({jugadores = []}) {
+    const [jugadoresConectados, setJugadoresConectados] = useState(jugadores);
+    const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
+
+    useEffect(() => {
+        if (jugadores.length > 0) {
+            setJugadoresConectados(jugadores);
+        }
+    }, [jugadores]);
+
+    const jugadoresOrdenados = [...jugadoresConectados].sort((a, b) => b.score - a.score);
+
+    const [springs, api] = useSprings(jugadoresOrdenados.length, index => ({
+        from: {transform: 'translateX(100vw)', opacity: 0},
+        to: {transform: 'translateX(0)', opacity: 1},
+        delay: index * 300,
+        config: {tension: 200, friction: 20}
+    }));
+
+    useEffect(() => {
+        api.start(index => ({
+            from: {transform: 'translateX(100vw)', opacity: 0},
+            to: {transform: 'translateX(0)', opacity: 1},
+            delay: index * 300,
+            config: {tension: 200, friction: 20}
+        }));
+    }, [jugadoresConectados, api]);
+
+    return (
+        <div className={styles.scoreScreen}>
+            <h1>Clasificación de Jugadores</h1>
+            <div className={styles.puntuacion}>
+                {springs.map((springStyle, index) => {
+                    const jugador = jugadoresOrdenados[index];
+                    const posicionPodio = index + 1;
+                    return (
+                        <animated.div key={jugador.id} style={springStyle} className={styles.posicionPodio}>
+                            <div className={styles.numeroPodio}>
+                                <h2>{posicionPodio}°</h2>
+                            </div>
+                            <IconoJugador
+                                nombreClase={styles.icono}
+                                nombre={jugador.name}
+                                rutaImagen={logos[index % logos.length]} // Asegúrate de usar un logo válido
+                            />
+                            <h3>Puntuación:</h3>
+                            <h4>{jugador.score}</h4>
+                        </animated.div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 
 export default JokeBattle;

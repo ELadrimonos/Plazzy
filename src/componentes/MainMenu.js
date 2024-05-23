@@ -18,7 +18,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
         setConnection(socket.connected)
 
         }, 1000);
-    }, [socket.connected]);
+    });
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -69,7 +69,7 @@ function MenuUnirse({menuCrear, unirsePartida}) {
         setTimeout(() => {
         setConnection(socket.connected)
 
-        }, 1000);    }, [socket.connected]);
+        }, 1000);    });
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -189,6 +189,8 @@ function Index({gameCodeRef = null, playerRef = null}) {
                 break;
             case 1:
                 gameName = 'chatbot';
+                break;
+            default:
                 break;
         }
         setGame(gameName);
