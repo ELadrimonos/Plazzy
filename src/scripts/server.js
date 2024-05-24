@@ -463,6 +463,7 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
     });
     if (count === lobby.data.length) {
         associateAnswersToUniquePrompt(lobby);
+        io.to(lobbyCode).emit('getPrompts', GameScreens.VOTING);
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
     }
 }
@@ -479,33 +480,21 @@ function getPromptsUnicos(lobby) {
     }, []);
 }
 
-// TODO arreglar esta función
-function getAnswersDePrompts(lobby, prompt) {
+function getAnswersDePrompts(lobby, promptId) {
     const dataArray = lobby.data;
     const answersDePrompts = [];
 
     dataArray.forEach(obj => {
-        obj.prompts.forEach(p => {
-            if (p.text === prompt) {
-                const promptIndex = obj.prompts.findIndex(prompt => prompt.text === prompt);
-                if (promptIndex !== -1) {
-                    const answer = obj.answers[promptIndex];
-                    answersDePrompts.push({ playerId: obj.playerId, text: answer });
-                }
+        obj.prompts.forEach((p, index) => {
+            if (promptId === p.id_prompt) {
+                const answer = obj.answers[index];
+                answersDePrompts.push({ playerId: obj.playerId, text: answer });
             }
         });
     });
 
-    // Comprobamos si hay más de 2 respuestas para el mismo prompt
-    if (answersDePrompts.length > 2) {
-        console.warn('EXISTEN MÁS DE 2 RESPUESTAS DE UN MISMO PROMPT: ' + prompt + '\n LOBBY: ' + JSON.stringify(lobby));
-    }
-
-    // Devolvemos solo los objetos encontrados
     return answersDePrompts;
 }
-
-
 
 function associateAnswersToUniquePrompt(lobby) {
     const promptsUnicos = getPromptsUnicos(lobby);
@@ -513,21 +502,21 @@ function associateAnswersToUniquePrompt(lobby) {
 
     promptsUnicos.forEach((prompt) => {
         const promptId = prompt.id;
-        console.log( 'Prompt ID:', promptId);
-        const answersDePrompt = [];
+        const promptText = prompt.text;
+        const answersDePrompt = getAnswersDePrompts(lobby, promptId);
 
-        lobby.data.forEach((data) => {
-            const answers = getAnswersDePrompts(lobby, prompt.text);
-            answers.forEach((answer) => {
-                answersDePrompt.push({ playerId: data.playerId, text: answer.text });
-            });
+        newData.push({
+            promptId: promptId,
+            promptText: promptText,
+            answers: answersDePrompt.map(answer => ({
+                playerId: answer.playerId,
+                answerText: answer.text
+            }))
         });
-
-        newData.push({ promptId: promptId, answers: answersDePrompt });
     });
 
     lobby.data = newData;
-    console.log('Datos individualizados: ', JSON.stringify(lobby.data));
+    console.log('Datos individualizados: ', JSON.stringify(lobby.data, null, 2));
 }
 
 async function addScoreToPlayer(lobby, player) {

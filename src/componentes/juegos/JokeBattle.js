@@ -32,13 +32,25 @@ class JokeBattle extends Juego {
             colorNoria: this.colorAleatorio(),
             offsetNoria: 0,
             prevOffsetNoria: 0,
-            promptIndex: 0,
+            currentPromptIndex: 0,
+            promptId: 0,
             bloquearRespuestas: false,
             respuestaSeleccionada: false,
         };
         this.interval = null;
         this.modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
-
+        this.promptsData = [];
+        socket.on('getVotingData', (data) => {
+            this.promptsData = data;
+            this.setState({
+                prompt: data[this.state.currentPromptIndex].promptText,
+                promptId: data[this.state.currentPromptIndex].promptId,
+                respuestaPrompt1: data[this.state.currentPromptIndex].answers[0].answerText,
+                propietarioRespuesta1: data[this.state.currentPromptIndex].answers[0].playerId,
+                respuestaPrompt2: data[this.state.currentPromptIndex].answers[1].answerText,
+                propietarioRespuesta2: data[this.state.currentPromptIndex].answers[1].playerId
+            });
+        });
     }
 
     // Método para emitir señal para mostrar respuestas
@@ -173,6 +185,11 @@ class JokeBattle extends Juego {
         );
     }
 
+    startNewRound() {
+        super.startNewRound();
+        this.promptsData = [];
+    }
+
     renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
@@ -193,34 +210,21 @@ class JokeBattle extends Juego {
             setTimeout(() => {
                 this.setState({senalMostrarRespuestas: true})
                 this.setState({respuestaSeleccionada: false});
+                this.setState({currentPromptIndex: this.state.currentPromptIndex + 1});
 
-                // Actualizar solamente todos los campos
-
-
-                // return <RespuestasPrompt prompt={this.state.prompt}
-                //                          senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                //                          handleTimeout={handleTimeout}
-                //                          propietarioIzq={this.state.propietarioRespuesta1}
-                //                          propietarioDer={this.state.propietarioRespuesta2}
-                //                          respuestaIzq={this.state.respuestaPrompt1}
-                //                          respuestaDer={this.state.respuestaPrompt2}
-                //                          handleClickRespuesta={handleClickRespuesta}
-                //                          gameCode={this.GameCode}
-                // />
+                this.setState({
+                                    prompt: this.promptsData[this.state.currentPromptIndex].promptText,
+                promptId: this.promptsData[this.state.currentPromptIndex].promptId,
+                respuestaPrompt1: this.promptsData[this.state.currentPromptIndex].answers[0].answerText,
+                propietarioRespuesta1: this.promptsData[this.state.currentPromptIndex].answers[0].playerId,
+                respuestaPrompt2: this.promptsData[this.state.currentPromptIndex].answers[1].answerText,
+                propietarioRespuesta2: this.promptsData[this.state.currentPromptIndex].answers[1].playerId
+                });
 
             }, 2000);
         };
 
-        // Cargar los datos de votación inicial
-        socket.on('getVotingData', (data) => {
-            this.setState({
-                prompt: data.prompt,
-                respuestaPrompt1: data.answer1,
-                propietarioRespuesta1: data.player1,
-                respuestaPrompt2: data.answer2,
-                propietarioRespuesta2: data.player2 // Asumiendo que tienes dos respuestas
-            });
-        });
+
 
         // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
 
@@ -297,7 +301,7 @@ function Prompt({texto}) {
     const prevTexto = useRef(texto);
 
     useEffect(() => {
-        if (prevTexto.current != texto) {
+        if (prevTexto.current !== texto) {
             setDisplayText(texto);
             prevTexto.current = texto;
         }
