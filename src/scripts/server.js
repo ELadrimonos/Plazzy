@@ -110,12 +110,13 @@ io.on('connection', (socket) => {
         // console.log('Usuario desconectado:', socket.id);
     });
 
-    socket.on('playerAnswer', (lobbyCode, playerID, answer) => {
+    socket.on('playerAnswer', async (lobbyCode, playerID, answer, promptId) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             const playerData = lobby.data.find((d) => d.playerId === playerID);
             if (playerData) {
                 playerData.answers.push(answer);
+                await crearRespuestasBBDD(lobby, playerID, answer, promptId)
                 comprobarNumeroDeRespuestas(lobbyCode);
             } else {
                 console.error('No se encontraron datos del jugador con ID:', playerID);
@@ -181,7 +182,7 @@ io.on('connection', (socket) => {
     socket.on('loadNextVotingData', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            socket.emit('getVotingData', lobby.data.prompts);
+            socket.emit('getVotingData', lobby.data);
         }
     });
 
@@ -218,7 +219,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('startVoting', (lobbyCode) => {
+    socket.on('startVoting',  (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             io.to(lobbyCode).emit('getVotingData', lobby.data);
@@ -244,7 +245,6 @@ io.on('connection', (socket) => {
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.FINAL_SCREEN);
             const ganador = devolverJugadoresPorPuntuacion(lobby.players)[0];
             const indexGanador = lobby.players.findIndex((p) => p.id === ganador.id);
-            console.log('GANADOR: ', indexGanador);
             io.to(lobbyCode).emit('getWinner', indexGanador);
         }
     });
@@ -253,11 +253,9 @@ io.on('connection', (socket) => {
     socket.on('startLobby', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            //TODO: Guardar todos los datos en la BBDD
+            clearLobbyData(lobby);
             lobby.id = generateUUID();
             lobby.round = 1;
-            clearLobbyData(lobby);
-
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.LOBBY);
         }
     });
@@ -274,7 +272,6 @@ const closeLobby = (lobbyCode) => {
 
 
     if (room) {
-        // Eliminar la sala de la lista de lobbies
         const index = lobbies.findIndex(lobby => lobby.code === lobbyCode);
         if (index !== -1) {
             lobbies.splice(index, 1);
@@ -409,6 +406,27 @@ async function crearJugadoresBBDD(lobbyId, player) {
     }
 }
 
+async function crearRespuestasBBDD(lobby, playerId, answerText, promptId) {
+    const url = `http://localhost:8080/api/answers/create`;
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            answerText: answerText,
+            promptId: promptId,
+            playerId: playerId,
+            ronda: lobby.round,
+            lobbyId: lobby.id
+        })
+    };
+    const response = await fetch(url, requestOptions);
+    if (!response.ok) {
+        console.error(`Error al registrar la respuesta en la base de datos: ${response.status} - ${response.statusText}`);
+    }
+}
+
 function clearLobbyData(lobby) {
     //TODO: Guardar en la base de datos
     // Usando la ronda actual y llamarlo al cambio de ronda
@@ -448,6 +466,7 @@ async function playerUseSafetyAnswer(lobbyCode, playerID) {
             }
             const safetyAnswer = await getRandomSafetyAnswer(promptID);
             playerData.answers.push(safetyAnswer);
+            await crearRespuestasBBDD(lobby, playerID, safetyAnswer, promptID);
         } else {
             console.error('No se encontraron datos del jugador con ID:', playerID);
         }
@@ -526,7 +545,7 @@ async function addScoreToPlayer(lobby, player) {
         player.score += 100 * lobby.round;
         const url = `http://localhost:8080/api/players/update-score`;
         const requestOptions = {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },

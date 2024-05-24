@@ -49,11 +49,11 @@ export function Contador({ className, tiempoInicial, onTiempoTerminado }) {
   return <h2 className={className}>{tiempoActual}</h2>;
 }
 
-export function InputRespuestaLimitado({socket, playerID, gameCode, onHandleSubmitRef ,styles, maxLength = 30}) {
+export function InputRespuestaLimitado({socket, playerID, promptId, gameCode, onHandleSubmitRef ,styles, maxLength = 30}) {
     const [respuesta, setRespuesta] = useState('');
 
     function enviarRespuesta() {
-        socket.emit('playerAnswer', gameCode, playerID, respuesta);
+        socket.emit('playerAnswer', gameCode, playerID, respuesta, promptId);
         onHandleSubmitRef();
         setRespuesta('');
     }

@@ -36,20 +36,24 @@ class JokeBattle extends Juego {
             promptId: 0,
             bloquearRespuestas: false,
             respuestaSeleccionada: false,
+            promptsData: [],
         };
         this.interval = null;
         this.modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
-        this.promptsData = [];
+
+
         socket.on('getVotingData', (data) => {
             console.log('EJECUTADO GETVOTINGDATA');
-            this.promptsData = data;
+
             this.setState({
-                prompt: data[this.state.currentPromptIndex].promptText,
-                promptId: data[this.state.currentPromptIndex].promptId,
-                respuestaPrompt1: data[this.state.currentPromptIndex].answers[0].answerText,
-                propietarioRespuesta1: data[this.state.currentPromptIndex].answers[0].playerId,
-                respuestaPrompt2: data[this.state.currentPromptIndex].answers[1].answerText,
-                propietarioRespuesta2: data[this.state.currentPromptIndex].answers[1].playerId
+                promptsData: data,
+                currentPromptIndex: 0,
+                prompt: data[0].promptText,
+                promptId: data[0].promptId,
+                respuestaPrompt1: data[0].answers[0].answerText,
+                propietarioRespuesta1: data[0].answers[0].playerId,
+                respuestaPrompt2: data[0].answers[1].answerText,
+                propietarioRespuesta2: data[0].answers[1].playerId
             });
         });
     }
@@ -93,6 +97,7 @@ class JokeBattle extends Juego {
 
     componentWillUnmount() {
         clearInterval(this.interval);
+        socket.off('getVotingData');
     }
 
     startVoting() {
@@ -162,6 +167,7 @@ class JokeBattle extends Juego {
                             <Prompt texto={this.state.prompts[this.state.currentPromptIndex]}/>
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
+                                                    promptId={this.state.prompts[this.state.currentPromptIndex].id}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
                             <SafetyButton handleSubmit={handleSubmit} gameCode={this.GameCode}
                                           playerId={this.playerReference.id}/>
@@ -191,46 +197,42 @@ class JokeBattle extends Juego {
         );
     }
 
-    startNewRound() {
-        super.startNewRound();
-    }
-
     renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
-            if (this.isPlayerHost()) {
-                socket.emit('loadNextVotingData', this.GameCode);
-                // Reiniciar el contador y las animaciones
-                this.setState({
-                    senalMostrarRespuestas: false,
-                    senalMostrarPropietarios: false,
-                    respuestaSeleccionada: false
-                });
-                // Volver a cargar los datos de votación
-                mostrarSiguientesRespuestas();
-            }
-        };
-
+            socket.emit('loadNextVotingData', this.GameCode);
+            // Reiniciar el contador y las animaciones
+            this.setState({
+                senalMostrarRespuestas: false,
+                senalMostrarPropietarios: false,
+                respuestaSeleccionada: false
+            });
+            // Volver a cargar los datos de votación
+            mostrarSiguientesRespuestas();
+        }
         const mostrarSiguientesRespuestas = () => {
             setTimeout(() => {
-                this.setState({senalMostrarRespuestas: true})
-                this.setState({respuestaSeleccionada: false});
-                this.setState({currentPromptIndex: this.state.currentPromptIndex + 1});
-
-                this.setState({
-                    prompt: this.promptsData[this.state.currentPromptIndex].promptText,
-                    promptId: this.promptsData[this.state.currentPromptIndex].promptId,
-                    respuestaPrompt1: this.promptsData[this.state.currentPromptIndex].answers[0].answerText,
-                    propietarioRespuesta1: this.promptsData[this.state.currentPromptIndex].answers[0].playerId,
-                    respuestaPrompt2: this.promptsData[this.state.currentPromptIndex].answers[1].answerText,
-                    propietarioRespuesta2: this.promptsData[this.state.currentPromptIndex].answers[1].playerId
+                this.setState((prevState) => {
+                    const newIndex = prevState.currentPromptIndex + 1;
+                    if (newIndex < prevState.promptsData.length) {
+                        return {
+                            senalMostrarRespuestas: true,
+                            currentPromptIndex: newIndex,
+                            prompt: prevState.promptsData[newIndex].promptText,
+                            promptId: prevState.promptsData[newIndex].promptId,
+                            respuestaPrompt1: prevState.promptsData[newIndex].answers[0].answerText,
+                            propietarioRespuesta1: prevState.promptsData[newIndex].answers[0].playerId,
+                            respuestaPrompt2: prevState.promptsData[newIndex].answers[1].answerText,
+                            propietarioRespuesta2: prevState.promptsData[newIndex].answers[1].playerId
+                        };
+                    } else {
+                        return {
+                            senalMostrarRespuestas: false
+                        };
+                    }
                 });
-
             }, 2000);
-        };
-
-
-        // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
+        }
 
         const handleClickRespuesta = (propietario) => {
             if (!this.state.respuestaSeleccionada) {
@@ -255,14 +257,14 @@ class JokeBattle extends Juego {
 
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
                 <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
-                <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
             </section>
         );
     }
 
     renderPuntuacion() {
         return <PodioPuntuacion jugadores={this.state.jugadoresConectados}/>
-    };
+    }
+    ;
 
 
     renderFin() {
@@ -289,7 +291,8 @@ class JokeBattle extends Juego {
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
                             <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20}/>
-                            <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
+                            <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]}
+                                           animationName="idle"/>
                         </Canvas>
                     </>
                 }
@@ -300,7 +303,9 @@ class JokeBattle extends Juego {
 }
 
 
-function Prompt({texto}) {
+function
+
+Prompt({texto}) {
     const [displayText, setDisplayText] = useState(texto);
     const prevTexto = useRef(texto);
 
@@ -319,48 +324,50 @@ function Prompt({texto}) {
     );
 }
 
-const Noria = React.memo(function Noria({jugadores, offset = 0}) {
-    const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
-    const [springStyles, setSpringStyles] = useSpring(() => ({
-        transform: `rotate(${offset * 45}deg)`
-    }));
+const
+    Noria = React.memo(function Noria({jugadores, offset = 0}) {
+        const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
+        const [springStyles, setSpringStyles] = useSpring(() => ({
+            transform: `rotate(${offset * 45}deg)`
+        }));
 
-    useEffect(() => {
-        setConnectedPlayers(jugadores);
-        setSpringStyles({transform: `rotate(${offset * 45}deg)`});
-        console.log("offset effect: " + offset);
-    }, [jugadores, offset, setSpringStyles]);
+        useEffect(() => {
+            setConnectedPlayers(jugadores);
+            setSpringStyles({transform: `rotate(${offset * 45}deg)`});
+        }, [jugadores, offset, setSpringStyles]);
 
-    let counter = 0;
-    const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
+        let counter = 0;
+        const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
 
-    const iconosJugadores = connectedPlayers.map((jugador) => (
-        <div className={styles.palo} key={jugador.id}>
-            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]}
-                          style={springStyles}/>
-        </div>
-    ));
-
-    // Rellenar los espacios restantes con IconoJugador vacíos
-    for (let i = connectedPlayers.length; i < 8; i++) {
-        iconosJugadores.push(
-            <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
-                <IconoJugador/>
+        const iconosJugadores = connectedPlayers.map((jugador) => (
+            <div className={styles.palo} key={jugador.id}>
+                <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]}
+                              style={springStyles}/>
             </div>
-        );
-    }
+        ));
 
-    return <>{iconosJugadores}</>;
-});
+        // Rellenar los espacios restantes con IconoJugador vacíos
+        for (let i = connectedPlayers.length; i < 8; i++) {
+            iconosJugadores.push(
+                <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
+                    <IconoJugador/>
+                </div>
+            );
+        }
 
-function RespuestaPrompt({
-                             texto,
-                             propietario,
-                             desdeIzquierda,
-                             senalMostrarPropietarios,
-                             onClick
-                         }) {
+        return <>{iconosJugadores}</>;
+    });
+
+function
+
+RespuestaPrompt({
+                    texto,
+                    propietario,
+                    desdeIzquierda,
+                    senalMostrarPropietarios,
+                    onClick
+                }) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
         config: {duration: 3000},
@@ -388,17 +395,19 @@ function RespuestaPrompt({
     );
 }
 
-function RespuestasPrompt({
-                              gameCode,
-                              handleTimeout,
-                              handleClickRespuesta,
-                              prompt,
-                              respuestaIzq,
-                              respuestaDer,
-                              propietarioIzq,
-                              propietarioDer,
-                              senalMostrarPropietarios
-                          }) {
+function
+
+RespuestasPrompt({
+                     gameCode,
+                     handleTimeout,
+                     handleClickRespuesta,
+                     prompt,
+                     respuestaIzq,
+                     respuestaDer,
+                     propietarioIzq,
+                     propietarioDer,
+                     senalMostrarPropietarios
+                 }) {
     return (
         <>
             <header className={styles.promptHeader}>
@@ -421,7 +430,9 @@ function RespuestasPrompt({
 
 }
 
-function AnimatedPropietario({propietario, senalMostrarPropietarios}) {
+function
+
+AnimatedPropietario({propietario, senalMostrarPropietarios}) {
     const props = useSpring({
         opacity: senalMostrarPropietarios ? 1 : 0,
         visibility: senalMostrarPropietarios ? 'visible' : 'hidden',
@@ -432,30 +443,33 @@ function AnimatedPropietario({propietario, senalMostrarPropietarios}) {
     );
 }
 
-const IntroduccionJokeBattle = () => {
-    const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
+const
+    IntroduccionJokeBattle = () => {
+        const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
 
-    const trail = useTrail(title.length, {
-        config: {mass: 5, tension: 600, friction: 200},
-        opacity: 1,
-        x: 0,
-        from: {opacity: 0, x: 20},
-    });
+        const trail = useTrail(title.length, {
+            config: {mass: 5, tension: 600, friction: 200},
+            opacity: 1,
+            x: 0,
+            from: {opacity: 0, x: 20},
+        });
 
-    return (
-        <div>
-            {trail.map((props, index) => (
-                <a.h1 className={styles.title} key={index} style={props}>
-                    {title[index]}
-                </a.h1>
-            ))}
-            <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases
-                recibidas y serán juzgados por el resto de jugadores.</p>
-        </div>
-    );
-};
+        return (
+            <div>
+                {trail.map((props, index) => (
+                    <a.h1 className={styles.title} key={index} style={props}>
+                        {title[index]}
+                    </a.h1>
+                ))}
+                <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases
+                    recibidas y serán juzgados por el resto de jugadores.</p>
+            </div>
+        );
+    };
 
-function PodioPuntuacion({jugadores = []}) {
+function
+
+PodioPuntuacion({jugadores = []}) {
     const [jugadoresConectados, setJugadoresConectados] = useState(jugadores);
     const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
@@ -510,7 +524,9 @@ function PodioPuntuacion({jugadores = []}) {
     );
 }
 
-function SafetyButton({gameCode, playerId, handleSubmit}) {
+function
+
+SafetyButton({gameCode, playerId, handleSubmit}) {
     const [clicked, setClicked] = useState(false);
 
     const animationProps = useSpring({
