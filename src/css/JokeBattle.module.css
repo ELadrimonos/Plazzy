@@ -436,6 +436,20 @@
     font-size: 1.5em;
 }
 
+.answerScreen .rondaActual {
+    font-size: 1.6em;
+    font-weight: bold;
+    backdrop-filter: brightness(80%) blur(5px);
+    border-radius: 30px;
+    color: white;
+    user-select: none;
+    padding: 10px;
+    margin: 0;
+    position: absolute;
+    left: 5%;
+    top: 5%;
+}
+
 .answerScreen .safetySendButton {
     max-width: 500px;
     font-size: 1.3em;
@@ -469,7 +483,7 @@
     font-size: 3em;
     font-weight: bold;
     backdrop-filter: brightness(80%) blur(5px);
-    border-radius: 50%;
+    border-radius: 15px;
     color: white;
     padding: 10px;
     margin: 0;
@@ -498,12 +512,16 @@
     font-size: 1.5em;
 }
 
-.answerInput > h2 {
+.answerInput .respuestaLength {
     position: absolute;
-    right: -25px;
-    top: -45px;
+    right: -35px;
+    top: -55px;
     rotate: 25deg;
     font-size: 1em;
+    background-color: #008CBA;
+    color: white;
+    padding: 5px;
+    border-radius: 10px;
 }
 
 .answerScreen .jugadores {

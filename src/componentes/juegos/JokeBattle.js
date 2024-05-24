@@ -74,7 +74,6 @@ class JokeBattle extends Juego {
             this.setState({prevOffsetNoria: prevState.offsetNoria});
         }
         if (this.state.estadoJuego === 'puntuaje' && this.state.rondaActual >= this.maxRounds && prevState.estadoJuego !== 'puntuaje') {
-            console.log('PARTIDA TERMINADA')
             setTimeout(
                 function () {
                     this.startEndGame();
@@ -82,6 +81,22 @@ class JokeBattle extends Juego {
                     .bind(this),
                 5000
             );
+        } else if (this.state.estadoJuego === 'puntuaje' && prevState.estadoJuego !== 'puntuaje') {
+            console.log('UNA DEMNADA')
+            if (this.isPlayerHost()) {
+                setTimeout(
+                    function () {
+                        this.startNewRound();
+                    }
+                        .bind(this),
+                    5000
+                );
+            }
+
+        }
+        if (this.state.estadoJuego === 'votando' && prevState.estadoJuego !== 'votando') {
+            this.setState({bloquearRespuestas: false, currentPromptIndex: 0});
+
         }
     }
 
@@ -115,10 +130,6 @@ class JokeBattle extends Juego {
         socket.off('getVotingData');
     }
 
-    startVoting() {
-        super.startVoting();
-        this.setState({bloquearRespuestas: false, currentPromptIndex: 0});
-    }
 
 // Métodos para renderizar diferentes estados del juego
     renderLobby() {
@@ -173,8 +184,9 @@ class JokeBattle extends Juego {
 
         return (
             <>
-                <FondoColoresRandom/>;
+                <FondoColoresRandom/>
                 <section className={styles.answerScreen}>
+                    <h1 className={styles.rondaActual}>RONDA {this.state.rondaActual}</h1>
                     <Contador className={styles.contador} tiempoInicial={90}
                               onTiempoTerminado={handleRunOutOfTime}/>
                     {!this.state.bloquearRespuestas && (
@@ -280,8 +292,7 @@ class JokeBattle extends Juego {
 
     renderPuntuacion() {
         return <PodioPuntuacion jugadores={this.state.jugadoresConectados}/>
-    }
-    ;
+    };
 
 
     renderFin() {
@@ -549,11 +560,11 @@ SafetyButton({gameCode, playerId, handleSubmit}) {
     const [clicked, setClicked] = useState(false);
 
     const animationProps = useSpring({
-        transform: clicked ? 'skewX(20deg)' : 'skewX(0deg)',
+        transform: clicked ? 'scale(0.9)' : 'scale(1)',
         background: clicked ? '#a9a611' : '#d2b638',
         fontWeight: clicked ? 'bold' : 'normal',
-        from: {transform: 'skewX(0deg)', background: '#d2b638', fontWeight: 'normal'},
-        config: {duration: 500},
+        from: {transform: 'scale(1)', background: '#d2b638', fontWeight: 'normal'},
+        config: {duration: 200},
         onRest: () => setClicked(false),
     });
 

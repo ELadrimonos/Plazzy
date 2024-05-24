@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
+import {useSpring, animated} from '@react-spring/web'
 
 export function IconoJugador({nombreClase, nombre, rutaImagen, style}) {
     return (
@@ -59,8 +60,20 @@ export function InputRespuestaLimitado({
                                            maxLength = 30
                                        }) {
     const [respuesta, setRespuesta] = useState('');
+        const [clicked, setClicked] = useState(false);
+
+    const animationProps = useSpring({
+        transform: clicked ? 'scale(0.9)' : 'scale(1)',
+        background: clicked ? '#770a5f' : '#d23885',
+        border: '3px solid black',
+        fontWeight: clicked ? 'bold' : 'normal',
+        from: {transform: 'scale(1)', background: '#d23885', fontWeight: 'normal'},
+        config: {duration: 200},
+        onRest: () => setClicked(false),
+    });
 
     function enviarRespuesta() {
+        setClicked(true);
         if (respuesta !== '') {
             socket.emit('playerAnswer', gameCode, playerID, respuesta, promptId);
             onHandleSubmitRef();
@@ -70,7 +83,7 @@ export function InputRespuestaLimitado({
 
     return (
         <div className={styles.answerInput}>
-            <h2>{respuesta.length}/30</h2>
+            <h2 className={styles.respuestaLength}>{respuesta.length}/30</h2>
             <input
                 type="text"
                 value={respuesta}
@@ -78,7 +91,7 @@ export function InputRespuestaLimitado({
                 onChange={e => setRespuesta(e.target.value)}
                 onSubmit={enviarRespuesta}
             />
-            <button onClick={enviarRespuesta}>Enviar</button>
+            <animated.button style={animationProps} onClick={enviarRespuesta}>Enviar</animated.button>
         </div>
     );
 }

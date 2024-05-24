@@ -149,7 +149,9 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             clearLobbyData(lobby);
+            lobby.round++;
             await generatePromptsForPlayers(lobbyCode);
+            io.to(lobbyCode).emit('updateRound', lobby.round);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
         }
     });
