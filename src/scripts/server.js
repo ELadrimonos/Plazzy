@@ -117,7 +117,7 @@ io.on('connection', (socket) => {
             if (playerData) {
                 playerData.answers.push(answer);
                 await crearRespuestasBBDD(lobby, playerID, answer, promptId)
-                comprobarNumeroDeRespuestas(lobbyCode);
+                await comprobarNumeroDeRespuestas(lobbyCode);
             } else {
                 console.error('No se encontraron datos del jugador con ID:', playerID);
             }
@@ -147,6 +147,7 @@ io.on('connection', (socket) => {
     socket.on('newRound', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            clearLobbyData(lobby);
             lobby.round++;
             await generatePromptsForPlayers(lobbyCode);
             io.to(lobbyCode).emit('updateRound', lobby.round);
@@ -213,19 +214,14 @@ io.on('connection', (socket) => {
     socket.on('startVoting', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            console.log('START VOTING')
-            io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
-            console.log(JSON.stringify(lobby.data, null, 2));
             io.to(lobbyCode).emit('getVotingData', lobby.data);
+            io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
         }
     });
 
     socket.on('startResults', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            await addScoreToPlayer(lobby, lobby.players[0]);
-            io.to(lobbyCode).emit('updatePlayers', lobby.players);
-
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
             clearLobbyData(lobby);
         }

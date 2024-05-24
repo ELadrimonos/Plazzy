@@ -230,34 +230,60 @@ class JokeBattle extends Juego {
     renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
-            // Reiniciar el contador y las animaciones
+
             this.setState({
                 senalMostrarRespuestas: false,
                 senalMostrarPropietarios: false,
                 respuestaSeleccionada: false
             });
-            // Volver a cargar los datos de votación
-            mostrarSiguientesRespuestas();
-        }
-        const mostrarSiguientesRespuestas = () => {
-            console.log(this.state.promptsData)
-            setTimeout(() => {
-                this.setState((prevState) => {
-                    const newIndex = prevState.currentPromptIndex + 1;
-                    return {
-                        senalMostrarRespuestas: true,
-                        currentPromptIndex: newIndex,
-                        prompt: prevState.promptsData[newIndex].promptText,
-                        promptId: prevState.promptsData[newIndex].promptId,
-                        respuestaPrompt1: prevState.promptsData[newIndex].answers[0].answerText,
-                        propietarioRespuesta1: prevState.promptsData[newIndex].answers[0].playerId,
-                        respuestaPrompt2: prevState.promptsData[newIndex].answers[1].answerText,
-                        propietarioRespuesta2: prevState.promptsData[newIndex].answers[1].playerId
-                    };
 
-                });
-            }, 2000);
+            mostrarSiguientesRespuestas();
+        };
+
+        const getPlayerName = (id) => {
+            const player = this.state.jugadoresConectados.find((jugador) => jugador.id === id);
+            if (player) {
+                return player.name;
+            }
         }
+
+
+        const mostrarSiguientesRespuestas = () => {
+            this.setState({
+                senalMostrarPropietarios: true
+            });
+
+            setTimeout(() => {
+                const {currentPromptIndex, promptsData} = this.state;
+                const newIndex = currentPromptIndex + 1;
+
+                if (newIndex >= promptsData.length) {
+                    this.setState({
+                        senalMostrarRespuestas: false,
+                        senalMostrarPropietarios: false,
+                        respuestaSeleccionada: false
+                    });
+
+                    if (this.isPlayerHost()) {
+                        socket.emit('startResults', this.GameCode);
+                    }
+                } else {
+                    const nextPrompt = promptsData[newIndex];
+                    this.setState({
+                        senalMostrarRespuestas: true,
+                        senalMostrarPropietarios: false,
+                        currentPromptIndex: newIndex,
+                        prompt: nextPrompt.promptText,
+                        promptId: nextPrompt.promptId,
+                        respuestaPrompt1: nextPrompt.answers[0].answerText,
+                        propietarioRespuesta1: getPlayerName(nextPrompt.answers[0].playerId),
+                        respuestaPrompt2: nextPrompt.answers[1].answerText,
+                        propietarioRespuesta2: getPlayerName(nextPrompt.answers[1].playerId),
+                        respuestaSeleccionada: false
+                    });
+                }
+            }, 3000);
+        };
 
         const handleClickRespuesta = (propietario) => {
             if (!this.state.respuestaSeleccionada) {
@@ -279,6 +305,7 @@ class JokeBattle extends Juego {
                                   respuestaDer={this.state.respuestaPrompt2}
                                   handleClickRespuesta={handleClickRespuesta}
                                   gameCode={this.GameCode}
+                                  bloquearRespuestas={this.state.respuestaSeleccionada}
                 />
 
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
@@ -388,7 +415,8 @@ function RespuestaPrompt({
                              propietario,
                              desdeIzquierda,
                              senalMostrarPropietarios,
-                             onClick
+                             clickFunc,
+                             bloquearRespuesta
                          }) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
@@ -396,6 +424,8 @@ function RespuestaPrompt({
         config: {duration: 3000},
         reset: true // Asegúrate de reiniciar la animación
     }));
+
+
 
     useEffect(() => {
         api.start({from: {x: desdeIzquierda ? -100 : 100}, to: {x: 0}});
@@ -405,9 +435,11 @@ function RespuestaPrompt({
         <animated.div
             style={{...springs}}
             className={styles.promptResponse}
-            onClick={onClick}
+            onClick={() => {
+                if (!bloquearRespuesta) clickFunc(propietario);
+            }}
         >
-            <p>{texto}</p>
+            <p className={bloquearRespuesta ? styles.responseTextBold : styles.responseText}>{texto}</p>
             <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios}/>
         </animated.div>
     );
@@ -422,7 +454,8 @@ function RespuestasPrompt({
                               respuestaDer,
                               propietarioIzq,
                               propietarioDer,
-                              senalMostrarPropietarios
+                              senalMostrarPropietarios,
+                              bloquearRespuestas
                           }) {
     return (
         <>
@@ -438,7 +471,8 @@ function RespuestasPrompt({
                     texto={respuestaIzq}
                     propietario={propietarioIzq}
                     senalMostrarPropietarios={senalMostrarPropietarios}
-                    onClick={() => handleClickRespuesta(propietarioIzq)}
+                    clickFunc={() => handleClickRespuesta(propietarioIzq)}
+                    bloquearRespuesta={bloquearRespuestas}
                 />
                 <RespuestaPrompt
                     key={`der-${prompt}`} // Añadir key para forzar el reinicio del componente
@@ -446,7 +480,8 @@ function RespuestasPrompt({
                     texto={respuestaDer}
                     propietario={propietarioDer}
                     senalMostrarPropietarios={senalMostrarPropietarios}
-                    onClick={() => handleClickRespuesta(propietarioDer)}
+                    clickFunc={() => handleClickRespuesta(propietarioDer)}
+                    bloquearRespuesta={bloquearRespuestas}
                 />
             </div>
         </>
@@ -460,37 +495,34 @@ function AnimatedPropietario({propietario, senalMostrarPropietarios}) {
     });
 
     return (
-        <animated.h5 style={props}>{propietario}</animated.h5>
+        <animated.h5 className={styles.responseOwner} style={props}>{propietario}</animated.h5>
     );
 }
 
-const
-    IntroduccionJokeBattle = () => {
-        const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
+const IntroduccionJokeBattle = () => {
+    const title = ['¿Cómo', 'jugar?']; // Texto dividido en palabras
 
-        const trail = useTrail(title.length, {
-            config: {mass: 5, tension: 600, friction: 200},
-            opacity: 1,
-            x: 0,
-            from: {opacity: 0, x: 20},
-        });
+    const trail = useTrail(title.length, {
+        config: {mass: 5, tension: 600, friction: 200},
+        opacity: 1,
+        x: 0,
+        from: {opacity: 0, x: 20},
+    });
 
-        return (
-            <div>
-                {trail.map((props, index) => (
-                    <a.h1 className={styles.title} key={index} style={props}>
-                        {title[index]}
-                    </a.h1>
-                ))}
-                <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases
-                    recibidas y serán juzgados por el resto de jugadores.</p>
-            </div>
-        );
-    };
+    return (
+        <div>
+            {trail.map((props, index) => (
+                <a.h1 className={styles.title} key={index} style={props}>
+                    {title[index]}
+                </a.h1>
+            ))}
+            <p>El juego consta de 3 rondas, donde los jugadores rellenarán los espacios restantes de las frases
+                recibidas y serán juzgados por el resto de jugadores.</p>
+        </div>
+    );
+};
 
-function
-
-PodioPuntuacion({jugadores = []}) {
+function PodioPuntuacion({jugadores = []}) {
     const [jugadoresConectados, setJugadoresConectados] = useState(jugadores);
     const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
@@ -545,9 +577,7 @@ PodioPuntuacion({jugadores = []}) {
     );
 }
 
-function
-
-SafetyButton({gameCode, playerId, handleSubmit}) {
+function SafetyButton({gameCode, playerId, handleSubmit}) {
     const [clicked, setClicked] = useState(false);
 
     const animationProps = useSpring({

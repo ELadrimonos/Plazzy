@@ -78,6 +78,7 @@ class Juego extends Component {
             this.generarQRLobby();
         }
         if (this.state.estadoJuego === 'respondiendo' && prevState.estadoJuego !== 'respondiendo') {
+            console.log('getPlayerPrompts');
             socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
         }
     }
