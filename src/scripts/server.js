@@ -68,7 +68,6 @@ io.on('connection', (socket) => {
             game: idJuego,
             data: [],
             round: 1,
-            promptsOrder: [],
             isCreatedInDB: false
         };
         lobbies.push(newLobby);
@@ -137,12 +136,10 @@ io.on('connection', (socket) => {
                 lobby.isCreatedInDB = true;
             }
 
-
             await generatePromptsForPlayers(lobbyCode);
-            console.log("Enviando evento 'cambiarEscena' a la sala:", lobbyCode);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
         } else {
-            console.log("¡El lobby no existe!");
+            console.warn("¡El lobby no existe!");
         }
     });
 
@@ -152,7 +149,6 @@ io.on('connection', (socket) => {
             await generatePromptsForPlayers(lobbyCode);
             clearLobbyData(lobby);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
-
         }
     });
 
@@ -184,7 +180,6 @@ io.on('connection', (socket) => {
     socket.on('loadNextVotingData', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-
             socket.emit('getVotingData', lobby.data.prompts);
         }
     });
@@ -198,7 +193,6 @@ io.on('connection', (socket) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
             const player = lobby.players.find((p) => p.name === playerName);
-            console.log('LLAMADA A EVENTO SOCKET playerVote')
             await addScoreToPlayer(lobby, player);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
 
@@ -226,7 +220,6 @@ io.on('connection', (socket) => {
     socket.on('startVoting', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            associateAnswersToUniquePrompt(lobby);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
         }
     });
@@ -351,6 +344,7 @@ async function generatePromptsForPlayers(lobbyCode, language = 'ES') {
 
                     // console.log('DATA ARRAY (generatePromptsForPlayers): ', dataArray);
                     lobby.data.push(dataArray);
+
                 });
             } else {
                 console.error(`Error al obtener las prompts en el idioma ${language}: ${response.status} - ${response.statusText}`);
@@ -468,51 +462,77 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
         if (d.answers.length === 2) count++;
     });
     if (count === lobby.data.length) {
+        associateAnswersToUniquePrompt(lobby);
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
     }
 }
 
 function getPromptsUnicos(lobby) {
-    const prompts = lobby.data.prompts.slice();
-    const promptsUnicos = [];
-    prompts.forEach((prompt) => {
-        if (!promptsUnicos.includes(prompt)) {
-            promptsUnicos.push(prompt);
+    const dataArray = lobby.data;
+    const prompts = dataArray.map(obj => obj.prompts).flat();
+    return prompts.reduce((unique, prompt) => {
+        const exists = unique.some(p => p.id === prompt.id_prompt && p.text === prompt.text);
+        if (!exists) {
+            unique.push({id: prompt.id_prompt, text: prompt.text});
         }
-    });
-    return promptsUnicos;
+        return unique;
+    }, []);
 }
 
+// TODO arreglar esta función
 function getAnswersDePrompts(lobby, prompt) {
-    const answers = lobby.data.answers.slice();
+    const dataArray = lobby.data;
     const answersDePrompts = [];
-    answers.forEach((answer) => {
-        if (answer === prompt) {
-            answersDePrompts.push(answer);
-        }
-        if (answersDePrompts.length > 2) {
-            console.warn('EXISTEN MÁS DE 2 RESPUESTAS DE UN MISMO PROMPT: ' + prompt + '\n LOBBY: ' + lobby);
-        }
+
+    dataArray.forEach(obj => {
+        obj.prompts.forEach(p => {
+            if (p.text === prompt) {
+                const promptIndex = obj.prompts.findIndex(prompt => prompt.text === prompt);
+                if (promptIndex !== -1) {
+                    const answer = obj.answers[promptIndex];
+                    answersDePrompts.push({ playerId: obj.playerId, text: answer });
+                }
+            }
+        });
     });
+
+    // Comprobamos si hay más de 2 respuestas para el mismo prompt
+    if (answersDePrompts.length > 2) {
+        console.warn('EXISTEN MÁS DE 2 RESPUESTAS DE UN MISMO PROMPT: ' + prompt + '\n LOBBY: ' + JSON.stringify(lobby));
+    }
+
+    // Devolvemos solo los objetos encontrados
     return answersDePrompts;
 }
 
+
+
 function associateAnswersToUniquePrompt(lobby) {
-    lobby.data.forEach((data) => {
-        const promptsUnicos = getPromptsUnicos(lobby);
-        const answersDePrompts = [];
-        promptsUnicos.forEach((prompt) => {
-            answersDePrompts.push(getAnswersDePrompts(lobby, prompt));
+    const promptsUnicos = getPromptsUnicos(lobby);
+    const newData = [];
+
+    promptsUnicos.forEach((prompt) => {
+        const promptId = prompt.id;
+        console.log( 'Prompt ID:', promptId);
+        const answersDePrompt = [];
+
+        lobby.data.forEach((data) => {
+            const answers = getAnswersDePrompts(lobby, prompt.text);
+            answers.forEach((answer) => {
+                answersDePrompt.push({ playerId: data.playerId, text: answer.text });
+            });
         });
-        data.answers = answersDePrompts;
+
+        newData.push({ promptId: promptId, answers: answersDePrompt });
     });
-    console.log('Datos individualizados: ', lobby.data);
+
+    lobby.data = newData;
+    console.log('Datos individualizados: ', JSON.stringify(lobby.data));
 }
 
 async function addScoreToPlayer(lobby, player) {
     if (player) {
         player.score += 100 * lobby.round;
-        console.log('JUGADORES CON PUNTOS ACTUALIZADOS (addScoreToPlayer): ', lobby.players);
         const url = `http://localhost:8080/api/players/update-score`;
         const requestOptions = {
             method: 'POST',

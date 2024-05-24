@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Juego from './Juego';
 import {CodigoPartida, Contador, IconoJugador, IconoLobby, InputRespuestaLimitado} from "../ComponentesComunes";
 import styles from '../../css/JokeBattle.module.css';
@@ -145,13 +145,8 @@ class JokeBattle extends Juego {
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
-                            <button className={styles.safetySendButton} onClick={() => {
-                                socket.emit('playerUseSafetyAnswer', this.GameCode, this.playerReference.id);
-                                handleSubmit();
-                            }
-                            }
-                            >¡Ayudame!
-                            </button>
+                            <SafetyButton handleSubmit={handleSubmit} gameCode={this.GameCode}
+                                          playerId={this.playerReference.id}/>
                         </>)}
                     <section className={styles.jugadores}>
                         <Canvas className={styles.listaJugadores}>
@@ -198,17 +193,20 @@ class JokeBattle extends Juego {
             setTimeout(() => {
                 this.setState({senalMostrarRespuestas: true})
                 this.setState({respuestaSeleccionada: false});
-                return <RespuestasPrompt prompt={this.state.prompt}
-                                         senalMostrarRespuestas={this.state.senalMostrarRespuestas}
-                                         senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                                         handleTimeout={handleTimeout}
-                                         propietarioIzq={this.state.propietarioRespuesta1}
-                                         propietarioDer={this.state.propietarioRespuesta2}
-                                         respuestaIzq={this.state.respuestaPrompt1}
-                                         respuestaDer={this.state.respuestaPrompt2}
-                                         handleClickRespuesta={handleClickRespuesta}
-                                         gameCode={this.GameCode}
-                />
+
+                // Actualizar solamente todos los campos
+
+
+                // return <RespuestasPrompt prompt={this.state.prompt}
+                //                          senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                //                          handleTimeout={handleTimeout}
+                //                          propietarioIzq={this.state.propietarioRespuesta1}
+                //                          propietarioDer={this.state.propietarioRespuesta2}
+                //                          respuestaIzq={this.state.respuestaPrompt1}
+                //                          respuestaDer={this.state.respuestaPrompt2}
+                //                          handleClickRespuesta={handleClickRespuesta}
+                //                          gameCode={this.GameCode}
+                // />
 
             }, 2000);
         };
@@ -235,7 +233,17 @@ class JokeBattle extends Juego {
 
         return (
             <section className={styles.round}>
-                mostrarSiguientesRespuestas();
+
+                <RespuestasPrompt prompt={this.state.prompt}
+                                  senalMostrarPropietarios={this.state.senalMostrarPropietarios}
+                                  handleTimeout={handleTimeout}
+                                  propietarioIzq={this.state.propietarioRespuesta1}
+                                  propietarioDer={this.state.propietarioRespuesta2}
+                                  respuestaIzq={this.state.respuestaPrompt1}
+                                  respuestaDer={this.state.respuestaPrompt2}
+                                  handleClickRespuesta={handleClickRespuesta}
+                                  gameCode={this.GameCode}
+                />
 
                 <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
                 <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
@@ -283,13 +291,24 @@ class JokeBattle extends Juego {
     }
 }
 
-function Prompt({texto}) {
-    const props = useSpring({
-        from: {opacity: 0, transform: 'scale(0)'},
-        to: {opacity: 1, transform: 'scale(1)'},
-    });
 
-    return <animated.h1 className={styles.prompt} style={{...props}}>{texto}</animated.h1>;
+function Prompt({texto}) {
+    const [displayText, setDisplayText] = useState(texto);
+    const prevTexto = useRef(texto);
+
+    useEffect(() => {
+        if (prevTexto.current != texto) {
+            setDisplayText(texto);
+            prevTexto.current = texto;
+        }
+    }, [texto]);
+
+
+    return (
+        <h1 className={styles.prompt}>
+            {displayText}
+        </h1>
+    );
 }
 
 const Noria = React.memo(function Noria({jugadores, offset = 0}) {
@@ -331,25 +350,21 @@ function RespuestaPrompt({
                              texto,
                              propietario,
                              desdeIzquierda,
-                             senalMostrarRespuestas,
                              senalMostrarPropietarios,
                              onClick
                          }) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
-        config: {duration: senalMostrarRespuestas ? 1000 : 500},
-        delay: senalMostrarRespuestas ? 0 : 200, // Ajusta el retraso en la animación si no se muestran las respuestas
-        visibility: senalMostrarRespuestas ? 'visible' : 'hidden', // Define la visibilidad inicial
+        config: {duration: desdeIzquierda ? 1000 : 500},
+        delay: desdeIzquierda ? 1000 : 6000, // Ajusta el retraso en la animación si no se muestran las respuestas
     }));
 
     useEffect(() => {
-        if (senalMostrarRespuestas) {
-            api.start({
-                from: {x: desdeIzquierda ? -100 : 100},
-                to: {x: 0},
-            });
-        }
-    }, [senalMostrarRespuestas, api, desdeIzquierda]);
+        api.start({
+            from: {x: desdeIzquierda ? -100 : 100},
+            to: {x: 0},
+        });
+    }, [api, desdeIzquierda]);
 
     return (
         <animated.div
@@ -360,8 +375,7 @@ function RespuestaPrompt({
             onClick={onClick} // Aquí se pasa la función onClick
         >
             <p>{texto}</p>
-            <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios}
-                                 senalMostrarRespuestas={senalMostrarRespuestas}/>
+            <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios}/>
         </animated.div>
     );
 }
@@ -375,7 +389,6 @@ function RespuestasPrompt({
                               respuestaDer,
                               propietarioIzq,
                               propietarioDer,
-                              senalMostrarRespuestas,
                               senalMostrarPropietarios
                           }) {
     return (
@@ -388,12 +401,10 @@ function RespuestasPrompt({
             <div className={styles.promptMessages}>
                 <RespuestaPrompt desdeIzquierda={true} texto={respuestaIzq}
                                  propietario={propietarioIzq}
-                                 senalMostrarRespuestas={senalMostrarRespuestas}
                                  senalMostrarPropietarios={senalMostrarPropietarios}
                                  onClick={() => handleClickRespuesta(propietarioIzq)}/>
                 <RespuestaPrompt desdeIzquierda={false} texto={respuestaDer}
                                  propietario={propietarioDer}
-                                 senalMostrarRespuestas={senalMostrarRespuestas}
                                  senalMostrarPropietarios={senalMostrarPropietarios}
                                  onClick={() => handleClickRespuesta(propietarioDer)}/>
             </div>
@@ -402,10 +413,10 @@ function RespuestasPrompt({
 
 }
 
-function AnimatedPropietario({propietario, senalMostrarPropietarios, senalMostrarRespuestas}) {
+function AnimatedPropietario({propietario, senalMostrarPropietarios}) {
     const props = useSpring({
-        opacity: senalMostrarPropietarios && senalMostrarRespuestas ? 1 : 0,
-        visibility: senalMostrarPropietarios && senalMostrarRespuestas ? 'visible' : 'hidden',
+        opacity: senalMostrarPropietarios ? 1 : 0,
+        visibility: senalMostrarPropietarios ? 'visible' : 'hidden',
     });
 
     return (
@@ -488,6 +499,35 @@ function PodioPuntuacion({jugadores = []}) {
                 })}
             </div>
         </div>
+    );
+}
+
+function SafetyButton({gameCode, playerId, handleSubmit}) {
+    const [clicked, setClicked] = useState(false);
+
+    const animationProps = useSpring({
+        transform: clicked ? 'skewX(20deg)' : 'skewX(0deg)',
+        background: clicked ? '#a9a611' : '#d2b638',
+        fontWeight: clicked ? 'bold' : 'normal',
+        from: {transform: 'skewX(0deg)', background: '#d2b638', fontWeight: 'normal'},
+        config: {duration: 500},
+        onRest: () => setClicked(false),
+    });
+
+    const handleClick = () => {
+        setClicked(true);
+        socket.emit('playerUseSafetyAnswer', gameCode, playerId);
+        handleSubmit();
+    };
+
+    return (
+        <animated.button
+            className={styles.safetySendButton}
+            style={animationProps}
+            onClick={handleClick}
+        >
+            ¡Ayudame!
+        </animated.button>
     );
 }
 

@@ -318,11 +318,30 @@
 }
 
 .round {
+    position: relative;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10%;
     height: 100vh;
+}
+
+.round::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -10;
+    background: radial-gradient(circle, rgba(0, 212, 255, 1) 8%, rgba(9, 9, 121, 1) 61%, rgba(2, 0, 36, 1) 86%);
+    animation: tunnelEffect 5s infinite linear;
+}
+
+@keyframes tunnelEffect {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        filter: hue-rotate(360deg);
+    }
 }
 
 .round header {
@@ -421,31 +440,23 @@
     max-width: 500px;
     font-size: 1.3em;
     background: none;
-    transition: 300ms;
     width: max-content;
     padding: 15px 30px;
     background: #d2b638;
+    position: relative;
+    overflow: hidden;
 }
 
-.answerScreen .safetySendButton:active {
-    transform: skewX(20deg);
-    background: #fffb00;
-    font-weight: bold;
-
-}
-
-.answerScreen .safetySendButton:active::before {
-    font-size: 1.6em;
-
-}
 
 .answerScreen .safetySendButton::before {
     content: "!";
     color: red;
     font-weight: bold;
-    transition: 300ms;
+    font-size: 1em;
+
 
 }
+
 
 .answerScreen .prompt {
     padding: 10px;
@@ -617,7 +628,7 @@
     width: 100%;
 }
 
-.scoreScreen{
+.scoreScreen {
     text-align: center;
     background-color: #0f181e;
     margin: 0;
