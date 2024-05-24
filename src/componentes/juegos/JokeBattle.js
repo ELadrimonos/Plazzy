@@ -47,28 +47,17 @@ class JokeBattle extends Juego {
     }
 
     getVotingData(data) {
-        console.log('GET VOTING DATA FUNC: ', data);
         this.setState({
             promptsData: data,
             currentPromptIndex: 0,
             prompt: data[0].promptText,
             promptId: data[0].promptId,
             respuestaPrompt1: data[0].answers[0].answerText,
-            propietarioRespuesta1: data[0].answers[0].playerId,
+            propietarioRespuesta1: this.getPlayerName(data[0].answers[0].playerId),
             respuestaPrompt2: data[0].answers[1].answerText,
-            propietarioRespuesta2: data[0].answers[1].playerId
+            propietarioRespuesta2: this.getPlayerName(data[0].answers[1].playerId),
         });
     };
-
-    // Método para emitir señal para mostrar respuestas
-    emitirSenalMostrarRespuestas = (valor) => {
-        this.setState({senalMostrarRespuestas: valor});
-    }
-
-    // Método para emitir señal para mostrar propietarios
-    emitirSenalMostrarPropietarios = (valor) => {
-        this.setState({senalMostrarPropietarios: valor});
-    }
 
     componentDidUpdate(prevProps, prevState) {
         super.componentDidUpdate(prevProps, prevState);
@@ -227,6 +216,14 @@ class JokeBattle extends Juego {
         );
     }
 
+    getPlayerName = (id) => {
+        const player = this.state.jugadoresConectados.find((jugador) => jugador.id === id);
+        if (player) {
+            return player.name;
+        }
+    }
+
+
     renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
@@ -239,13 +236,6 @@ class JokeBattle extends Juego {
 
             mostrarSiguientesRespuestas();
         };
-
-        const getPlayerName = (id) => {
-            const player = this.state.jugadoresConectados.find((jugador) => jugador.id === id);
-            if (player) {
-                return player.name;
-            }
-        }
 
 
         const mostrarSiguientesRespuestas = () => {
@@ -285,9 +275,9 @@ class JokeBattle extends Juego {
                         prompt: nextPrompt.promptText,
                         promptId: nextPrompt.promptId,
                         respuestaPrompt1: nextPrompt.answers[0].answerText,
-                        propietarioRespuesta1: getPlayerName(nextPrompt.answers[0].playerId),
+                        propietarioRespuesta1: this.getPlayerName(nextPrompt.answers[0].playerId),
                         respuestaPrompt2: nextPrompt.answers[1].answerText,
-                        propietarioRespuesta2: getPlayerName(nextPrompt.answers[1].playerId),
+                        propietarioRespuesta2: this.getPlayerName(nextPrompt.answers[1].playerId),
                         respuestaSeleccionada: false
                     });
                 }
@@ -316,9 +306,6 @@ class JokeBattle extends Juego {
                                   gameCode={this.GameCode}
                                   bloquearRespuestas={this.state.respuestaSeleccionada}
                 />
-
-                <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
-                <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
             </section>
         );
     }
@@ -435,7 +422,6 @@ function RespuestaPrompt({
     }));
 
 
-
     useEffect(() => {
         api.start({from: {x: desdeIzquierda ? -100 : 100}, to: {x: 0}});
     }, [api, desdeIzquierda, texto]);
@@ -471,7 +457,7 @@ function RespuestasPrompt({
             <header className={styles.promptHeader}>
                 <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
                 <Prompt texto={prompt}/>
-                <IconoLobby gameCode={gameCode}/>
+                <IconoLobby className={styles.gameCode} gameCode={gameCode}/>
             </header>
             <div className={styles.promptMessages}>
                 <RespuestaPrompt

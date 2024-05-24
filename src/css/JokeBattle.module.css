@@ -432,12 +432,47 @@
     left: 25%;
 }
 
+
 .promptResponse > .responseText {
     font-weight: normal;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .promptResponse > .responseTextBold {
     font-weight: bold;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+@media screen and (max-width: 767px) {
+    .round .promptMessages {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+    }
+
+
+    .round .promptMessages .promptResponse {
+        width: 300px;
+        height: 200px;
+    }
+
+    .promptResponse > .responseText {
+        font-weight: normal;
+        max-width: 100%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        font-size: 0.4em;
+    }
+
+    .promptHeader .gameCode {
+        display: none;
+    }
 }
 
 .round .promptMessages .promptResponse:nth-child(2) {
@@ -484,9 +519,8 @@
     color: red;
     font-weight: bold;
     font-size: 1em;
-
-
 }
+
 
 
 .answerScreen .prompt {
@@ -557,6 +591,31 @@
     z-index: 100;
     gap: 20px;
     width: 100%;
+}
+
+
+@media screen and (max-width: 767px) {
+    .answerScreen {
+
+        margin-top: 150px;
+    }
+
+    .answerScreen .safetySendButton {
+        font-size: 1em;
+    }
+
+    .answerScreen .contador {
+        top: 0;
+        position: absolute;
+        right: 0;
+        font-weight: bold;
+        backdrop-filter: brightness(80%) blur(5px);
+        border-radius: 15px;
+        color: white;
+        padding: 10px;
+        margin: 0;
+    }
+
 }
 
 .answerScreen .jugadores .listaJugadores .icono {
