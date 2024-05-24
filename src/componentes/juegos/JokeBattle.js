@@ -14,7 +14,7 @@ import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
 import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 import {Canvas} from "@react-three/fiber";
-import {OrthographicCamera} from "@react-three/drei";
+import {PerspectiveCamera} from "@react-three/drei";
 import FondoColoresRandom from "../FondoColoresRandom";
 
 class JokeBattle extends Juego {
@@ -73,6 +73,16 @@ class JokeBattle extends Juego {
         if (prevState.offsetNoria !== this.state.offsetNoria) {
             this.setState({prevOffsetNoria: prevState.offsetNoria});
         }
+        if (this.state.estadoJuego === 'puntuaje' && this.state.rondaActual >= this.maxRounds && prevState.estadoJuego !== 'puntuaje') {
+            console.log('PARTIDA TERMINADA')
+            setTimeout(
+                function () {
+                    this.startEndGame();
+                }
+                    .bind(this),
+                5000
+            );
+        }
     }
 
 
@@ -87,6 +97,11 @@ class JokeBattle extends Juego {
                 },
                 1000
             );
+        }
+        if (this.state.estadoJuego === 'puntuaje') {
+            if (this.state.rondaActual >= this.maxRounds) {
+                setTimeout(this.startEndGame, 5000);
+            }
         }
 
     }
@@ -105,7 +120,7 @@ class JokeBattle extends Juego {
         this.setState({bloquearRespuestas: false, currentPromptIndex: 0});
     }
 
-    // Métodos para renderizar diferentes estados del juego
+// Métodos para renderizar diferentes estados del juego
     renderLobby() {
 
         return (
@@ -176,7 +191,7 @@ class JokeBattle extends Juego {
                         <Canvas className={styles.listaJugadores}>
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
-                            <OrthographicCamera makeDefault position={[0, 0, 50]} zoom={20}/>
+                            <PerspectiveCamera fov={10} makeDefault position={[0, 0, 10000]}/>
                             <ModeloJugador modeloPath={this.modelos[indexJugador]}
                                            animationName={!this.state.bloquearRespuestas ? "idle" : null}
                                            bloquearRespuestas={this.state.bloquearRespuestas}/>
@@ -193,6 +208,8 @@ class JokeBattle extends Juego {
             <section className={styles.introScreen}>
                 <IntroduccionJokeBattle/>
                 <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
+                <button onClick={() => this.startEndGame()}>Finalizar</button>
+
             </section>
         );
     }
@@ -274,28 +291,30 @@ class JokeBattle extends Juego {
         });
 
         return (
-            <section>
+            <section className={styles.endScreen}>
                 <h1>Fin de la partida</h1>
-                {
-                    this.isPlayerHost() && (
-                        <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
-                    )
-                }
-                <button onClick={() => window.location.reload()}>Regresar al menú</button>
 
                 {
                     this.state.ganador &&
                     <>
                         <h2>GANADOR: {this.state.ganador.name}</h2>
-                        <Canvas>
+                        <Canvas className={styles.winnerModel}>
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
-                            <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20}/>
+                            <PerspectiveCamera fov={10} makeDefault position={[0, 0, 10000]}/>
                             <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]}
                                            animationName="idle"/>
                         </Canvas>
                     </>
                 }
+                <div className={styles.buttonList}>
+                    {
+                        this.isPlayerHost() && (
+                            <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
+                        )
+                    }
+                    <button onClick={() => window.location.reload()}>Regresar al menú</button>
+                </div>
 
             </section>
         );

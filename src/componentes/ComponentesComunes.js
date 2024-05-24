@@ -8,7 +8,7 @@ export function IconoJugador({nombreClase, nombre, rutaImagen, style}) {
         </div>);
 }
 
-export function IconoLobby({gameCode}){
+export function IconoLobby({gameCode}) {
     return (
         <div>
             <h3>plazzy.es</h3>
@@ -23,51 +23,62 @@ export function CodigoPartida({gameCode}) {
 
 // onTiempoTerminado es una función que se ejecuta cuando termina
 
-export function Contador({ className, tiempoInicial, onTiempoTerminado }) {
-  const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
-  const intervaloRef = useRef(null);
+export function Contador({className, tiempoInicial, onTiempoTerminado}) {
+    const [tiempoActual, setTiempoActual] = useState(tiempoInicial);
+    const intervaloRef = useRef(null);
 
-  useEffect(() => {
-    intervaloRef.current = setInterval(() => {
-      setTiempoActual(tiempo => {
-        if (tiempo > 0) {
-          return tiempo - 1;
-        } else {
-          clearInterval(intervaloRef.current);
-          if (onTiempoTerminado !== undefined) {
-            onTiempoTerminado();
-          }
-          return tiempo;
-        }
-      });
-    }, 1000);
+    useEffect(() => {
+        intervaloRef.current = setInterval(() => {
+            setTiempoActual(tiempo => {
+                if (tiempo > 0) {
+                    return tiempo - 1;
+                } else {
+                    clearInterval(intervaloRef.current);
+                    if (onTiempoTerminado !== undefined) {
+                        onTiempoTerminado();
+                    }
+                    return tiempo;
+                }
+            });
+        }, 1000);
 
-    // Limpiar el intervalo al desmontar el componente
-    return () => clearInterval(intervaloRef.current);
-  }, [tiempoActual]);
+        // Limpiar el intervalo al desmontar el componente
+        return () => clearInterval(intervaloRef.current);
+    }, [tiempoActual]);
 
-  return <h2 className={className}>{tiempoActual}</h2>;
+    return <h2 className={className}>{tiempoActual}</h2>;
 }
 
-export function InputRespuestaLimitado({socket, playerID, promptId, gameCode, onHandleSubmitRef ,styles, maxLength = 30}) {
+export function InputRespuestaLimitado({
+                                           socket,
+                                           playerID,
+                                           promptId,
+                                           gameCode,
+                                           onHandleSubmitRef,
+                                           styles,
+                                           maxLength = 30
+                                       }) {
     const [respuesta, setRespuesta] = useState('');
 
     function enviarRespuesta() {
-        socket.emit('playerAnswer', gameCode, playerID, respuesta, promptId);
-        onHandleSubmitRef();
-        setRespuesta('');
+        if (respuesta !== '') {
+            socket.emit('playerAnswer', gameCode, playerID, respuesta, promptId);
+            onHandleSubmitRef();
+            setRespuesta('');
+        }
     }
 
     return (
         <div className={styles.answerInput}>
-        <h2>{respuesta.length}/30</h2>
-    <input
-        type="text"
-        value={respuesta}
-        maxLength={maxLength}
-        onChange={e => setRespuesta( e.target.value)}
-    />
-    <button onClick={enviarRespuesta}>Enviar</button>
-            </div>
+            <h2>{respuesta.length}/30</h2>
+            <input
+                type="text"
+                value={respuesta}
+                maxLength={maxLength}
+                onChange={e => setRespuesta(e.target.value)}
+                onSubmit={enviarRespuesta}
+            />
+            <button onClick={enviarRespuesta}>Enviar</button>
+        </div>
     );
 }
