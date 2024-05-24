@@ -261,7 +261,16 @@ class JokeBattle extends Juego {
                     this.setState({
                         senalMostrarRespuestas: false,
                         senalMostrarPropietarios: false,
-                        respuestaSeleccionada: false
+                        respuestaSeleccionada: false,
+                        prompts: [],
+                        currentPromptIndex: 0,
+                        prompt: "",
+                        promptId: "",
+                        respuestaPrompt1: "",
+                        propietarioRespuesta1: "",
+                        respuestaPrompt2: "",
+                        propietarioRespuesta2: "",
+                        promptsData: []
                     });
 
                     if (this.isPlayerHost()) {
@@ -421,7 +430,7 @@ function RespuestaPrompt({
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
         to: {x: 0},
-        config: {duration: 3000},
+        config: {duration: 1200},
         reset: true // Asegúrate de reiniciar la animación
     }));
 
@@ -429,7 +438,7 @@ function RespuestaPrompt({
 
     useEffect(() => {
         api.start({from: {x: desdeIzquierda ? -100 : 100}, to: {x: 0}});
-    }, [api, desdeIzquierda, texto]); // Reinicia la animación cuando 'texto' cambia
+    }, [api, desdeIzquierda, texto]);
 
     return (
         <animated.div

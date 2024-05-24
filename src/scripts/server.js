@@ -222,6 +222,7 @@ io.on('connection', (socket) => {
     socket.on('startResults', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            io.to(lobbyCode).emit('updatePlayers', lobby.players);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
             clearLobbyData(lobby);
         }
