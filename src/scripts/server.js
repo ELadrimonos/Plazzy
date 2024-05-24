@@ -138,7 +138,7 @@ io.on('connection', (socket) => {
             }
 
             await generatePromptsForPlayers(lobbyCode);
-            console.log(JSON.stringify(lobby.data, null, 2));
+            // console.log(JSON.stringify(lobby.data, null, 2));
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
         } else {
             console.warn("¡El lobby no existe!");
@@ -206,7 +206,8 @@ io.on('connection', (socket) => {
         if (lobby) {
             const playerData = lobby.data.find((obj) => obj.playerId === playerID);
             if (playerData) {
-                const playerPrompts = playerData.prompts.filter(objeto => objeto !== undefined).map(objeto => objeto.text);
+                const playerPrompts = playerData.prompts;
+                console.log(JSON.stringify(playerPrompts, null, 2));
                 socket.emit('getPrompts', playerPrompts);
             }
         }

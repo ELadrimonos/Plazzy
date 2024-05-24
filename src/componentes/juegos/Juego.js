@@ -48,6 +48,8 @@ class Juego extends Component {
   }
 
   startAnswering() {
+      socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
+
     socket.emit('startAnswering', this.GameCode);
   }
 

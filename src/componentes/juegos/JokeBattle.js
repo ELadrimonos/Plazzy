@@ -164,10 +164,10 @@ class JokeBattle extends Juego {
                               onTiempoTerminado={handleRunOutOfTime}/>
                     {!this.state.bloquearRespuestas && (
                         <>
-                            <Prompt texto={this.state.prompts[this.state.currentPromptIndex]}/>
+                            <Prompt texto={this.state.prompts[this.state.currentPromptIndex]?.text}/>
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
-                                                    promptId={this.state.prompts[this.state.currentPromptIndex].id}
+                                                    promptId={this.state.prompts[this.state.currentPromptIndex]?.id_prompt}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
                             <SafetyButton handleSubmit={handleSubmit} gameCode={this.GameCode}
                                           playerId={this.playerReference.id}/>
