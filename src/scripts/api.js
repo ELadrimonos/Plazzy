@@ -128,7 +128,7 @@ router.post('/players/create', (req, res) => {
     })
 });
 
-router.post('/players/update-score', (req, res) => {
+router.put('/players/update', (req, res) => {
     const { lobbyId, playerId, score } = req.body;
 
     db.query('SELECT * FROM salas WHERE id_sala = ?', [lobbyId], (error, results) => {

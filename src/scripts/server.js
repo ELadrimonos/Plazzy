@@ -481,9 +481,6 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
         if (d.answers.length === 2) count++;
     });
     if (count === lobby.data.length && lobby.data.length > 0) {
-        console.log('COMPROBAR NUMERO DE RESPUESTAS: ', lobby.data);
-        console.log('COMPROBAR NUMERO DE RESPUESTAS LONGITUD: ', lobby.data.length);
-        console.log('COMPROBAR NUMERO DE RESPUESTAS CONTADOR: ', count);
         associateAnswersToUniquePrompt(lobby);
         io.to(lobbyCode).emit('getPrompts', GameScreens.VOTING);
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
@@ -544,7 +541,7 @@ function associateAnswersToUniquePrompt(lobby) {
 async function addScoreToPlayer(lobby, player) {
     if (player) {
         player.score += 100 * lobby.round;
-        const url = `http://localhost:8080/api/players/update-score`;
+        const url = `http://localhost:8080/api/players/update`;
         const requestOptions = {
             method: 'PUT',
             headers: {
@@ -553,12 +550,17 @@ async function addScoreToPlayer(lobby, player) {
             body: JSON.stringify({
                 playerId: player.id,
                 score: player.score,
-                lobbyId: lobby.lobbyId
+                lobbyId: lobby.id // Asegúrate de que este es el campo correcto
             })
         };
-        const response = await fetch(url, requestOptions);
-        if (!response.ok) {
-            console.error(`Error actualizar puntuación del jugador ${playerName} (addScoreToPlayer): ${response.status} - ${response.statusText}`);
+        try {
+            const response = await fetch(url, requestOptions);
+            const responseData = await response.text(); // Leer el cuerpo de la respuesta para obtener más detalles
+            if (!response.ok) {
+                console.error(`Error actualizar puntuación del jugador ${player.name} (addScoreToPlayer): ${response.status} - ${responseData}`);
+            }
+        } catch (error) {
+            console.error(error.message);
         }
     }
 }
