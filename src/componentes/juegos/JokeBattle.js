@@ -41,22 +41,24 @@ class JokeBattle extends Juego {
         this.interval = null;
         this.modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
 
-
-        socket.on('getVotingData', (data) => {
-            console.log('EJECUTADO GETVOTINGDATA');
-
-            this.setState({
-                promptsData: data,
-                currentPromptIndex: 0,
-                prompt: data[0].promptText,
-                promptId: data[0].promptId,
-                respuestaPrompt1: data[0].answers[0].answerText,
-                propietarioRespuesta1: data[0].answers[0].playerId,
-                respuestaPrompt2: data[0].answers[1].answerText,
-                propietarioRespuesta2: data[0].answers[1].playerId
-            });
-        });
+        socket.on('receiveVotingData', (data) => {
+            this.getVotingData(data);
+        })
     }
+
+    getVotingData(data) {
+        console.log('GET VOTING DATA FUNC: ', data);
+        this.setState({
+            promptsData: data,
+            currentPromptIndex: 0,
+            prompt: data[0].promptText,
+            promptId: data[0].promptId,
+            respuestaPrompt1: data[0].answers[0].answerText,
+            propietarioRespuesta1: data[0].answers[0].playerId,
+            respuestaPrompt2: data[0].answers[1].answerText,
+            propietarioRespuesta2: data[0].answers[1].playerId
+        });
+    };
 
     // Método para emitir señal para mostrar respuestas
     emitirSenalMostrarRespuestas = (valor) => {
@@ -82,7 +84,6 @@ class JokeBattle extends Juego {
                 5000
             );
         } else if (this.state.estadoJuego === 'puntuaje' && prevState.estadoJuego !== 'puntuaje') {
-            console.log('UNA DEMNADA')
             if (this.isPlayerHost()) {
                 setTimeout(
                     function () {
@@ -166,6 +167,17 @@ class JokeBattle extends Juego {
             </>);
     }
 
+    renderIntro() {
+        return (
+            <section className={styles.introScreen}>
+                <IntroduccionJokeBattle/>
+                <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
+                <button onClick={() => this.startEndGame()}>Finalizar</button>
+
+            </section>
+        );
+    }
+
     renderRespondiendo() {
 
         const handleSubmit = () => {
@@ -215,21 +227,9 @@ class JokeBattle extends Juego {
         );
     }
 
-    renderIntro() {
-        return (
-            <section className={styles.introScreen}>
-                <IntroduccionJokeBattle/>
-                <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
-                <button onClick={() => this.startEndGame()}>Finalizar</button>
-
-            </section>
-        );
-    }
-
     renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
-            socket.emit('loadNextVotingData', this.GameCode);
             // Reiniciar el contador y las animaciones
             this.setState({
                 senalMostrarRespuestas: false,
@@ -240,25 +240,21 @@ class JokeBattle extends Juego {
             mostrarSiguientesRespuestas();
         }
         const mostrarSiguientesRespuestas = () => {
+            console.log(this.state.promptsData)
             setTimeout(() => {
                 this.setState((prevState) => {
                     const newIndex = prevState.currentPromptIndex + 1;
-                    if (newIndex < prevState.promptsData.length) {
-                        return {
-                            senalMostrarRespuestas: true,
-                            currentPromptIndex: newIndex,
-                            prompt: prevState.promptsData[newIndex].promptText,
-                            promptId: prevState.promptsData[newIndex].promptId,
-                            respuestaPrompt1: prevState.promptsData[newIndex].answers[0].answerText,
-                            propietarioRespuesta1: prevState.promptsData[newIndex].answers[0].playerId,
-                            respuestaPrompt2: prevState.promptsData[newIndex].answers[1].answerText,
-                            propietarioRespuesta2: prevState.promptsData[newIndex].answers[1].playerId
-                        };
-                    } else {
-                        return {
-                            senalMostrarRespuestas: false
-                        };
-                    }
+                    return {
+                        senalMostrarRespuestas: true,
+                        currentPromptIndex: newIndex,
+                        prompt: prevState.promptsData[newIndex].promptText,
+                        promptId: prevState.promptsData[newIndex].promptId,
+                        respuestaPrompt1: prevState.promptsData[newIndex].answers[0].answerText,
+                        propietarioRespuesta1: prevState.promptsData[newIndex].answers[0].playerId,
+                        respuestaPrompt2: prevState.promptsData[newIndex].answers[1].answerText,
+                        propietarioRespuesta2: prevState.promptsData[newIndex].answers[1].playerId
+                    };
+
                 });
             }, 2000);
         }
@@ -273,7 +269,8 @@ class JokeBattle extends Juego {
         return (
             <section className={styles.round}>
 
-                <RespuestasPrompt prompt={this.state.prompt}
+                <RespuestasPrompt key={'Respuestas_' + this.state.currentPromptIndex}
+                                  prompt={this.state.prompt}
                                   senalMostrarPropietarios={this.state.senalMostrarPropietarios}
                                   handleTimeout={handleTimeout}
                                   propietarioIzq={this.state.propietarioRespuesta1}
@@ -333,9 +330,7 @@ class JokeBattle extends Juego {
 }
 
 
-function
-
-Prompt({texto}) {
+function Prompt({texto}) {
     const [displayText, setDisplayText] = useState(texto);
     const prevTexto = useRef(texto);
 
@@ -345,7 +340,6 @@ Prompt({texto}) {
             prevTexto.current = texto;
         }
     }, [texto]);
-
 
     return (
         <h1 className={styles.prompt}>
@@ -389,35 +383,29 @@ const
         return <>{iconosJugadores}</>;
     });
 
-function
-
-RespuestaPrompt({
-                    texto,
-                    propietario,
-                    desdeIzquierda,
-                    senalMostrarPropietarios,
-                    onClick
-                }) {
+function RespuestaPrompt({
+                             texto,
+                             propietario,
+                             desdeIzquierda,
+                             senalMostrarPropietarios,
+                             onClick
+                         }) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
+        to: {x: 0},
         config: {duration: 3000},
-        delay: desdeIzquierda ? 1000 : 3000, // Ajusta el retraso en la animación si no se muestran las respuestas
+        reset: true // Asegúrate de reiniciar la animación
     }));
 
     useEffect(() => {
-        api.start({
-            from: {x: desdeIzquierda ? -100 : 100},
-            to: {x: 0},
-        });
-    }, [api, desdeIzquierda]);
+        api.start({from: {x: desdeIzquierda ? -100 : 100}, to: {x: 0}});
+    }, [api, desdeIzquierda, texto]); // Reinicia la animación cuando 'texto' cambia
 
     return (
         <animated.div
-            style={{
-                ...springs,
-            }}
+            style={{...springs}}
             className={styles.promptResponse}
-            onClick={onClick} // Aquí se pasa la función onClick
+            onClick={onClick}
         >
             <p>{texto}</p>
             <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios}/>
@@ -425,19 +413,17 @@ RespuestaPrompt({
     );
 }
 
-function
-
-RespuestasPrompt({
-                     gameCode,
-                     handleTimeout,
-                     handleClickRespuesta,
-                     prompt,
-                     respuestaIzq,
-                     respuestaDer,
-                     propietarioIzq,
-                     propietarioDer,
-                     senalMostrarPropietarios
-                 }) {
+function RespuestasPrompt({
+                              gameCode,
+                              handleTimeout,
+                              handleClickRespuesta,
+                              prompt,
+                              respuestaIzq,
+                              respuestaDer,
+                              propietarioIzq,
+                              propietarioDer,
+                              senalMostrarPropietarios
+                          }) {
     return (
         <>
             <header className={styles.promptHeader}>
@@ -446,26 +432,31 @@ RespuestasPrompt({
                 <IconoLobby gameCode={gameCode}/>
             </header>
             <div className={styles.promptMessages}>
-                <RespuestaPrompt desdeIzquierda={true} texto={respuestaIzq}
-                                 propietario={propietarioIzq}
-                                 senalMostrarPropietarios={senalMostrarPropietarios}
-                                 onClick={() => handleClickRespuesta(propietarioIzq)}/>
-                <RespuestaPrompt desdeIzquierda={false} texto={respuestaDer}
-                                 propietario={propietarioDer}
-                                 senalMostrarPropietarios={senalMostrarPropietarios}
-                                 onClick={() => handleClickRespuesta(propietarioDer)}/>
+                <RespuestaPrompt
+                    key={`izq-${prompt}`} // Añadir key para forzar el reinicio del componente
+                    desdeIzquierda={true}
+                    texto={respuestaIzq}
+                    propietario={propietarioIzq}
+                    senalMostrarPropietarios={senalMostrarPropietarios}
+                    onClick={() => handleClickRespuesta(propietarioIzq)}
+                />
+                <RespuestaPrompt
+                    key={`der-${prompt}`} // Añadir key para forzar el reinicio del componente
+                    desdeIzquierda={false}
+                    texto={respuestaDer}
+                    propietario={propietarioDer}
+                    senalMostrarPropietarios={senalMostrarPropietarios}
+                    onClick={() => handleClickRespuesta(propietarioDer)}
+                />
             </div>
         </>
     );
-
 }
 
-function
-
-AnimatedPropietario({propietario, senalMostrarPropietarios}) {
+function AnimatedPropietario({propietario, senalMostrarPropietarios}) {
     const props = useSpring({
         opacity: senalMostrarPropietarios ? 1 : 0,
-        visibility: senalMostrarPropietarios ? 'visible' : 'hidden',
+        visibility: senalMostrarPropietarios ? 'visible' : 'hidden'
     });
 
     return (

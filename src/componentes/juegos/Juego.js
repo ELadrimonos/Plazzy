@@ -79,14 +79,12 @@ class Juego extends Component {
         }
         if (this.state.estadoJuego === 'respondiendo' && prevState.estadoJuego !== 'respondiendo') {
             socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
-            console.log('Emitido getPlayerPrompts: ' + this.GameCode + ', ' + this.playerReference.id);
         }
     }
 
     generarQRLobby() {
         const imgQRCode = document.getElementById("QRcode");
-        let url = window.location.href + "/game/" + this.GameCode;
-        console.log('URL IMAGEN: ' + url)
+        let url = window.location.href + "game/" + this.GameCode;
         imgQRCode.src = "https://api.qrserver.com/v1/create-qr-code/?data=" + url + "";
     }
 
