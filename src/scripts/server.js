@@ -137,6 +137,7 @@ io.on('connection', (socket) => {
             }
 
             await generatePromptsForPlayers(lobbyCode);
+            console.log(JSON.stringify(lobby.data, null, 2));
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.START);
         } else {
             console.warn("¡El lobby no existe!");
@@ -146,8 +147,8 @@ io.on('connection', (socket) => {
     socket.on('newRound', async (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            await generatePromptsForPlayers(lobbyCode);
             clearLobbyData(lobby);
+            await generatePromptsForPlayers(lobbyCode);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.ANSWER);
         }
     });
@@ -202,7 +203,7 @@ io.on('connection', (socket) => {
     socket.on('getPlayerPrompts', (lobbyCode, playerID) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
-            const playerData = lobby.data.find((data) => data.playerId === playerID);
+            const playerData = lobby.data.find((obj) => obj.playerId === playerID);
             if (playerData) {
                 const playerPrompts = playerData.prompts.filter(objeto => objeto !== undefined).map(objeto => objeto.text);
                 socket.emit('getPrompts', playerPrompts);
@@ -220,6 +221,7 @@ io.on('connection', (socket) => {
     socket.on('startVoting', (lobbyCode) => {
         const lobby = getLobby(lobbyCode);
         if (lobby) {
+            io.to(lobbyCode).emit('getVotingData', lobby.data);
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);
         }
     });
@@ -229,8 +231,7 @@ io.on('connection', (socket) => {
         if (lobby) {
             await addScoreToPlayer(lobby, lobby.players[0]);
             io.to(lobbyCode).emit('updatePlayers', lobby.players);
-            // No se llama por alguna razon
-            // socket.emit('playerVote', lobbyCode, lobby.players[1].name);
+
             io.to(lobbyCode).emit('cambiarEscena', GameScreens.SCOREBOARD);
             clearLobbyData(lobby);
         }
@@ -298,7 +299,6 @@ function generateUUID() {
 }
 
 const getLobby = (lobbyCode) => lobbies.find((l) => l.code === lobbyCode);
-
 
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -420,7 +420,6 @@ function devolverJugadoresPorPuntuacion(jugadores) {
 }
 
 
-//TODO Arreglar esta función
 async function getRandomSafetyAnswer(id, language = 'ES') {
     const url = `http://localhost:8080/api/safety-answers/${id}/${language}`;
     const response = await fetch(url);
@@ -461,7 +460,10 @@ function comprobarNumeroDeRespuestas(lobbyCode) {
     lobby.data.forEach((d) => {
         if (d.answers.length === 2) count++;
     });
-    if (count === lobby.data.length) {
+    if (count === lobby.data.length && lobby.data.length > 0) {
+        console.log('COMPROBAR NUMERO DE RESPUESTAS: ', lobby.data);
+        console.log('COMPROBAR NUMERO DE RESPUESTAS LONGITUD: ', lobby.data.length);
+        console.log('COMPROBAR NUMERO DE RESPUESTAS CONTADOR: ', count);
         associateAnswersToUniquePrompt(lobby);
         io.to(lobbyCode).emit('getPrompts', GameScreens.VOTING);
         io.to(lobbyCode).emit('cambiarEscena', GameScreens.VOTING);

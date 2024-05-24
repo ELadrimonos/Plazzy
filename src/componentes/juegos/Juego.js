@@ -73,6 +73,7 @@ class Juego extends Component {
     }
     if (this.state.estadoJuego === 'respondiendo' && prevState.estadoJuego !== 'respondiendo') {
       socket.emit('getPlayerPrompts', this.GameCode, this.playerReference.id);
+      console.log('Emitido getPlayerPrompts: ' + this.GameCode + ', ' + this.playerReference.id);
     }
   }
 

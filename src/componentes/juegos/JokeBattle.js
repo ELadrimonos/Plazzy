@@ -41,6 +41,7 @@ class JokeBattle extends Juego {
         this.modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
         this.promptsData = [];
         socket.on('getVotingData', (data) => {
+            console.log('EJECUTADO GETVOTINGDATA');
             this.promptsData = data;
             this.setState({
                 prompt: data[this.state.currentPromptIndex].promptText,
@@ -94,6 +95,11 @@ class JokeBattle extends Juego {
         clearInterval(this.interval);
     }
 
+    startVoting() {
+        super.startVoting();
+        this.setState({bloquearRespuestas: false, currentPromptIndex: 0});
+    }
+
     // Métodos para renderizar diferentes estados del juego
     renderLobby() {
 
@@ -132,8 +138,8 @@ class JokeBattle extends Juego {
     renderRespondiendo() {
 
         const handleSubmit = () => {
-            if (this.state.promptIndex < this.state.prompts.length - 1)
-                this.setState({promptIndex: this.state.promptIndex + 1});
+            if (this.state.currentPromptIndex < this.state.prompts.length - 1)
+                this.setState({currentPromptIndex: this.state.currentPromptIndex + 1});
             else
                 this.setState({bloquearRespuestas: true});
         }
@@ -153,7 +159,7 @@ class JokeBattle extends Juego {
                               onTiempoTerminado={handleRunOutOfTime}/>
                     {!this.state.bloquearRespuestas && (
                         <>
-                            <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
+                            <Prompt texto={this.state.prompts[this.state.currentPromptIndex]}/>
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
@@ -187,7 +193,6 @@ class JokeBattle extends Juego {
 
     startNewRound() {
         super.startNewRound();
-        this.promptsData = [];
     }
 
     renderVotando() {
@@ -213,17 +218,16 @@ class JokeBattle extends Juego {
                 this.setState({currentPromptIndex: this.state.currentPromptIndex + 1});
 
                 this.setState({
-                                    prompt: this.promptsData[this.state.currentPromptIndex].promptText,
-                promptId: this.promptsData[this.state.currentPromptIndex].promptId,
-                respuestaPrompt1: this.promptsData[this.state.currentPromptIndex].answers[0].answerText,
-                propietarioRespuesta1: this.promptsData[this.state.currentPromptIndex].answers[0].playerId,
-                respuestaPrompt2: this.promptsData[this.state.currentPromptIndex].answers[1].answerText,
-                propietarioRespuesta2: this.promptsData[this.state.currentPromptIndex].answers[1].playerId
+                    prompt: this.promptsData[this.state.currentPromptIndex].promptText,
+                    promptId: this.promptsData[this.state.currentPromptIndex].promptId,
+                    respuestaPrompt1: this.promptsData[this.state.currentPromptIndex].answers[0].answerText,
+                    propietarioRespuesta1: this.promptsData[this.state.currentPromptIndex].answers[0].playerId,
+                    respuestaPrompt2: this.promptsData[this.state.currentPromptIndex].answers[1].answerText,
+                    propietarioRespuesta2: this.promptsData[this.state.currentPromptIndex].answers[1].playerId
                 });
 
             }, 2000);
         };
-
 
 
         // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
@@ -359,8 +363,8 @@ function RespuestaPrompt({
                          }) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
-        config: {duration: desdeIzquierda ? 1000 : 500},
-        delay: desdeIzquierda ? 1000 : 6000, // Ajusta el retraso en la animación si no se muestran las respuestas
+        config: {duration: 3000},
+        delay: desdeIzquierda ? 1000 : 3000, // Ajusta el retraso en la animación si no se muestran las respuestas
     }));
 
     useEffect(() => {
