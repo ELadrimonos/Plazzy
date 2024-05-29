@@ -1,13 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./db'); // Importa tu módulo de conexión a la base de datos
+const db = require('./db');
+const {join} = require("path");
+
+// Cargar la página index en el servidor
+router.get('/*', function(req, res) {
+  res.sendFile(join(__dirname, '/index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err)
+    }
+  })
+})
 
 // Obtener todos los prompts en un idioma específico
 router.get('/prompts/:gameId/:language', (req, res) => {
     const {gameId, language} = req.params;
 
     const query = 'SELECT id_prompt, text FROM prompts WHERE id_juego = ? AND idioma = ?';
-    db.query(query, [gameId, language], (err, results, fields) => {
+    db.query(query, [gameId, language], (err, results) => {
         if (err) {
             console.error('Error al obtener los prompts:', err);
             res.status(500).json({error: 'Error al obtener los prompts'});
