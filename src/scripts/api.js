@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
-const {join} = require("path");
 
 
 // Obtener todos los prompts en un idioma específico
@@ -206,16 +205,6 @@ router.post('/lobby/create', (req, res) => {
     });
 });
 
-// Serve the static files from the "public" directory
-router.use(express.static(join(__dirname, '../../public')));
 
-// Cargar la página index en el servidor (catch-all route)
-router.get('/*', function (req, res) {
-    res.sendFile(join(__dirname, '../../public/index.html'), function (err) {
-        if (err) {
-            res.status(500).send(err);
-        }
-    });
-});
 
 module.exports = router;
