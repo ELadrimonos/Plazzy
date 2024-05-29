@@ -8,16 +8,16 @@ const io = require('socket.io')(http, {
     }
 });
 const apiRoutes = require('./api');
-const {join} = require("path");
+const path = require('path');
 
 
 app.use(express.json());
 app.use('/api', apiRoutes);
 
-app.use(express.static(join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('*', function (req, res) {
-    res.sendFile(join(__dirname, 'build', 'index.html'), (err) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'), (err) => {
         if (err) {
             res.status(500).send(err);
         }
