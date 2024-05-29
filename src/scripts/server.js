@@ -14,10 +14,12 @@ const path = require('path');
 app.use(express.json());
 app.use('/api', apiRoutes);
 
-app.use(express.static(path.join(__dirname, 'build')));
+const appRoot = path.resolve(__dirname, '../..');
+const publicPath = path.join(appRoot, 'build');
 
-app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'), (err) => {
+app.use(express.static(publicPath));
+app.get('/*', function (req, res) {
+    res.sendFile(path.join(publicPath, 'index.html'), (err) => {
         if (err) {
             res.status(500).send(err);
         }
