@@ -26,7 +26,7 @@ const GameScreens = Object.freeze({
 const lobbies = [];
 
 
-http.listen(8080, () => console.log("LISTENING ON 8080"));
+http.listen(8181, () => console.log("LISTENING ON 8181"));
 
 
 io.on('connection', (socket) => {
