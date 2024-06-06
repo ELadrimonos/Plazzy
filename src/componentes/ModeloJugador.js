@@ -38,7 +38,7 @@ const ModeloJugador = ({ modeloPath, animationName, bloquearRespuestas }) => {
   });
 
   return (
-    <Stage environment={null}>
+    <Stage environment={null} receiveShadow={false}>
       <primitive object={scene} scale={[0.2, 0.2, 0.2]} ref={meshRef} />
     </Stage>
   );

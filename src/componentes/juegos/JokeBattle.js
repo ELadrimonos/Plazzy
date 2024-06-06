@@ -14,7 +14,7 @@ import logo6 from '../../assets/img/player_icons/JokeBattle/6.webp';
 import logo7 from '../../assets/img/player_icons/JokeBattle/7.webp';
 import ModeloJugador from "../ModeloJugador";
 import {Canvas} from "@react-three/fiber";
-import {OrthographicCamera} from "@react-three/drei";
+import {PerspectiveCamera} from "@react-three/drei";
 import FondoColoresRandom from "../FondoColoresRandom";
 
 class JokeBattle extends Juego {
@@ -32,29 +32,61 @@ class JokeBattle extends Juego {
             colorNoria: this.colorAleatorio(),
             offsetNoria: 0,
             prevOffsetNoria: 0,
-            promptIndex: 0,
+            currentPromptIndex: 0,
+            promptId: 0,
             bloquearRespuestas: false,
             respuestaSeleccionada: false,
+            promptsData: [],
         };
         this.interval = null;
         this.modelos = ["/Burger.glb", "/Cube.glb", "/Barrel.glb", "/Cross.glb", "/Monkey.glb", "/Cone.glb", "/Icosphere.glb", "/Triangle.glb"];
 
+        socket.on('receiveVotingData', (data) => {
+            this.getVotingData(data);
+        })
     }
 
-    // Método para emitir señal para mostrar respuestas
-    emitirSenalMostrarRespuestas = (valor) => {
-        this.setState({senalMostrarRespuestas: valor});
-    }
-
-    // Método para emitir señal para mostrar propietarios
-    emitirSenalMostrarPropietarios = (valor) => {
-        this.setState({senalMostrarPropietarios: valor});
-    }
+    getVotingData(data) {
+        this.setState({
+            promptsData: data,
+            currentPromptIndex: 0,
+            prompt: data[0].promptText,
+            promptId: data[0].promptId,
+            respuestaPrompt1: data[0].answers[0].answerText,
+            propietarioRespuesta1: this.getPlayerName(data[0].answers[0].playerId),
+            respuestaPrompt2: data[0].answers[1].answerText,
+            propietarioRespuesta2: this.getPlayerName(data[0].answers[1].playerId),
+        });
+    };
 
     componentDidUpdate(prevProps, prevState) {
         super.componentDidUpdate(prevProps, prevState);
         if (prevState.offsetNoria !== this.state.offsetNoria) {
             this.setState({prevOffsetNoria: prevState.offsetNoria});
+        }
+        if (this.state.estadoJuego === 'puntuaje' && this.state.rondaActual >= this.maxRounds && prevState.estadoJuego !== 'puntuaje') {
+            setTimeout(
+                function () {
+                    this.startEndGame();
+                }
+                    .bind(this),
+                5000
+            );
+        } else if (this.state.estadoJuego === 'puntuaje' && prevState.estadoJuego !== 'puntuaje') {
+            if (this.isPlayerHost()) {
+                setTimeout(
+                    function () {
+                        this.startNewRound();
+                    }
+                        .bind(this),
+                    5000
+                );
+            }
+
+        }
+        if (this.state.estadoJuego === 'votando' && prevState.estadoJuego !== 'votando') {
+            this.setState({bloquearRespuestas: false, currentPromptIndex: 0});
+
         }
     }
 
@@ -71,6 +103,11 @@ class JokeBattle extends Juego {
                 1000
             );
         }
+        if (this.state.estadoJuego === 'puntuaje') {
+            if (this.state.rondaActual >= this.maxRounds) {
+                setTimeout(this.startEndGame, 5000);
+            }
+        }
 
     }
 
@@ -80,9 +117,11 @@ class JokeBattle extends Juego {
 
     componentWillUnmount() {
         clearInterval(this.interval);
+        socket.off('getVotingData');
     }
 
-    // Métodos para renderizar diferentes estados del juego
+
+// Métodos para renderizar diferentes estados del juego
     renderLobby() {
 
         return (
@@ -117,11 +156,22 @@ class JokeBattle extends Juego {
             </>);
     }
 
+    renderIntro() {
+        return (
+            <section className={styles.introScreen}>
+                <IntroduccionJokeBattle/>
+                <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
+                <button onClick={() => this.startEndGame()}>Finalizar</button>
+
+            </section>
+        );
+    }
+
     renderRespondiendo() {
 
         const handleSubmit = () => {
-            if (this.state.promptIndex < this.state.prompts.length - 1)
-                this.setState({promptIndex: this.state.promptIndex + 1});
+            if (this.state.currentPromptIndex < this.state.prompts.length - 1)
+                this.setState({currentPromptIndex: this.state.currentPromptIndex + 1});
             else
                 this.setState({bloquearRespuestas: true});
         }
@@ -135,15 +185,17 @@ class JokeBattle extends Juego {
 
         return (
             <>
-                <FondoColoresRandom/>;
+                <FondoColoresRandom/>
                 <section className={styles.answerScreen}>
+                    <h1 className={styles.rondaActual}>RONDA {this.state.rondaActual}</h1>
                     <Contador className={styles.contador} tiempoInicial={90}
                               onTiempoTerminado={handleRunOutOfTime}/>
                     {!this.state.bloquearRespuestas && (
                         <>
-                            <Prompt texto={this.state.prompts[this.state.promptIndex]}/>
+                            <Prompt texto={this.state.prompts[this.state.currentPromptIndex]?.text}/>
                             <InputRespuestaLimitado socket={socket} playerID={this.playerReference.id}
                                                     gameCode={this.GameCode}
+                                                    promptId={this.state.prompts[this.state.currentPromptIndex]?.id_prompt}
                                                     styles={styles} onHandleSubmitRef={handleSubmit}/>
                             <SafetyButton handleSubmit={handleSubmit} gameCode={this.GameCode}
                                           playerId={this.playerReference.id}/>
@@ -152,7 +204,7 @@ class JokeBattle extends Juego {
                         <Canvas className={styles.listaJugadores}>
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
-                            <OrthographicCamera makeDefault position={[0, 0, 50]} zoom={20}/>
+                            <PerspectiveCamera fov={10} makeDefault position={[0, 0, 10000]}/>
                             <ModeloJugador modeloPath={this.modelos[indexJugador]}
                                            animationName={!this.state.bloquearRespuestas ? "idle" : null}
                                            bloquearRespuestas={this.state.bloquearRespuestas}/>
@@ -164,65 +216,73 @@ class JokeBattle extends Juego {
         );
     }
 
-    renderIntro() {
-        return (
-            <section className={styles.introScreen}>
-                <IntroduccionJokeBattle/>
-                <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
-            </section>
-        );
+    getPlayerName = (id) => {
+        const player = this.state.jugadoresConectados.find((jugador) => jugador.id === id);
+        if (player) {
+            return player.name;
+        }
     }
+
 
     renderVotando() {
         const handleTimeout = () => {
             console.log('SIN TIEMPO');
-            if (this.isPlayerHost()) {
-                socket.emit('loadNextVotingData', this.GameCode);
-                // Reiniciar el contador y las animaciones
-                this.setState({
-                    senalMostrarRespuestas: false,
-                    senalMostrarPropietarios: false,
-                    respuestaSeleccionada: false
-                });
-                // Volver a cargar los datos de votación
-                mostrarSiguientesRespuestas();
-            }
+
+            this.setState({
+                senalMostrarRespuestas: false,
+                senalMostrarPropietarios: false,
+                respuestaSeleccionada: false
+            });
+
+            mostrarSiguientesRespuestas();
         };
+
 
         const mostrarSiguientesRespuestas = () => {
-            setTimeout(() => {
-                this.setState({senalMostrarRespuestas: true})
-                this.setState({respuestaSeleccionada: false});
-
-                // Actualizar solamente todos los campos
-
-
-                // return <RespuestasPrompt prompt={this.state.prompt}
-                //                          senalMostrarPropietarios={this.state.senalMostrarPropietarios}
-                //                          handleTimeout={handleTimeout}
-                //                          propietarioIzq={this.state.propietarioRespuesta1}
-                //                          propietarioDer={this.state.propietarioRespuesta2}
-                //                          respuestaIzq={this.state.respuestaPrompt1}
-                //                          respuestaDer={this.state.respuestaPrompt2}
-                //                          handleClickRespuesta={handleClickRespuesta}
-                //                          gameCode={this.GameCode}
-                // />
-
-            }, 2000);
-        };
-
-        // Cargar los datos de votación inicial
-        socket.on('getVotingData', (data) => {
             this.setState({
-                prompt: data.prompt,
-                respuestaPrompt1: data.answer1,
-                propietarioRespuesta1: data.player1,
-                respuestaPrompt2: data.answer2,
-                propietarioRespuesta2: data.player2 // Asumiendo que tienes dos respuestas
+                senalMostrarPropietarios: true
             });
-        });
 
-        // Llamar a mostrarSiguientesRespuestas() después de cargar los datos iniciales
+            setTimeout(() => {
+                const {currentPromptIndex, promptsData} = this.state;
+                const newIndex = currentPromptIndex + 1;
+
+                if (newIndex >= promptsData.length) {
+                    this.setState({
+                        senalMostrarRespuestas: false,
+                        senalMostrarPropietarios: false,
+                        respuestaSeleccionada: false,
+                        prompts: [],
+                        currentPromptIndex: 0,
+                        prompt: "",
+                        promptId: "",
+                        respuestaPrompt1: "",
+                        propietarioRespuesta1: "",
+                        respuestaPrompt2: "",
+                        propietarioRespuesta2: "",
+                        promptsData: []
+                    });
+
+                    if (this.isPlayerHost()) {
+                        socket.emit('startResults', this.GameCode);
+                    }
+                } else {
+                    const nextPrompt = promptsData[newIndex];
+                    this.setState({
+                        senalMostrarRespuestas: true,
+                        senalMostrarPropietarios: false,
+                        currentPromptIndex: newIndex,
+                        prompt: nextPrompt.promptText,
+                        promptId: nextPrompt.promptId,
+                        respuestaPrompt1: nextPrompt.answers[0].answerText,
+                        propietarioRespuesta1: this.getPlayerName(nextPrompt.answers[0].playerId),
+                        respuestaPrompt2: nextPrompt.answers[1].answerText,
+                        propietarioRespuesta2: this.getPlayerName(nextPrompt.answers[1].playerId),
+                        respuestaSeleccionada: false
+                    });
+                }
+            }, 3000);
+        };
 
         const handleClickRespuesta = (propietario) => {
             if (!this.state.respuestaSeleccionada) {
@@ -234,7 +294,8 @@ class JokeBattle extends Juego {
         return (
             <section className={styles.round}>
 
-                <RespuestasPrompt prompt={this.state.prompt}
+                <RespuestasPrompt key={'Respuestas_' + this.state.currentPromptIndex}
+                                  prompt={this.state.prompt}
                                   senalMostrarPropietarios={this.state.senalMostrarPropietarios}
                                   handleTimeout={handleTimeout}
                                   propietarioIzq={this.state.propietarioRespuesta1}
@@ -243,11 +304,8 @@ class JokeBattle extends Juego {
                                   respuestaDer={this.state.respuestaPrompt2}
                                   handleClickRespuesta={handleClickRespuesta}
                                   gameCode={this.GameCode}
+                                  bloquearRespuestas={this.state.respuestaSeleccionada}
                 />
-
-                <button onClick={() => socket.emit('startEndGame', this.GameCode)}>Finalizar</button>
-                <button onClick={() => socket.emit('startResults', this.GameCode)}>Ver puntuaje</button>
-                <button onClick={() => this.emitirSenalMostrarRespuestas(true)}>Comenzar</button>
             </section>
         );
     }
@@ -264,27 +322,30 @@ class JokeBattle extends Juego {
         });
 
         return (
-            <section>
+            <section className={styles.endScreen}>
                 <h1>Fin de la partida</h1>
-                {
-                    this.isPlayerHost() && (
-                        <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
-                    )
-                }
-                <button onClick={() => window.location.reload()}>Regresar al menú</button>
 
                 {
                     this.state.ganador &&
                     <>
                         <h2>GANADOR: {this.state.ganador.name}</h2>
-                        <Canvas>
+                        <Canvas className={styles.winnerModel}>
                             <ambientLight intensity={0.5}/>
                             <directionalLight position={[10, 10, 10]} intensity={1}/>
-                            <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20}/>
-                            <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]} animationName="idle"/>
+                            <PerspectiveCamera fov={10} makeDefault position={[0, 0, 10000]}/>
+                            <ModeloJugador modeloPath={this.modelos[this.state.ganador.index]}
+                                           animationName="idle"/>
                         </Canvas>
                     </>
                 }
+                <div className={styles.buttonList}>
+                    {
+                        this.isPlayerHost() && (
+                            <button onClick={() => socket.emit('startLobby', this.GameCode)}>Volver a jugar</button>
+                        )
+                    }
+                    <button onClick={() => window.location.reload()}>Regresar al menú</button>
+                </div>
 
             </section>
         );
@@ -297,12 +358,11 @@ function Prompt({texto}) {
     const prevTexto = useRef(texto);
 
     useEffect(() => {
-        if (prevTexto.current != texto) {
+        if (prevTexto.current !== texto) {
             setDisplayText(texto);
             prevTexto.current = texto;
         }
     }, [texto]);
-
 
     return (
         <h1 className={styles.prompt}>
@@ -311,70 +371,70 @@ function Prompt({texto}) {
     );
 }
 
-const Noria = React.memo(function Noria({jugadores, offset = 0}) {
-    const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
-    const [springStyles, setSpringStyles] = useSpring(() => ({
-        transform: `rotate(${offset * 45}deg)`
-    }));
+const
+    Noria = React.memo(function Noria({jugadores, offset = 0}) {
+        const [connectedPlayers, setConnectedPlayers] = useState(jugadores);
+        const [springStyles, setSpringStyles] = useSpring(() => ({
+            transform: `rotate(${offset * 45}deg)`
+        }));
 
-    useEffect(() => {
-        setConnectedPlayers(jugadores);
-        setSpringStyles({transform: `rotate(${offset * 45}deg)`});
-        console.log("offset effect: " + offset);
-    }, [jugadores, offset, setSpringStyles]);
+        useEffect(() => {
+            setConnectedPlayers(jugadores);
+            setSpringStyles({transform: `rotate(${offset * 45}deg)`});
+        }, [jugadores, offset, setSpringStyles]);
 
-    let counter = 0;
-    const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
+        let counter = 0;
+        const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
 
-    const iconosJugadores = connectedPlayers.map((jugador) => (
-        <div className={styles.palo} key={jugador.id}>
-            <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]}
-                          style={springStyles}/>
-        </div>
-    ));
-
-    // Rellenar los espacios restantes con IconoJugador vacíos
-    for (let i = connectedPlayers.length; i < 8; i++) {
-        iconosJugadores.push(
-            <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
-                <IconoJugador/>
+        const iconosJugadores = connectedPlayers.map((jugador) => (
+            <div className={styles.palo} key={jugador.id}>
+                <IconoJugador nombreClase={styles.icono} nombre={jugador.name} rutaImagen={logos[counter++]}
+                              style={springStyles}/>
             </div>
-        );
-    }
+        ));
 
-    return <>{iconosJugadores}</>;
-});
+        // Rellenar los espacios restantes con IconoJugador vacíos
+        for (let i = connectedPlayers.length; i < 8; i++) {
+            iconosJugadores.push(
+                <div className={styles.palo} key={i} style={{visibility: 'hidden'}}>
+                    <IconoJugador/>
+                </div>
+            );
+        }
+
+        return <>{iconosJugadores}</>;
+    });
 
 function RespuestaPrompt({
                              texto,
                              propietario,
                              desdeIzquierda,
                              senalMostrarPropietarios,
-                             onClick
+                             clickFunc,
+                             bloquearRespuesta
                          }) {
     const [springs, api] = useSpring(() => ({
         from: {x: desdeIzquierda ? -100 : 100},
-        config: {duration: desdeIzquierda ? 1000 : 500},
-        delay: desdeIzquierda ? 1000 : 6000, // Ajusta el retraso en la animación si no se muestran las respuestas
+        to: {x: 0},
+        config: {duration: 1200},
+        reset: true // Asegúrate de reiniciar la animación
     }));
 
+
     useEffect(() => {
-        api.start({
-            from: {x: desdeIzquierda ? -100 : 100},
-            to: {x: 0},
-        });
-    }, [api, desdeIzquierda]);
+        api.start({from: {x: desdeIzquierda ? -100 : 100}, to: {x: 0}});
+    }, [api, desdeIzquierda, texto]);
 
     return (
         <animated.div
-            style={{
-                ...springs,
-            }}
+            style={{...springs}}
             className={styles.promptResponse}
-            onClick={onClick} // Aquí se pasa la función onClick
+            onClick={() => {
+                if (!bloquearRespuesta) clickFunc(propietario);
+            }}
         >
-            <p>{texto}</p>
+            <p className={bloquearRespuesta ? styles.responseTextBold : styles.responseText}>{texto}</p>
             <AnimatedPropietario propietario={propietario} senalMostrarPropietarios={senalMostrarPropietarios}/>
         </animated.div>
     );
@@ -389,38 +449,48 @@ function RespuestasPrompt({
                               respuestaDer,
                               propietarioIzq,
                               propietarioDer,
-                              senalMostrarPropietarios
+                              senalMostrarPropietarios,
+                              bloquearRespuestas
                           }) {
     return (
         <>
             <header className={styles.promptHeader}>
                 <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
                 <Prompt texto={prompt}/>
-                <IconoLobby gameCode={gameCode}/>
+                <IconoLobby className={styles.gameCode} gameCode={gameCode}/>
             </header>
             <div className={styles.promptMessages}>
-                <RespuestaPrompt desdeIzquierda={true} texto={respuestaIzq}
-                                 propietario={propietarioIzq}
-                                 senalMostrarPropietarios={senalMostrarPropietarios}
-                                 onClick={() => handleClickRespuesta(propietarioIzq)}/>
-                <RespuestaPrompt desdeIzquierda={false} texto={respuestaDer}
-                                 propietario={propietarioDer}
-                                 senalMostrarPropietarios={senalMostrarPropietarios}
-                                 onClick={() => handleClickRespuesta(propietarioDer)}/>
+                <RespuestaPrompt
+                    key={`izq-${prompt}`} // Añadir key para forzar el reinicio del componente
+                    desdeIzquierda={true}
+                    texto={respuestaIzq}
+                    propietario={propietarioIzq}
+                    senalMostrarPropietarios={senalMostrarPropietarios}
+                    clickFunc={() => handleClickRespuesta(propietarioIzq)}
+                    bloquearRespuesta={bloquearRespuestas}
+                />
+                <RespuestaPrompt
+                    key={`der-${prompt}`} // Añadir key para forzar el reinicio del componente
+                    desdeIzquierda={false}
+                    texto={respuestaDer}
+                    propietario={propietarioDer}
+                    senalMostrarPropietarios={senalMostrarPropietarios}
+                    clickFunc={() => handleClickRespuesta(propietarioDer)}
+                    bloquearRespuesta={bloquearRespuestas}
+                />
             </div>
         </>
     );
-
 }
 
 function AnimatedPropietario({propietario, senalMostrarPropietarios}) {
     const props = useSpring({
         opacity: senalMostrarPropietarios ? 1 : 0,
-        visibility: senalMostrarPropietarios ? 'visible' : 'hidden',
+        visibility: senalMostrarPropietarios ? 'visible' : 'hidden'
     });
 
     return (
-        <animated.h5 style={props}>{propietario}</animated.h5>
+        <animated.h5 className={styles.responseOwner} style={props}>{propietario}</animated.h5>
     );
 }
 
@@ -506,11 +576,11 @@ function SafetyButton({gameCode, playerId, handleSubmit}) {
     const [clicked, setClicked] = useState(false);
 
     const animationProps = useSpring({
-        transform: clicked ? 'skewX(20deg)' : 'skewX(0deg)',
+        transform: clicked ? 'scale(0.9)' : 'scale(1)',
         background: clicked ? '#a9a611' : '#d2b638',
         fontWeight: clicked ? 'bold' : 'normal',
-        from: {transform: 'skewX(0deg)', background: '#d2b638', fontWeight: 'normal'},
-        config: {duration: 500},
+        from: {transform: 'scale(1)', background: '#d2b638', fontWeight: 'normal'},
+        config: {duration: 200},
         onRest: () => setClicked(false),
     });
 

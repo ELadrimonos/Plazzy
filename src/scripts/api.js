@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./db'); // Importa tu módulo de conexión a la base de datos
+const db = require('./db');
+
 
 // Obtener todos los prompts en un idioma específico
 router.get('/prompts/:gameId/:language', (req, res) => {
     const {gameId, language} = req.params;
 
     const query = 'SELECT id_prompt, text FROM prompts WHERE id_juego = ? AND idioma = ?';
-    db.query(query, [gameId, language], (err, results, fields) => {
+    db.query(query, [gameId, language], (err, results) => {
         if (err) {
             console.error('Error al obtener los prompts:', err);
             res.status(500).json({error: 'Error al obtener los prompts'});
@@ -86,8 +87,8 @@ router.post('/send-answer', (req, res) => {
     });
 });
 
-router.post('/lobby/store', (req, res) => {
-    const {lobbyId, answers} = req.body;
+router.post('/answers/create', (req, res) => {
+    const {lobbyId, answerText, playerId, promptId, ronda} = req.body;
     db.query('SELECT * FROM salas  WHERE id_sala = ?', [lobbyId], (error) => {
         if (error) {
             console.error(error);
@@ -95,7 +96,7 @@ router.post('/lobby/store', (req, res) => {
             return;
         }
 
-        db.query('INSERT INTO respuestas (id_prompt, texto, id_jugador, ronda, id_sala) VALUES (?, ?, ?, ?, ?)', [answers.promptId, answers.value, answers.playerId, answers.ronda, lobbyId], (error) => {
+        db.query('INSERT INTO respuestas (id_prompt, texto, id_jugador, ronda, id_sala) VALUES (?, ?, ?, ?, ?)', [promptId, answerText, playerId, ronda, lobbyId], (error) => {
             if (error) {
                 console.error(error);
                 res.status(500).json({error: 'Error al registrar la respuesta'});
@@ -128,26 +129,32 @@ router.post('/players/create', (req, res) => {
     })
 });
 
-router.post('/players/update-score', (req, res) => {
-    const {lobbyId, playerId, score} = req.body;
+router.put('/players/update', (req, res) => {
+    const { lobbyId, playerId, score } = req.body;
 
-    db.query('SELECT * FROM salas  WHERE id_sala = ?', [lobbyId], (error) => {
+    db.query('SELECT * FROM salas WHERE id_sala = ?', [lobbyId], (error, results) => {
         if (error) {
             console.error(error);
-            res.status(500).json({error: 'Error al obtener el id de la sala'});
+            res.status(500).json({ error: 'Error al obtener el id de la sala' });
             return;
         }
 
-        db.query('UPDATE jugadores SET puntuacion = ? WHERE id_jugador = ? AND id_sala = ? ', [score, playerId, lobbyId], (error) => {
+        if (results.length === 0) {
+            res.status(404).json({ error: 'Sala no encontrada' });
+            return;
+        }
+
+        db.query('UPDATE jugadores SET puntuacion = ? WHERE id_jugador = ? AND id_sala = ?', [score, playerId, lobbyId], (error) => {
             if (error) {
                 console.error(error);
-                res.status(500).json({error: 'Error al actualizar la puntuacion del jugador'});
+                res.status(500).json({ error: 'Error al actualizar la puntuacion del jugador' });
                 return;
             }
             res.sendStatus(200);
         });
-    })
+    });
 });
+
 
 // Este bloque servirá para poder crear respuestas por defecto personalizadas
 router.post('/safety-answers/create', (req, res) => {
@@ -197,5 +204,7 @@ router.post('/lobby/create', (req, res) => {
         res.status(200).json({ message: 'Sala creada exitosamente' });
     });
 });
+
+
 
 module.exports = router;
