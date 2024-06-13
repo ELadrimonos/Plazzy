@@ -6,7 +6,7 @@ name: Build and deploy Node.js app to Azure Web App - plazzy
 on:
   push:
     branches:
-      - master
+      - produccion
   workflow_dispatch:
 
 jobs:
