@@ -40,7 +40,7 @@ const GameScreens = Object.freeze({
 const lobbies = [];
 
 
-http.listen(8080, () => console.log("LISTENING ON 8080"));
+http.listen(80, () => console.log("LISTENING ON 80"));
 
 
 io.on('connection', (socket) => {
