@@ -40,7 +40,8 @@ const GameScreens = Object.freeze({
 const lobbies = [];
 
 
-http.listen(80, () => console.log("LISTENING ON 80"));
+// Se puede emplear el mismo puerto que HTTP, no lo intentes cambiar para arreglarlo *palm face*
+http.listen(8080, () => console.log("LISTENING ON 8080"));
 
 
 io.on('connection', (socket) => {
