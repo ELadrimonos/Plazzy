@@ -13,6 +13,7 @@ const {readFileSync} = require("fs");
 
 const p12Path = '/var/ssl/private/1A1442320B0734904340224F4063853DEDEDAAF1.p12';
 const p12Password = process.env.PRIVATE_KEY_PASSWORD;
+console.log('Private key password: ', p12Password);
 
 
 const readPkcs12Async = (p12Path, p12Password) => {
@@ -30,6 +31,8 @@ const readPkcs12Async = (p12Path, p12Password) => {
 const startServer = async () => {
     try {
         const certificate = await readPkcs12Async(p12Path, p12Password);
+
+
         const credentials = {
             key: certificate.key,
             cert: certificate.cert,
@@ -602,6 +605,6 @@ const startServer = async () => {
         console.error('Error al iniciar el servidor:', error);
     }
 }
-startServer().then(r => console.log("Servidor iniciado"));
+startServer().then(() => console.log("Servidor iniciado"));
 
 
