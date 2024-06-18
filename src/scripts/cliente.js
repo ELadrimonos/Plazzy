@@ -1,11 +1,6 @@
 import io from 'socket.io-client';
 
-export const socket = io("http://plazzy.es:8080", {
-        cors: {
-        origin: "http://plazzy.es:8080",
-        credentials: true
-      },transports : ['websocket'] });
-
+export const socket = io('ws://plazzy.es:8080');
 
 socket.on('joinError', (message) => {
     alert(message);
