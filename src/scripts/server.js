@@ -3,7 +3,8 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*",
+        // Cambiar luego
+        origin: "http://plazzy.es",
         methods: ["GET", "POST"]
     }
 });
@@ -45,7 +46,7 @@ http.listen(8080, () => console.log("LISTENING ON 8080"));
 
 
 io.on('connection', (socket) => {
-    // console.log('Usuario conectado:', socket.id);
+    console.log('Usuario conectado:', socket.id);
 
 // Unirse a sala
     socket.on('joinGame', (nombreJug, lobbyCode) => {
