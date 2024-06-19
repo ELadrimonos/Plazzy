@@ -41,7 +41,7 @@ const lobbies = [];
 
 
 // Se puede emplear el mismo puerto que HTTP, no lo intentes cambiar para arreglarlo *palm face*
-http.listen(80, () => console.log("LISTENING ON 80"));
+http.listen(3000, () => console.log("LISTENING ON 3000"));
 
 
 io.on('connection', (socket) => {
