@@ -3,8 +3,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        // Cambiar luego
-        origin: "http://plazzy.es",
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
@@ -42,7 +41,7 @@ const lobbies = [];
 
 
 // Se puede emplear el mismo puerto que HTTP, no lo intentes cambiar para arreglarlo *palm face*
-http.listen(8080, () => console.log("LISTENING ON 8080"));
+http.listen(80, () => console.log("LISTENING ON 80"));
 
 
 io.on('connection', (socket) => {
