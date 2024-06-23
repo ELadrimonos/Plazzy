@@ -15,7 +15,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
 
     useEffect(() => {
         setTimeout(() => {
-        setConnection(socket.connected)
+            setConnection(socket.connected)
 
         }, 1000);
     });
@@ -67,9 +67,10 @@ function MenuUnirse({menuCrear, unirsePartida}) {
 
     useEffect(() => {
         setTimeout(() => {
-        setConnection(socket.connected)
+            setConnection(socket.connected)
 
-        }, 1000);    });
+        }, 1000);
+    });
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -204,8 +205,8 @@ function Index({gameCodeRef = null, playerRef = null}) {
 
     socket.on('updatePlayers', (players) => {
         setPlayersInLobby(players);
-        if (player){
-            if (playersInLobby[0] === player){
+        if (player) {
+            if (playersInLobby[0] === player) {
                 setIsHost(true);
             }
         }
@@ -227,20 +228,19 @@ function Index({gameCodeRef = null, playerRef = null}) {
         socket.emit('joinGame', userName, gameCode);
     };
 
-    if (player){
-        if (gameCode){
-            if (game === 'jokebattle') {
-                return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
-            } else if (game === 'chatbot') {
-                return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
-            }
+    if (player && gameCode && isHost) {
+        if (game === 'jokebattle') {
+            return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+        } else if (game === 'chatbot') {
+            return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+            // }
         }
+        return (
+            <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+        );
+
+
     }
-    return (
-        <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
-    );
-
-
 }
 
 export default Index;

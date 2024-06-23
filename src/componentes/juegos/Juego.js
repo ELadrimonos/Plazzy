@@ -42,7 +42,11 @@ class Juego extends Component {
 
     isPlayerHost() {
         if (this.playerHostVar === null) {
-            return this.playerReference.id === this.state.jugadoresConectados[0].id;
+            return (
+                this.playerReference &&
+                this.state.jugadoresConectados.length > 0 &&
+                this.playerReference.id === this.state.jugadoresConectados[0].id
+            );
         }
         return this.playerHostVar;
     }
