@@ -10,9 +10,8 @@ const io = require('socket.io')(server, {
 
 const apiRoutes = require('./api');
 const path = require('path');
-const PORT = process.env.WEBSITE_PORT || 80;
+const PORT = 8080;
 
-app.set('port', PORT);
 app.use(express.json());
 app.use('/api', apiRoutes);
 
