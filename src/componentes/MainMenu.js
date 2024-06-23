@@ -135,6 +135,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
     const [player, setPlayer] = useState(null);
     const [playersInLobby, setPlayersInLobby] = useState([]);
     const [gameCode, setGameCode] = useState(null);
+    const [isHost, setIsHost] = useState(false);
 
     const handleCreate = (userName, gameMode) => {
         setGame(gameMode);
@@ -170,6 +171,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
         setPlayersInLobby([]);
         setGame(null);
         setGameCode(null);
+        setIsHost(false);
         if (isInGameRoute) {
             navigate('/');
         }
@@ -202,6 +204,11 @@ function Index({gameCodeRef = null, playerRef = null}) {
 
     socket.on('updatePlayers', (players) => {
         setPlayersInLobby(players);
+        if (player){
+            if (playersInLobby[0] === player){
+                setIsHost(true);
+            }
+        }
     });
 
     // Si refresca la pagina se desconecta
@@ -220,15 +227,21 @@ function Index({gameCodeRef = null, playerRef = null}) {
         socket.emit('joinGame', userName, gameCode);
     };
 
-    if (game === 'jokebattle' && gameCode && player) {
-        return <JokeBattle gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
-    } else if (game === 'chatbot' && gameCode) {
-        return <Chatbot gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
-    } else {
-        return (
-            <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin} connectedPlayers={playersInLobby}/>
-        );
+    if (player){
+        if (gameCode){
+            if (game === 'jokebattle') {
+                return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+            } else if (game === 'chatbot') {
+                return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+            } else {
+                return (
+                    <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+                );
+            }
+        }
     }
+
+
 }
 
 export default Index;

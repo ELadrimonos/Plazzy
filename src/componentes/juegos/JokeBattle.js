@@ -161,8 +161,6 @@ class JokeBattle extends Juego {
             <section className={styles.introScreen}>
                 <IntroduccionJokeBattle/>
                 <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
-                <button onClick={() => this.startEndGame()}>Finalizar</button>
-
             </section>
         );
     }

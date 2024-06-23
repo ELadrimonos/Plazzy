@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useSpring, animated, to as interpolate, createInterpolator } from '@react-spring/web';
-import { random } from 'lodash';
-import { cubicCoordinates, stepsCoordinates } from 'easing-coordinates';
+import React, {useEffect, useMemo, useState} from 'react';
+import {animated, createInterpolator, to as interpolate, useSpring} from '@react-spring/web';
+import {random} from 'lodash';
+import {cubicCoordinates, stepsCoordinates} from 'easing-coordinates';
 
 const easeMap = {
     'ease-in-out': { x1: 0.42, y1: 0, x2: 0.58, y2: 1 },
@@ -76,12 +76,10 @@ const FondoColoresRandom = () => {
                 coordinates = cubicCoordinates(customBezier[0], customBezier[1], customBezier[2], customBezier[3], stops);
             }
 
-            const fullCoordinates = Array.from({ length: stops }, (_, i) => {
+            return Array.from({length: stops}, (_, i) => {
                 const coord = coordinates.find(c => Math.round(c.x * stops) === i);
                 return coord ? [coord.x, coord.y] : [i / stops, 0];
             });
-
-            return fullCoordinates;
         } catch (error) {
             console.error("An error occurred while generating coordinates:", error);
             return Array.from({ length: stops }, (_, i) => [i / stops, 0]);
@@ -105,7 +103,7 @@ const FondoColoresRandom = () => {
     return (
         <animated.div
             style={{
-                height: '100%',
+                height: '100vh',
                 width: '100vw',
                 top: 0,
                 position: 'absolute',

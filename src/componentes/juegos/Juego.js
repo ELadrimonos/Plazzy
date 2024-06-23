@@ -15,6 +15,7 @@ class Juego extends Component {
         };
         this.GameCode = props.gameCode;
         this.playerReference = props.player;
+        this.playerHostVar = props.isHost || null;
         this.maxJugadores = 8;
         this.maxRounds = 3;
         socket.on('cambiarEscena', (pantalla) => {
@@ -40,7 +41,10 @@ class Juego extends Component {
 
 
     isPlayerHost() {
-        return this.playerReference.id === this.state.jugadoresConectados[0].id;
+        if (this.playerHostVar === null) {
+            return this.playerReference.id === this.state.jugadoresConectados[0].id;
+        }
+        return this.playerHostVar;
     }
 
     startGame() {
