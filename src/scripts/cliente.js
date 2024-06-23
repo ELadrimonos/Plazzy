@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 
-export const socket = io(`ws://plazzy.es:${process.env.PORT}`,
+export const socket = io(`ws://plazzy.es`,
     {
         transports: ['websocket'], // Ensure only WebSocket transport is used
         reconnectionAttempts: 5, // Number of reconnection attempts
