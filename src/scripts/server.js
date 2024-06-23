@@ -1,16 +1,18 @@
 const express = require('express');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
     }
 });
+
 const apiRoutes = require('./api');
 const path = require('path');
+const PORT = process.env.WEBSITE_PORT || 80;
 
-
+app.set('port', PORT);
 app.use(express.json());
 app.use('/api', apiRoutes);
 
@@ -41,7 +43,7 @@ const lobbies = [];
 
 
 // Se puede emplear el mismo puerto que HTTP, no lo intentes cambiar para arreglarlo *palm face*
-http.listen(8080, () => console.log("LISTENING ON 8080"));
+server.listen(PORT, () => console.log(`LISTENING ON ${PORT}`));
 
 
 io.on('connection', (socket) => {
