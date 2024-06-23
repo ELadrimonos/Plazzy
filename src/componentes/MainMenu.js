@@ -233,13 +233,12 @@ function Index({gameCodeRef = null, playerRef = null}) {
                 return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
             } else if (game === 'chatbot') {
                 return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
-            } else {
-                return (
-                    <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
-                );
             }
         }
     }
+    return (
+        <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+    );
 
 
 }
