@@ -10,7 +10,7 @@ const io = require('socket.io')(server, {
 
 const apiRoutes = require('./api');
 const path = require('path');
-const PORT = 8080;
+const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use('/api', apiRoutes);
