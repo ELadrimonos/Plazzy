@@ -558,7 +558,7 @@ function PodioPuntuacion({jugadores = []}) {
                             <IconoJugador
                                 nombreClase={styles.icono}
                                 nombre={jugador.name}
-                                rutaImagen={logos[index % logos.length]} // Asegúrate de usar un logo válido
+                                rutaImagen={logos[index]}
                             />
                             <h3>Puntuación:</h3>
                             <h4>{jugador.score}</h4>
