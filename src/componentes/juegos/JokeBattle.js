@@ -24,7 +24,7 @@ class JokeBattle extends Juego {
             ...this.state, // Así obtengo los estados de la clase padre
             senalMostrarRespuestas: false,
             senalMostrarPropietarios: false,
-            prompt: 'PRUEBA',
+            prompt: 'Eres un peruano de la verga',
             respuestaPrompt1: 'UNO',
             respuestaPrompt2: 'DOS',
             propietarioRespuesta1: '',
@@ -457,7 +457,7 @@ function RespuestasPrompt({
     return (
         <>
             <header className={styles.promptHeader}>
-                <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
+                <Contador className={styles.contador} tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
                 <Prompt texto={prompt}/>
                 <IconoLobby className={styles.gameCode} gameCode={gameCode}/>
             </header>

@@ -228,17 +228,17 @@ function Index({gameCodeRef = null, playerRef = null}) {
         socket.emit('joinGame', userName, gameCode);
     };
 
-    if (player && gameCode) {
-        if (game === 'jokebattle') {
+    // if (player && gameCode) {
+    //     if (game === 'jokebattle') {
             return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
-        } else if (game === 'chatbot') {
-            return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
-        }
-
-    }
-    return (
-        <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
-    );
+    //     } else if (game === 'chatbot') {
+    //         return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+    //     }
+    //
+    // }
+    // return (
+    //     <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+    // );
 }
 
 export default Index;
