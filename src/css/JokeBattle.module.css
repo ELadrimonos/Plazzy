@@ -823,4 +823,15 @@
         font-size: 0.5em;
     }
 
+    .puntuacion {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+        max-width: 70%;
+        flex-flow: column wrap;
+        gap: 20px;
+
+    }
+
 }
