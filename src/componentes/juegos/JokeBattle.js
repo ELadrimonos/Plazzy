@@ -313,7 +313,7 @@ class JokeBattle extends Juego {
     }
 
     renderPuntuacion() {
-        return <PodioPuntuacion jugadores={this.state.jugadoresConectados}/>
+        return <PodioPuntuacion btnFunc={this.startNewRound} jugadores={this.state.jugadoresConectados}/>
     };
 
 
@@ -519,7 +519,7 @@ const IntroduccionJokeBattle = () => {
     );
 };
 
-function PodioPuntuacion({jugadores = []}) {
+function PodioPuntuacion({btnFunc, jugadores = []}) {
     const [jugadoresConectados, setJugadoresConectados] = useState(jugadores);
     const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
@@ -550,6 +550,7 @@ function PodioPuntuacion({jugadores = []}) {
     return (
         <div className={styles.scoreScreen}>
             <h1>Clasificación de Jugadores</h1>
+            <button className={styles.startButton} onClick={btnFunc}>Empezar nueva ronda</button>
             <div className={styles.puntuacion}>
                 {springs.map((springStyle, index) => {
                     const jugador = jugadoresOrdenados[index];
