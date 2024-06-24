@@ -185,9 +185,13 @@ class JokeBattle extends Juego {
             <>
                 <FondoColoresRandom/>
                 <section className={styles.answerScreen}>
+                    <div style={{position: 'relative', display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+
                     <h1 className={styles.rondaActual}>RONDA {this.state.rondaActual}</h1>
                     <Contador className={styles.contador} tiempoInicial={90}
                               onTiempoTerminado={handleRunOutOfTime}/>
+                    </div>
+
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.currentPromptIndex]?.text}/>

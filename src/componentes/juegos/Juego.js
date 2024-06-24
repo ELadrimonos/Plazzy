@@ -6,7 +6,7 @@ class Juego extends Component {
         super(props);
         this.state = {
             // Estado común del juego
-            estadoJuego: 'lobby', // estado inicial del juego
+            estadoJuego: 'respondiendo', // estado inicial del juego
             rondaActual: 1, // ronda inicial del juego
             jugadoresConectados: props.connectedPlayers,
             prompts: [],
@@ -150,7 +150,6 @@ class Juego extends Component {
     }
 
     render() {
-
         switch (this.state.estadoJuego) {
             case 'lobby':
                 return this.renderLobby();

@@ -35,7 +35,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
 
 
     return (
-        <animated.section id="menuCrearPartida" style={{...springs, 'maxWidth': '50%'}}>
+        <animated.section id="menuCrearPartida" className={styles.seccionMenu} style={{...springs}}>
             <fieldset id="crearPartidaForm">
                 <legend>Crear Partida</legend>
                 <form onSubmit={handleSubmit}>
@@ -89,7 +89,7 @@ function MenuUnirse({menuCrear, unirsePartida}) {
 
 
     return (
-        <animated.section style={{...springs, 'maxWidth': '50%'}} id="menuPrincipal">
+        <animated.section style={{...springs}} className={styles.seccionMenu} id="menuPrincipal">
             <fieldset id="joinGame">
                 <legend>Unirse A Partida</legend>
                 <form onSubmit={handleSubmit}>
