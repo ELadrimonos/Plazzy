@@ -228,7 +228,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
         socket.emit('joinGame', userName, gameCode);
     };
 
-    if (player && gameCode && isHost) {
+    if (player && gameCode) {
         if (game === 'jokebattle') {
             return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
         } else if (game === 'chatbot') {
