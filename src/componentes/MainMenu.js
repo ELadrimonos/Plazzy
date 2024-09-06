@@ -15,7 +15,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
 
     useEffect(() => {
         setTimeout(() => {
-        setConnection(socket.connected)
+            setConnection(socket.connected)
 
         }, 1000);
     });
@@ -35,7 +35,7 @@ function MenuCrear({volverAlMenu, crearPartida}) {
 
 
     return (
-        <animated.section id="menuCrearPartida" style={{...springs, 'maxWidth': '50%'}}>
+        <animated.section id="menuCrearPartida" className={styles.seccionMenu} style={{...springs}}>
             <fieldset id="crearPartidaForm">
                 <legend>Crear Partida</legend>
                 <form onSubmit={handleSubmit}>
@@ -67,9 +67,10 @@ function MenuUnirse({menuCrear, unirsePartida}) {
 
     useEffect(() => {
         setTimeout(() => {
-        setConnection(socket.connected)
+            setConnection(socket.connected)
 
-        }, 1000);    });
+        }, 1000);
+    });
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -88,7 +89,7 @@ function MenuUnirse({menuCrear, unirsePartida}) {
 
 
     return (
-        <animated.section style={{...springs, 'maxWidth': '50%'}} id="menuPrincipal">
+        <animated.section style={{...springs}} className={styles.seccionMenu} id="menuPrincipal">
             <fieldset id="joinGame">
                 <legend>Unirse A Partida</legend>
                 <form onSubmit={handleSubmit}>
@@ -135,6 +136,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
     const [player, setPlayer] = useState(null);
     const [playersInLobby, setPlayersInLobby] = useState([]);
     const [gameCode, setGameCode] = useState(null);
+    const [isHost, setIsHost] = useState(false);
 
     const handleCreate = (userName, gameMode) => {
         setGame(gameMode);
@@ -170,6 +172,7 @@ function Index({gameCodeRef = null, playerRef = null}) {
         setPlayersInLobby([]);
         setGame(null);
         setGameCode(null);
+        setIsHost(false);
         if (isInGameRoute) {
             navigate('/');
         }
@@ -202,6 +205,11 @@ function Index({gameCodeRef = null, playerRef = null}) {
 
     socket.on('updatePlayers', (players) => {
         setPlayersInLobby(players);
+        if (player) {
+            if (playersInLobby[0] === player) {
+                setIsHost(true);
+            }
+        }
     });
 
     // Si refresca la pagina se desconecta
@@ -220,15 +228,17 @@ function Index({gameCodeRef = null, playerRef = null}) {
         socket.emit('joinGame', userName, gameCode);
     };
 
-    if (game === 'jokebattle' && gameCode && player) {
-        return <JokeBattle gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
-    } else if (game === 'chatbot' && gameCode) {
-        return <Chatbot gameCode={gameCode} player={player} connectedPlayers={playersInLobby}/>;
-    } else {
-        return (
-            <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin} connectedPlayers={playersInLobby}/>
-        );
+    if (player && gameCode) {
+        if (game === 'jokebattle') {
+            return <JokeBattle gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+        } else if (game === 'chatbot') {
+            return <Chatbot gameCode={gameCode} player={player} isHost={isHost} connectedPlayers={playersInLobby}/>;
+        }
+
     }
+    return (
+        <MenuPrincipal onCreate={handleCreate} onJoin={handleJoin}/>
+    );
 }
 
 export default Index;

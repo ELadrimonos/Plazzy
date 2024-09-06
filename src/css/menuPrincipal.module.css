@@ -10,14 +10,13 @@
     position: absolute;
 }
 
-animated.section {
+.seccionMenu {
     width: 50%;
-    position: fixed;
+    max-width: 50%;
     left: 0;
     top: 0;
     bottom: 0;
     background-color: #fff;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     padding: 20px;
     overflow-y: auto;
 }
@@ -107,10 +106,18 @@ input[type="text"] {
     background-color: greenyellow;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1000px) and (orientation: portrait) {
     .main {
         display: flex;
         justify-content: center;
+        width: 100%;
+        padding: 10px;
+        margin: 0;
+    }
+
+    .seccionMenu {
+        width: 100%;
+        max-width: 100%;
     }
 
     *{

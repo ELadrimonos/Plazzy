@@ -1,16 +1,33 @@
 const express = require('express');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    transports: ['websocket']
+
 });
+
 const apiRoutes = require('./api');
+const path = require('path');
+const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use('/api', apiRoutes);
+
+const appRoot = path.resolve(__dirname, '../..');
+const publicPath = path.join(appRoot, 'build');
+
+app.use(express.static(publicPath));
+app.get('/*', function (req, res) {
+    res.sendFile(path.join(publicPath, 'index.html'), (err) => {
+        if (err) {
+            res.status(500).send(err);
+        }
+    });
+});
 
 // Enum de pantallas de juego
 const GameScreens = Object.freeze({
@@ -26,11 +43,12 @@ const GameScreens = Object.freeze({
 const lobbies = [];
 
 
-http.listen(8080, () => console.log("LISTENING ON 8080"));
+// Se puede emplear el mismo puerto que HTTP, no lo intentes cambiar para arreglarlo *palm face*
+server.listen(PORT, () => console.log(`LISTENING ON ${PORT}`));
 
 
 io.on('connection', (socket) => {
-    // console.log('Usuario conectado:', socket.id);
+    console.log('Usuario conectado:', socket.id);
 
 // Unirse a sala
     socket.on('joinGame', (nombreJug, lobbyCode) => {

@@ -24,7 +24,7 @@ class JokeBattle extends Juego {
             ...this.state, // Así obtengo los estados de la clase padre
             senalMostrarRespuestas: false,
             senalMostrarPropietarios: false,
-            prompt: 'PRUEBA',
+            prompt: 'Eres un peruano de la verga',
             respuestaPrompt1: 'UNO',
             respuestaPrompt2: 'DOS',
             propietarioRespuesta1: '',
@@ -161,8 +161,6 @@ class JokeBattle extends Juego {
             <section className={styles.introScreen}>
                 <IntroduccionJokeBattle/>
                 <button className={styles.startButton} onClick={() => this.startAnswering()}>Comenzar</button>
-                <button onClick={() => this.startEndGame()}>Finalizar</button>
-
             </section>
         );
     }
@@ -187,9 +185,13 @@ class JokeBattle extends Juego {
             <>
                 <FondoColoresRandom/>
                 <section className={styles.answerScreen}>
+                    <div style={{position: 'relative', display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+
                     <h1 className={styles.rondaActual}>RONDA {this.state.rondaActual}</h1>
                     <Contador className={styles.contador} tiempoInicial={90}
                               onTiempoTerminado={handleRunOutOfTime}/>
+                    </div>
+
                     {!this.state.bloquearRespuestas && (
                         <>
                             <Prompt texto={this.state.prompts[this.state.currentPromptIndex]?.text}/>
@@ -311,7 +313,7 @@ class JokeBattle extends Juego {
     }
 
     renderPuntuacion() {
-        return <PodioPuntuacion jugadores={this.state.jugadoresConectados}/>
+        return <PodioPuntuacion btnFunc={this.startNewRound} jugadores={this.state.jugadoresConectados}/>
     };
 
 
@@ -455,7 +457,7 @@ function RespuestasPrompt({
     return (
         <>
             <header className={styles.promptHeader}>
-                <Contador tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
+                <Contador className={styles.contador} tiempoInicial={10} onTiempoTerminado={handleTimeout}/>
                 <Prompt texto={prompt}/>
                 <IconoLobby className={styles.gameCode} gameCode={gameCode}/>
             </header>
@@ -517,7 +519,7 @@ const IntroduccionJokeBattle = () => {
     );
 };
 
-function PodioPuntuacion({jugadores = []}) {
+function PodioPuntuacion({btnFunc, jugadores = []}) {
     const [jugadoresConectados, setJugadoresConectados] = useState(jugadores);
     const logos = [logo0, logo1, logo2, logo3, logo4, logo5, logo6, logo7];
 
@@ -548,6 +550,7 @@ function PodioPuntuacion({jugadores = []}) {
     return (
         <div className={styles.scoreScreen}>
             <h1>Clasificación de Jugadores</h1>
+            <button className={styles.startButton} onClick={btnFunc}>Empezar nueva ronda</button>
             <div className={styles.puntuacion}>
                 {springs.map((springStyle, index) => {
                     const jugador = jugadoresOrdenados[index];
@@ -560,7 +563,7 @@ function PodioPuntuacion({jugadores = []}) {
                             <IconoJugador
                                 nombreClase={styles.icono}
                                 nombre={jugador.name}
-                                rutaImagen={logos[index % logos.length]} // Asegúrate de usar un logo válido
+                                rutaImagen={logos[index]}
                             />
                             <h3>Puntuación:</h3>
                             <h4>{jugador.score}</h4>

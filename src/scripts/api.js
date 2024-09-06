@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./db'); // Importa tu módulo de conexión a la base de datos
+const db = require('./db');
+
 
 // Obtener todos los prompts en un idioma específico
 router.get('/prompts/:gameId/:language', (req, res) => {
     const {gameId, language} = req.params;
 
     const query = 'SELECT id_prompt, text FROM prompts WHERE id_juego = ? AND idioma = ?';
-    db.query(query, [gameId, language], (err, results, fields) => {
+    db.query(query, [gameId, language], (err, results) => {
         if (err) {
             console.error('Error al obtener los prompts:', err);
             res.status(500).json({error: 'Error al obtener los prompts'});
@@ -203,5 +204,7 @@ router.post('/lobby/create', (req, res) => {
         res.status(200).json({ message: 'Sala creada exitosamente' });
     });
 });
+
+
 
 module.exports = router;
